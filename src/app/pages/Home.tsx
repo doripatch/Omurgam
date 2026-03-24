@@ -1,0 +1,633 @@
+import { Link } from 'react-router';
+import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, User, ThumbsUp, Clock } from 'lucide-react';
+import { motion } from 'motion/react';
+import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { useState, useEffect } from 'react';
+import { supabase, TABLES } from '../lib/supabase';
+import { toast } from 'sonner';
+
+interface Question {
+  id: string;
+  question: string;
+  excerpt: string;
+  category: string;
+  is_answered: boolean;
+  likes: number;
+  created_at: string;
+  users?: {
+    name: string;
+  };
+  answers?: {
+    count: number;
+  }[];
+}
+
+export default function Home() {
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
+
+  useEffect(() => {
+    loadAnsweredQuestions();
+  }, []);
+
+  const loadAnsweredQuestions = async () => {
+    try {
+      setIsLoadingQuestions(true);
+      const { data, error } = await supabase
+        .from(TABLES.QUESTIONS)
+        .select(`
+          *,
+          users:user_id (name),
+          answers (id)
+        `)
+        .eq('is_answered', true)
+        .order('created_at', { ascending: false })
+        .limit(4);
+
+      if (error) throw error;
+      
+      const formattedQuestions = (data || []).map((q: any) => ({
+        ...q,
+        answers: q.answers || []
+      }));
+      
+      console.log('🏠 Anasayfa - Yanıtlanan sorular:', formattedQuestions);
+      setQuestions(formattedQuestions);
+    } catch (error: any) {
+      console.error('❌ Sorular yüklenirken hata:', error);
+    } finally {
+      setIsLoadingQuestions(false);
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInHours < 1) return 'Az önce';
+    if (diffInHours < 24) return `${diffInHours} saat önce`;
+    if (diffInDays === 1) return '1 gün önce';
+    if (diffInDays < 7) return `${diffInDays} gün önce`;
+    return date.toLocaleDateString('tr-TR');
+  };
+
+  return (
+    <div className="w-full bg-stone-50 dark:bg-slate-900">
+      {/* HERO - Ultra Minimal with Huge Typography */}
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 py-20">
+        {/* Subtle Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.02]">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgb(120, 53, 15) 1px, transparent 0)`,
+            backgroundSize: '50px 50px'
+          }}></div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            className="text-center"
+          >
+            {/* Small Badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100/80 backdrop-blur-sm rounded-full mb-8"
+            >
+              <Sparkles className="w-4 h-4 text-amber-700" />
+              <span className="text-sm font-bold text-amber-900 tracking-wide">Prof. Dr. Defne Kaya Utlu</span>
+            </motion.div>
+
+            {/* Giant Hero Title */}
+            <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-black tracking-tighter mb-6 leading-[0.9]">
+              <span className="block text-slate-900">Omurgam</span>
+            </h1>
+
+            {/* Subtitle with Gradient */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+              className="text-2xl md:text-4xl font-light text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed"
+            >
+              Omurga sağlığınız için{' '}
+              <span className="font-bold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
+                bilimsel bilgilendirme
+              </span>
+              {' '}platformu
+            </motion.p>
+
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+            >
+              <Link
+                to="/videolar"
+                className="group relative px-8 py-5 bg-slate-900 text-white rounded-2xl font-bold text-lg overflow-hidden hover:scale-105 transition-transform duration-300"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-600 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative flex items-center gap-3">
+                  <Play className="w-5 h-5" />
+                  <span>Video Arşivi</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+
+              <Link
+                to="/mr-analiz"
+                className="group px-8 py-5 bg-white border-2 border-slate-200 text-slate-900 rounded-2xl font-bold text-lg hover:border-amber-600 hover:bg-amber-50 transition-all duration-300"
+              >
+                <div className="flex items-center gap-3">
+                  <Search className="w-5 h-5" />
+                  <span>Terim Sözlüğü</span>
+                </div>
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1, duration: 1 }}
+          className="absolute bottom-12 left-1/2 -translate-x-1/2"
+        >
+          <div className="flex flex-col items-center gap-2 text-slate-400">
+            <span className="text-xs uppercase tracking-wider font-semibold">Aşağı Kaydır</span>
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              className="w-6 h-10 border-2 border-slate-300 rounded-full flex items-start justify-center p-2"
+            >
+              <div className="w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
+            </motion.div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* STATS BAR - Minimal */}
+      <section className="py-12 px-4 bg-white border-y border-slate-200">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { number: '150+', label: 'Bilgilendirme Videosu' },
+              { number: '50+', label: 'Tıbbi Terim' },
+              { number: '24/7', label: 'Erişim' },
+              { number: '100%', label: 'Bilimsel İçerik' }
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.6 }}
+                className="text-center"
+              >
+                <div className="text-4xl md:text-5xl font-black text-slate-900 mb-2">{stat.number}</div>
+                <div className="text-sm text-slate-600 font-medium">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FORUM / COMMUNITY QUESTIONS - Main Feature */}
+      <section className="py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 to-slate-800">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-12"
+          >
+            <span className="inline-block px-4 py-2 bg-amber-500/20 text-amber-300 font-bold rounded-full mb-6 text-sm uppercase tracking-wide">
+              Topluluk Forumu
+            </span>
+            <h2 className="text-5xl md:text-7xl font-black text-white mb-4">
+              Soru & Cevap
+            </h2>
+            <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-8">
+              Omurga sağlığı hakkında merak ettiklerinizi sorun, deneyimlerinizi paylaşın
+            </p>
+            <Link
+              to="/soru-sor"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-full font-bold hover:shadow-lg hover:shadow-amber-500/50 transition-all hover:scale-105"
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span>Yeni Soru Sor</span>
+            </Link>
+          </motion.div>
+
+          {/* Questions Grid */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {isLoadingQuestions ? (
+              <div className="col-span-2 text-center">
+                <p className="text-xl text-slate-300">Sorular yükleniyor...</p>
+              </div>
+            ) : (
+              questions.map((question, index) => (
+                <motion.div
+                  key={question.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.6 }}
+                  className="group bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                  onClick={() => window.location.href = `/soru/${question.id}`}
+                >
+                  {/* User Info */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={question.users?.name ? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100'}
+                        alt={question.users?.name || 'Kullanıcı'}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-amber-500"
+                      />
+                      <div>
+                        <p className="font-bold text-white">{question.users?.name || 'Kullanıcı'}</p>
+                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                          <Clock className="w-3 h-3" />
+                          <span>{formatTimeAgo(question.created_at)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-3 py-1 bg-amber-500/20 text-amber-300 rounded-full text-xs font-bold">
+                      {question.category}
+                    </div>
+                  </div>
+
+                  {/* Question */}
+                  <h3 className="text-xl font-black text-white mb-3 group-hover:text-amber-300 transition-colors">
+                    {question.question}
+                  </h3>
+                  <p className="text-slate-300 text-sm mb-4 line-clamp-2">
+                    {question.excerpt}
+                  </p>
+
+                  {/* Stats & Actions */}
+                  <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1 text-slate-400">
+                        <MessageCircle className="w-4 h-4" />
+                        <span className="text-sm font-medium">{question.answers.length} cevap</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-slate-400">
+                        <ThumbsUp className="w-4 h-4" />
+                        <span className="text-sm font-medium">{question.likes}</span>
+                      </div>
+                    </div>
+                    {question.is_answered && (
+                      <div className="flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-xs font-bold">
+                        <Check className="w-3 h-3" />
+                        <span>Cevaplanmış</span>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </div>
+
+          {/* View All Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+            className="text-center mt-12"
+          >
+            <Link
+              to="/soru-sor"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white rounded-2xl font-bold hover:bg-white/20 transition-all group"
+            >
+              <span>Tüm Soruları Görüntüle</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ASYMMETRIC BENTO GRID - Main Features */}
+      <section className="py-32 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="mb-16"
+          >
+            <h2 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white mb-4">
+              Neler Sunuyoruz?
+            </h2>
+            <p className="text-xl text-slate-600 dark:text-slate-400 font-light max-w-2xl">
+              Omurga sağlığınız için ihtiyacınız olan her şey, bir arada
+            </p>
+          </motion.div>
+
+          {/* Bento Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-6 auto-rows-[280px]">
+            {/* Large Card - Video Archive */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="md:col-span-4 md:row-span-2 group"
+            >
+              <Link
+                to="/videolar"
+                className="relative h-full bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl overflow-hidden p-8 flex flex-col justify-end hover:scale-[1.02] transition-transform duration-500"
+              >
+                {/* Background Image */}
+                <div className="absolute inset-0">
+                  <ImageWithFallback
+                    src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200"
+                    alt="Video Arşivi"
+                    className="w-full h-full object-cover opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
+                </div>
+
+                {/* Content */}
+                <div className="relative z-10">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full mb-4">
+                    <Play className="w-4 h-4 text-amber-300" />
+                    <span className="text-sm font-bold text-amber-300">150+ VİDEO</span>
+                  </div>
+                  <h3 className="text-4xl md:text-5xl font-black text-white mb-3">Video Arşivi</h3>
+                  <p className="text-lg text-slate-300 mb-6 max-w-lg">
+                    Profesyonel fizyoterapist rehberliğinde hazırlanmış egzersiz ve bilgilendirme videoları
+                  </p>
+                  <div className="inline-flex items-center gap-2 text-white font-bold group-hover:gap-4 transition-all">
+                    <span>Keşfet</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+
+            {/* Medium Card - MR Dictionary */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1, duration: 0.8 }}
+              className="md:col-span-2 md:row-span-1 group"
+            >
+              <Link
+                to="/mr-analiz"
+                className="relative h-full bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-3xl overflow-hidden p-8 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-500"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="w-14 h-14 bg-gradient-to-br from-amber-600 to-orange-600 rounded-2xl flex items-center justify-center">
+                    <Search className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="w-10 h-10 bg-white/80 dark:bg-slate-800/80 rounded-full flex items-center justify-center group-hover:bg-amber-600 transition-colors duration-300">
+                    <ArrowRight className="w-5 h-5 text-amber-700 dark:text-amber-300 group-hover:text-white transition-colors" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Terim Sözlüğü</h3>
+                  <p className="text-slate-700 dark:text-slate-300 font-medium">MR raporu terimlerini anlayın</p>
+                </div>
+              </Link>
+            </motion.div>
+
+            {/* Medium Card - Ask Question */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+              className="md:col-span-2 md:row-span-1 group"
+            >
+              <Link
+                to="/soru-sor"
+                className="relative h-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden p-8 flex flex-col justify-between hover:border-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-500"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="w-14 h-14 bg-slate-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center group-hover:bg-amber-600 transition-colors duration-300">
+                    <Heart className="w-7 h-7 text-slate-700 dark:text-slate-300 group-hover:text-white transition-colors" />
+                  </div>
+                  <div className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center group-hover:bg-amber-600 transition-colors duration-300">
+                    <ArrowRight className="w-5 h-5 text-slate-700 dark:text-slate-300 group-hover:text-white transition-colors" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Soru Sor</h3>
+                  <p className="text-slate-700 dark:text-slate-400 font-medium">Sorularınızı paylaşın</p>
+                </div>
+              </Link>
+            </motion.div>
+
+            {/* Wide Card - Blog */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              className="md:col-span-3 md:row-span-1 group"
+            >
+              <Link
+                to="/blog"
+                className="relative h-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl overflow-hidden p-8 flex items-end hover:scale-[1.02] transition-transform duration-500"
+              >
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute inset-0" style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+                  }}></div>
+                </div>
+                <div className="relative w-full flex items-end justify-between">
+                  <div>
+                    <h3 className="text-3xl font-black text-white mb-2">Blog & Makaleler</h3>
+                    <p className="text-slate-300 font-medium">Güncel sağlık bilgileri</p>
+                  </div>
+                  <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-amber-600 transition-colors duration-300">
+                    <ArrowRight className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+
+            {/* Medium Card - Profile */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+              className="md:col-span-3 md:row-span-1 group"
+            >
+              <Link
+                to="/giris"
+                className="relative h-full bg-gradient-to-br from-amber-600 to-orange-600 rounded-3xl overflow-hidden p-8 flex items-end hover:scale-[1.02] transition-transform duration-500"
+              >
+                <div className="absolute top-8 right-8">
+                  <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                    <Star className="w-10 h-10 text-white" />
+                  </div>
+                </div>
+                <div className="relative w-full">
+                  <h3 className="text-3xl font-black text-white mb-2">Hesap Oluştur</h3>
+                  <p className="text-amber-100 font-medium mb-4">Tüm özelliklere erişim</p>
+                  <div className="inline-flex items-center gap-2 text-white font-bold">
+                    <span>Başla</span>
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* WHY US - Large Typography Section */}
+      <section className="py-32 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-800">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <span className="inline-block px-4 py-2 bg-amber-100 text-amber-900 font-bold rounded-full mb-6 text-sm uppercase tracking-wide">
+                Neden Omurgam?
+              </span>
+              <h2 className="text-5xl md:text-6xl font-black text-slate-900 mb-6 leading-tight">
+                Bilimsel ve<br />
+                <span className="bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
+                  Güvenilir İçerik
+                </span>
+              </h2>
+              <p className="text-xl text-slate-600 leading-relaxed mb-8">
+                Prof. Dr. Defne Kaya Utlu'nun akademik bilgi birikimi ve klinik deneyimiyle hazırlanmış, 
+                Sağlık Bakanlığı prosedürlerine uygun bilgilendirme içerikleri.
+              </p>
+              <div className="space-y-4">
+                {[
+                  'Fizyoterapi profesörü tarafından hazırlanmış içerikler',
+                  'Bilimsel araştırmalara dayalı bilgiler',
+                  'Sağlık Bakanlığı prosedürlerine uygun',
+                  'Sürekli güncellenen video arşivi'
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1, duration: 0.6 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="w-6 h-6 bg-amber-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-slate-700 font-medium">{item}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="relative"
+            >
+              <div className="relative rounded-3xl overflow-hidden">
+                <ImageWithFallback
+                  src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800"
+                  alt="Prof. Dr. Defne Kaya Utlu"
+                  className="w-full h-[600px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
+                <div className="absolute bottom-8 left-8 right-8">
+                  <div className="backdrop-blur-xl bg-white/90 rounded-2xl p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-amber-600 to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Heart className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-black text-slate-900 mb-1">Prof. Dr. Defne Kaya Utlu</h4>
+                        <p className="text-sm text-slate-600">Fizyoterapi Profesörü</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA - Final Push */}
+      <section className="py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 to-slate-800 relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
+              Omurga Sağlığınız<br />
+              İçin İlk Adım
+            </h2>
+            <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto">
+              Hemen üye olun, video arşivine erişin ve omurga sağlığınız hakkında bilgi edinin
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/giris"
+                className="group px-10 py-5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-amber-500/50 transition-all hover:scale-105"
+              >
+                <div className="flex items-center gap-3">
+                  <span>Ücretsiz Kayıt Ol</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+              <Link
+                to="/videolar"
+                className="px-10 py-5 bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white rounded-2xl font-bold text-lg hover:bg-white/20 transition-all"
+              >
+                Videoları İncele
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* DISCLAIMER - Important Legal */}
+      <section className="py-12 px-4 bg-amber-50 border-t border-amber-200">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-sm text-slate-700 leading-relaxed">
+            <strong className="font-bold text-slate-900">ÖNEMLİ:</strong> Bu platform yalnızca bilgilendirme amaçlıdır. 
+            Burada yer alan bilgiler tıbbi teşhis, tedavi veya reçete yerine geçmez. 
+            Sağlık sorunlarınız için mutlaka hekiminize danışın. 
+            Prof. Dr. Defne Kaya Utlu fizyoterapi profesörü olup, tıbbi tedavi uygulamaz.
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+}

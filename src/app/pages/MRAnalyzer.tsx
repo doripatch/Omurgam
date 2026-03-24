@@ -1,0 +1,347 @@
+import { useState, useEffect } from 'react';
+import { Search, Brain, AlertTriangle, CheckCircle, Info, TrendingUp, Shield, AlertCircle } from 'lucide-react';
+import { termsAPI } from '../lib/api';
+import { toast } from 'sonner';
+
+interface MRTerm {
+  id: string;
+  term: string;
+  explanation: string;
+  risk_level: 'low' | 'medium' | 'high';
+  category: string;
+  recommendations: string[];
+}
+
+export default function MRAnalyzer() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<MRTerm[]>([]);
+  const [selectedTerm, setSelectedTerm] = useState<MRTerm | null>(null);
+  const [allTerms, setAllTerms] = useState<MRTerm[]>([]);
+  const [popularTerms, setPopularTerms] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadTerms();
+  }, []);
+
+  const loadTerms = async () => {
+    try {
+      setIsLoading(true);
+      const data = await termsAPI.getAll();
+      setAllTerms(data.terms || []);
+      
+      // Set popular terms (first 6 terms)
+      const popular = (data.terms || []).slice(0, 6).map((t: MRTerm) => t.term);
+      setPopularTerms(popular);
+    } catch (error) {
+      console.error('❌ Terimler yüklenirken hata:', error);
+      toast.error('Terimler yüklenemedi');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      toast.error('Lütfen bir terim girin');
+      return;
+    }
+
+    try {
+      const data = await termsAPI.search(searchQuery);
+      setSearchResults(data.terms || []);
+      
+      if (data.terms && data.terms.length > 0) {
+        setSelectedTerm(data.terms[0]);
+      } else {
+        setSelectedTerm(null);
+        toast.info('Aradığınız terim bulunamadı');
+      }
+    } catch (error) {
+      console.error('❌ Arama hatası:', error);
+      toast.error('Arama sırasında hata oluştu');
+    }
+  };
+
+  const handlePopularTermClick = (termName: string) => {
+    setSearchQuery(termName);
+    const result = allTerms.find(t => t.term === termName);
+    if (result) {
+      setSelectedTerm(result);
+      setSearchResults([result]);
+    }
+  };
+
+  const getRiskColor = (level: 'low' | 'medium' | 'high') => {
+    switch (level) {
+      case 'low':
+        return 'from-emerald-500 to-green-500';
+      case 'medium':
+        return 'from-amber-500 to-orange-500';
+      case 'high':
+        return 'from-red-500 to-rose-500';
+    }
+  };
+
+  const getRiskIcon = (level: 'low' | 'medium' | 'high') => {
+    switch (level) {
+      case 'low':
+        return <CheckCircle className="w-8 h-8 text-white" />;
+      case 'medium':
+        return <AlertCircle className="w-8 h-8 text-white" />;
+      case 'high':
+        return <AlertTriangle className="w-8 h-8 text-white" />;
+    }
+  };
+
+  const getRiskText = (level: 'low' | 'medium' | 'high') => {
+    switch (level) {
+      case 'low':
+        return 'Düşük Risk';
+      case 'medium':
+        return 'Orta Risk';
+      case 'high':
+        return 'Yüksek Risk';
+    }
+  };
+
+  return (
+    <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-emerald-50/20">
+      {/* Hero Header */}
+      <div className="relative bg-gradient-to-br from-amber-700 via-orange-800 to-amber-900 text-white py-12 md:py-20 px-4 overflow-hidden">
+        {/* Decorative Elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-400/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-400/20 rounded-full blur-3xl"></div>
+
+        <div className="relative max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full mb-4 md:mb-6">
+            <Search className="w-4 h-4" />
+            <span className="text-xs md:text-sm font-semibold">TIBBİ TERİM SÖZLÜĞÜ</span>
+          </div>
+
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
+            MR Raporu Terim Sözlüğü
+          </h1>
+          <p className="text-base md:text-xl text-amber-100 mb-4 px-2">
+            MR raporunuzda geçen tıbbi terimleri arayın ve ne anlama geldiklerini öğrenin
+          </p>
+          
+          {/* Disclaimer */}
+          <div className="max-w-2xl mx-auto mb-6 md:mb-8 p-3 md:p-4 bg-amber-500/20 border border-amber-400/30 rounded-2xl">
+            <p className="text-xs md:text-sm text-amber-100">
+              <strong className="text-white">ÖNEMLİ:</strong> Bu sözlük yalnızca bilgilendirme amaçlıdır. 
+              MR raporunuzun tıbbi analizi için mutlaka hekiminize danışın.
+            </p>
+          </div>
+
+          {/* Main Search */}
+          <div className="max-w-3xl mx-auto">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 rounded-3xl blur-xl"></div>
+              <div className="relative backdrop-blur-xl bg-white/95 rounded-2xl md:rounded-3xl shadow-2xl p-1.5 md:p-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-1 px-3 sm:px-0">
+                    <div className="sm:pl-4">
+                      <Search className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder='Disk protrüzyonu...'
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                      className="flex-1 bg-transparent py-3 sm:py-4 px-1 sm:px-2 text-base sm:text-lg text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSearch}
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-xl sm:rounded-2xl hover:shadow-lg transition-all hover:scale-105"
+                  >
+                    Ara
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Popular Terms */}
+          <div className="mt-6 md:mt-8">
+            <p className="text-teal-200 text-xs md:text-sm mb-3">Popüler Aramalar:</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {popularTerms.map((term) => (
+                <button
+                  key={term}
+                  onClick={() => handlePopularTermClick(term)}
+                  className="px-3 md:px-4 py-1.5 md:py-2 backdrop-blur-sm bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white text-xs md:text-sm transition-colors"
+                >
+                  {term}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Results Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        {selectedTerm ? (
+          <div className="space-y-4 md:space-y-6">
+            {/* Risk Level Card */}
+            <div className={`relative overflow-hidden rounded-2xl md:rounded-3xl bg-gradient-to-br ${getRiskColor(selectedTerm.risk_level)} p-1`}>
+              <div className="backdrop-blur-xl bg-white/95 rounded-[1rem] md:rounded-[1.4rem] p-4 md:p-8">
+                <div className="flex flex-col sm:flex-row items-start gap-4 md:gap-6">
+                  <div className={`w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br ${getRiskColor(selectedTerm.risk_level)} rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0`}>
+                    {getRiskIcon(selectedTerm.risk_level)}
+                  </div>
+                  <div className="flex-1 w-full">
+                    <div className="flex flex-col sm:flex-row items-start justify-between mb-3 md:mb-4 gap-3">
+                      <div className="flex-1">
+                        <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
+                          {selectedTerm.term}
+                        </h2>
+                        <span className="inline-block px-3 md:px-4 py-1 bg-slate-100 text-slate-700 text-xs md:text-sm font-semibold rounded-full">
+                          {selectedTerm.category}
+                        </span>
+                      </div>
+                      <div className="text-left sm:text-right">
+                        <div className="text-xs md:text-sm text-slate-500 mb-1">Risk Seviyesi</div>
+                        <div className={`text-xl md:text-2xl font-bold bg-gradient-to-r ${getRiskColor(selectedTerm.risk_level)} bg-clip-text text-transparent`}>
+                          {getRiskText(selectedTerm.risk_level)}
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-base md:text-lg text-slate-700 leading-relaxed">
+                      {selectedTerm.explanation}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recommendations Card */}
+            <div className="backdrop-blur-xl bg-white/80 border border-teal-200/30 rounded-2xl md:rounded-3xl p-4 md:p-8">
+              <div className="flex items-center gap-3 mb-4 md:mb-6">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-100 to-emerald-100 rounded-2xl flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-teal-600" />
+                </div>
+                <h3 className="text-lg md:text-2xl font-bold text-slate-900">Öneriler ve Tedavi Yaklaşımı</h3>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3 md:gap-4">
+                {(selectedTerm.recommendations || []).map((rec, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 p-3 md:p-4 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-xl md:rounded-2xl"
+                  >
+                    <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-teal-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm md:text-base text-slate-700">{rec}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Warning Card */}
+            <div className="backdrop-blur-xl bg-amber-50/80 border border-amber-200 rounded-2xl md:rounded-3xl p-4 md:p-6">
+              <div className="flex items-start gap-3 md:gap-4">
+                <Info className="w-5 h-5 md:w-6 md:h-6 text-amber-600 flex-shrink-0 mt-1" />
+                <div>
+                  <h4 className="font-bold text-amber-900 mb-2 text-sm md:text-base">Önemli Uyarı</h4>
+                  <p className="text-amber-800 text-xs md:text-base">
+                    Bu bilgiler yalnızca bilgilendirme amaçlıdır ve kesin tanı yerine geçmez. 
+                    MR raporunuzun detaylı değerlendirmesi için mutlaka bir omurga uzmanına danışın. 
+                    Her hastanın durumu farklıdır ve bireysel tedavi planı gerektirir.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : searchResults.length > 0 ? (
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-4 md:mb-6">
+              {searchResults.length} sonuç bulundu
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
+              {searchResults.map((term) => (
+                <button
+                  key={term.term}
+                  onClick={() => setSelectedTerm(term)}
+                  className="text-left backdrop-blur-xl bg-white/80 border border-teal-200/30 rounded-2xl md:rounded-3xl p-4 md:p-6 hover:shadow-xl transition-all hover:scale-105"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-lg md:text-xl font-bold text-slate-900 flex-1">{term.term}</h3>
+                    <div className={`w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br ${getRiskColor(term.risk_level)} rounded-xl flex items-center justify-center ml-2`}>
+                      {getRiskIcon(term.risk_level)}
+                    </div>
+                  </div>
+                  <p className="text-slate-600 mb-3 line-clamp-2 text-sm md:text-base">{term.explanation}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs md:text-sm text-slate-500">{term.category}</span>
+                    <span className={`text-xs md:text-sm font-semibold bg-gradient-to-r ${getRiskColor(term.risk_level)} bg-clip-text text-transparent`}>
+                      {getRiskText(term.risk_level)}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : searchQuery && searchResults.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Search className="w-10 h-10 text-slate-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">Sonuç bulunamadı</h3>
+            <p className="text-slate-600 mb-6">
+              Aradığınız terim veritabanımızda bulunamadı. Farklı bir terim deneyin.
+            </p>
+            <p className="text-sm text-slate-500">
+              Veya doğrudan <a href="/soru-sor" className="text-teal-600 hover:underline">soru sorabilirsiniz</a>
+            </p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Info Cards */}
+            <div className="backdrop-blur-xl bg-white/80 border border-teal-200/30 rounded-3xl p-8 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-8 h-8 text-emerald-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Düşük Risk</h3>
+              <p className="text-slate-600 text-sm">
+                Genellikle konservatif tedavi yöntemleri ile tedavi edilebilir
+              </p>
+            </div>
+
+            <div className="backdrop-blur-xl bg-white/80 border border-teal-200/30 rounded-3xl p-8 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-8 h-8 text-amber-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Orta Risk</h3>
+              <p className="text-slate-600 text-sm">
+                Düzenli takip ve tedavi gerektirebilir, doktor kontrolü önemlidir
+              </p>
+            </div>
+
+            <div className="backdrop-blur-xl bg-white/80 border border-teal-200/30 rounded-3xl p-8 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Yüksek Risk</h3>
+              <p className="text-slate-600 text-sm">
+                Acil uzman değerlendirmesi gerektirebilir, ciddi takip şarttır
+              </p>
+            </div>
+
+            {/* Database Stats */}
+            <div className="md:col-span-3 backdrop-blur-xl bg-gradient-to-br from-teal-600 to-emerald-600 rounded-3xl p-8 text-white text-center">
+              <Search className="w-16 h-16 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold mb-2">
+                Sözlüğümüzde {allTerms.length}+ Tıbbi Terim
+              </h3>
+              <p className="text-teal-100">
+                Sürekli güncellenen veri tabanımız ile MR raporu terimlerini anlayın
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
