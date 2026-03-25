@@ -904,9 +904,45 @@ const getYouTubeThumbnail = (videoUrl: string): string | null => {
   return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 };
 
-// Create video
+// Create video (admin only)
 app.post("/videos", async (c) => {
   try {
+    console.log("📹 Creating video...");
+
+    // Get user token from X-User-Token header
+    const userToken = c.req.header("X-User-Token");
+
+    if (!userToken) {
+      console.error("❌ No user token found in X-User-Token header");
+      return c.json({ error: "Unauthorized: No user token provided" }, 401);
+    }
+
+    console.log("🔑 User token found (first 30 chars):", userToken.substring(0, 30) + "...");
+
+    // Verify user is admin
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') || '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
+
+    if (authError || !user) {
+      console.error("❌ Auth error:", authError);
+      return c.json({ error: "Unauthorized: Invalid token" }, 401);
+    }
+
+    console.log("✅ User authenticated:", user.email);
+
+    // Get user role from KV store
+    const userData = await kv.get(`user_${user.id}`);
+    if (!userData || userData.role !== 'admin') {
+      console.error("❌ User is not admin. Role:", userData?.role);
+      return c.json({ error: "Forbidden: Admin access required" }, 403);
+    }
+
+    console.log("✅ User is admin, proceeding with video creation...");
+
     const body = await c.req.json();
     const id = crypto.randomUUID();
     
@@ -938,9 +974,41 @@ app.post("/videos", async (c) => {
   }
 });
 
-// Update video
+// Update video (admin only)
 app.put("/videos/:id", async (c) => {
   try {
+    console.log("📹 Updating video...");
+
+    // Get user token from X-User-Token header
+    const userToken = c.req.header("X-User-Token");
+
+    if (!userToken) {
+      console.error("❌ No user token found in X-User-Token header");
+      return c.json({ error: "Unauthorized: No user token provided" }, 401);
+    }
+
+    // Verify user is admin
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') || '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
+
+    if (authError || !user) {
+      console.error("❌ Auth error:", authError);
+      return c.json({ error: "Unauthorized: Invalid token" }, 401);
+    }
+
+    // Get user role from KV store
+    const userData = await kv.get(`user_${user.id}`);
+    if (!userData || userData.role !== 'admin') {
+      console.error("❌ User is not admin. Role:", userData?.role);
+      return c.json({ error: "Forbidden: Admin access required" }, 403);
+    }
+
+    console.log("✅ User is admin, proceeding with video update...");
+
     const id = c.req.param("id");
     const body = await c.req.json();
     const existing = await kv.get(`video_${id}`);
@@ -975,9 +1043,41 @@ app.put("/videos/:id", async (c) => {
   }
 });
 
-// Delete video
+// Delete video (admin only)
 app.delete("/videos/:id", async (c) => {
   try {
+    console.log("📹 Deleting video...");
+
+    // Get user token from X-User-Token header
+    const userToken = c.req.header("X-User-Token");
+
+    if (!userToken) {
+      console.error("❌ No user token found in X-User-Token header");
+      return c.json({ error: "Unauthorized: No user token provided" }, 401);
+    }
+
+    // Verify user is admin
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') || '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
+
+    if (authError || !user) {
+      console.error("❌ Auth error:", authError);
+      return c.json({ error: "Unauthorized: Invalid token" }, 401);
+    }
+
+    // Get user role from KV store
+    const userData = await kv.get(`user_${user.id}`);
+    if (!userData || userData.role !== 'admin') {
+      console.error("❌ User is not admin. Role:", userData?.role);
+      return c.json({ error: "Forbidden: Admin access required" }, 403);
+    }
+
+    console.log("✅ User is admin, proceeding with video deletion...");
+
     const id = c.req.param("id");
     await kv.del(`video_${id}`);
     console.log("✅ Video deleted:", id);
