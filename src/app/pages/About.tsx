@@ -3,9 +3,9 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
 
 export default function About() {
-  const { settings, loading } = useSiteSettings();
+  const { settings, isLoading } = useSiteSettingsStore();  // 
 
-  if (loading) {
+  if (isLoading) {  //
     return (
       <div className="w-full bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-16 px-4 flex items-center justify-center">
         <div className="text-center">
@@ -25,8 +25,6 @@ export default function About() {
             <Heart className="w-4 h-4" />
             <span>Hakkımızda</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-teal-700 to-teal-900 dark:from-teal-400 dark:to-teal-600 bg-clip-text text-transparent mb-4">
-            Prof. Dr. Defne Kaya Utlu
           <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-teal-700 to-teal-900 dark:from-teal-400 dark:to-teal-600 bg-clip-text text-transparent mb-4">
   {settings?.aboutTitle || 'Prof. Dr. Defne Kaya Utlu'}
 </h1>
