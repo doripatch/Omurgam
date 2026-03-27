@@ -1,7 +1,21 @@
 import { GraduationCap, Award, Briefcase, Heart, BookOpen, Globe, Users, Trophy, Building2 } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { useSiteSettingsStore } from '../store/siteSettingsStore';
 
 export default function About() {
+  const { settings, loading } = useSiteSettings();
+
+  if (loading) {
+    return (
+      <div className="w-full bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-16 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400">Yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-16 px-4">
       <div className="max-w-7xl mx-auto">
@@ -13,10 +27,12 @@ export default function About() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-teal-700 to-teal-900 dark:from-teal-400 dark:to-teal-600 bg-clip-text text-transparent mb-4">
             Prof. Dr. Defne Kaya Utlu
-          </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Fizik Tedavi ve Rehabilitasyon Uzmanı
-          </p>
+          <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-teal-700 to-teal-900 dark:from-teal-400 dark:to-teal-600 bg-clip-text text-transparent mb-4">
+  {settings?.aboutTitle || 'Prof. Dr. Defne Kaya Utlu'}
+</h1>
+<p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+  {settings?.aboutContent || 'Fizyoterapi Profesörü'}
+</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8 mb-12">
