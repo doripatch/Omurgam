@@ -94,6 +94,14 @@ export default function Root() {
                 Blog
               </Link>
               <Link 
+  to="/forum" 
+  className={`text-sm font-medium transition-colors ${
+    isActive('/forum') ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-400'
+  }`}
+>
+  Forum
+</Link>
+              <Link 
                 to="/hakkimizda" 
                 className={`text-sm font-medium transition-colors ${
                   isActive('/hakkimizda') ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-400'
@@ -201,6 +209,15 @@ export default function Root() {
               >
                 Blog
               </Link>
+              <Link 
+  to="/forum" 
+  onClick={() => setMobileMenuOpen(false)}
+  className={`block py-2 text-sm font-medium ${
+    isActive('/forum') ? 'text-amber-700' : 'text-slate-700'
+  }`}
+>
+  Forum
+</Link>
               <Link 
                 to="/hakkimizda" 
                 onClick={() => setMobileMenuOpen(false)}

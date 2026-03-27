@@ -309,7 +309,7 @@ export default function Home() {
             className="text-center mt-12"
           >
             <Link
-              to="/soru-sor"
+              to="/forum"
               className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white rounded-2xl font-bold hover:bg-white/20 transition-all group"
             >
               <span>Tüm Soruları Görüntüle</span>

@@ -7,6 +7,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AskQuestion from "./pages/AskQuestion";
 import QuestionDetail from "./pages/QuestionDetail";
+import Forum from "./pages/Forum";
 import MRAnalyzer from "./pages/MRAnalyzer";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
