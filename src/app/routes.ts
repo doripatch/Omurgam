@@ -40,6 +40,7 @@ export const router = createBrowserRouter([
       { path: "blog/:id", Component: BlogPost },
       { path: "soru-sor", Component: AskQuestion },
       { path: "soru/:id", Component: QuestionDetail },
+      { path: "forum", Component: Forum },
       { path: "mr-analiz", Component: MRAnalyzer },
       { path: "hakkimizda", Component: About },
       { path: "iletisim", Component: Contact },
