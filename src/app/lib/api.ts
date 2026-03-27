@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 
 // DEVELOPMENT: Use hardcoded project ID
 // PRODUCTION: Will be overridden by environment variables
-const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/server/make-server-b69488c3`;
+const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-b69488c3`;
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
