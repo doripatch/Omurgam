@@ -28,7 +28,7 @@ export default function About() {
           <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-teal-700 to-teal-900 dark:from-teal-400 dark:to-teal-600 bg-clip-text text-transparent mb-4">
   {settings?.aboutTitle || 'Prof. Dr. Defne Kaya Utlu'}
 </h1>
-</p> className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto"
+<p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
   {settings?.aboutContent || 'Fizyoterapi Profesörü'}
 </p>
         </div>
