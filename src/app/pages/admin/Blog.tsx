@@ -20,6 +20,8 @@ export default function AdminBlog() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -56,6 +58,43 @@ export default function AdminBlog() {
       loadPosts();
     } catch (error: any) {
       toast.error(error.message || 'Yazı silinirken hata oluştu');
+    }
+  };
+  
+  const handleBulkDelete = async () => {
+    if (selectedPosts.length === 0) {
+      toast.error('Lütfen en az bir yazı seçin');
+      return;
+    }
+
+    if (!confirm(`${selectedPosts.length} yazıyı silmek istediğinize emin misiniz?`)) {
+      return;
+    }
+
+    try {
+      for (const id of selectedPosts) {
+        await blogAPI.delete(id);
+      }
+      toast.success(`${selectedPosts.length} yazı silindi`);
+      setSelectedPosts([]);
+      setIsDeleteMode(false);
+      loadPosts();
+    } catch (error: any) {
+      toast.error(error.message || 'Yazılar silinirken hata oluştu');
+    }
+  };
+
+  const togglePostSelection = (id: string) => {
+    setSelectedPosts(prev =>
+      prev.includes(id) ? prev.filter(postId => postId !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedPosts.length === posts.length) {
+      setSelectedPosts([]);
+    } else {
+      setSelectedPosts(posts.map(p => p.id));
     }
   };
 
@@ -157,13 +196,46 @@ export default function AdminBlog() {
             <h1 className="text-4xl font-bold text-slate-900 mb-2">Blog Yönetimi</h1>
             <p className="text-slate-600">Blog yazılarını yönetin</p>
           </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all hover:scale-105"
-          >
-            <Plus className="w-5 h-5" />
-            Yeni Yazı
-          </button>
+          <div className="flex gap-3">
+            {!isDeleteMode ? (
+              <>
+                <button
+                  onClick={() => setIsDeleteMode(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all hover:scale-105"
+                >
+                  <Trash2 className="w-5 h-5" />
+                  Toplu Sil
+                </button>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all hover:scale-105"
+                >
+                  <Plus className="w-5 h-5" />
+                  Yeni Yazı
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={selectedPosts.length === 0}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Trash2 className="w-5 h-5" />
+                  Seçilenleri Sil ({selectedPosts.length})
+                </button>
+                <button
+                  onClick={() => {
+                    setIsDeleteMode(false);
+                    setSelectedPosts([]);
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 bg-slate-200 text-slate-700 font-semibold rounded-2xl hover:bg-slate-300 transition-all"
+                >
+                  İptal
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Posts Table */}
@@ -172,25 +244,37 @@ export default function AdminBlog() {
             <table className="w-full">
               <thead className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-200">
                 <tr>
+                  {isDeleteMode && (
+                    <th className="px-6 py-4 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedPosts.length === posts.length && posts.length > 0}
+                        onChange={toggleSelectAll}
+                        className="w-5 h-5 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
+                      />
+                    </th>
+                  )}
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Başlık</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Kategori</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Tarih</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Görüntülenme</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Durum</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-slate-900">İşlemler</th>
+                  {!isDeleteMode && (
+                    <th className="px-6 py-4 text-right text-sm font-semibold text-slate-900">İşlemler</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-4 text-center">
+                    <td colSpan={7} className="px-6 py-4 text-center">
                       <Loader2 className="w-5 h-5 animate-spin" />
                       Yükleniyor...
                     </td>
                   </tr>
                 ) : posts.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-4 text-center">
+                    <td colSpan={7} className="px-6 py-4 text-center">
                       <AlertCircle className="w-5 h-5 text-red-500" />
                       Hiç yazı bulunamadı
                     </td>
@@ -198,6 +282,16 @@ export default function AdminBlog() {
                 ) : (
                   posts.map((post) => (
                     <tr key={post.id} className="hover:bg-purple-50/50 transition-colors">
+                      {isDeleteMode && (
+                        <td className="px-6 py-4 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedPosts.includes(post.id)}
+                            onChange={() => togglePostSelection(post.id)}
+                            className="w-5 h-5 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
+                          />
+                        </td>
+                      )}
                       <td className="px-6 py-4">
                         <div className="font-medium text-slate-900">{post.title}</div>
                       </td>
@@ -229,32 +323,34 @@ export default function AdminBlog() {
                           )}
                         </button>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => {
-                              setEditingPost(post);
-                              setFormData({
-                                title: post.title,
-                                content: post.content,
-                                excerpt: post.excerpt,
-                                category: post.category,
-                                published: post.published,
-                              });
-                              setShowEditModal(true);
-                            }}
-                            className="p-2 hover:bg-teal-100 text-teal-600 rounded-xl transition-colors"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(post.id)}
-                            className="p-2 hover:bg-red-100 text-red-600 rounded-xl transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+                      {!isDeleteMode && (
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => {
+                                setEditingPost(post);
+                                setFormData({
+                                  title: post.title,
+                                  content: post.content,
+                                  excerpt: post.excerpt,
+                                  category: post.category,
+                                  published: post.published,
+                                });
+                                setShowEditModal(true);
+                              }}
+                              className="p-2 hover:bg-teal-100 text-teal-600 rounded-xl transition-colors"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(post.id)}
+                              className="p-2 hover:bg-red-100 text-red-600 rounded-xl transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}
