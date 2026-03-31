@@ -1,151 +1,190 @@
 import { useState, useEffect } from 'react';
-import { Plus, Upload, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { videosAPI } from '../../lib/api';
+import { blogAPI } from '../../lib/api';
 
-interface Video {
+interface BlogPost {
   id: string;
   title: string;
+  content: string;
+  excerpt: string;
   category: string;
   views: number;
   published: boolean;
-  videoUrl?: string;
-  thumbnailUrl?: string;
-  description?: string;
-  duration?: string;
+  created_at: string;
 }
 
-// Extract YouTube video ID from URL
-const getYouTubeVideoId = (url: string): string | null => {
-  const patterns = [
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
-    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)/,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?]+)/,
-  ];
-
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match && match[1]) {
-      return match[1];
-    }
-  }
-  return null;
-};
-
-// Get YouTube thumbnail URL
-const getYouTubeThumbnail = (videoUrl: string): string | null => {
-  const videoId = getYouTubeVideoId(videoUrl);
-  if (!videoId) return null;
-  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-};
-
-export default function AdminVideos() {
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [videos, setVideos] = useState<Video[]>([]);
+export default function AdminBlog() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
+    content: '',
+    excerpt: '',
     category: 'Bel Fıtığı',
-    videoUrl: '',
-    thumbnailUrl: '',
-    duration: '',
-    published: true // Varsayılan olarak yayınlansın
+    published: false,
   });
 
-  // Fetch videos from API
   useEffect(() => {
-    loadVideos();
+    loadPosts();
   }, []);
 
-  const loadVideos = async () => {
+  const loadPosts = async () => {
     try {
       setIsLoading(true);
-      const data = await videosAPI.getAll();
-      setVideos(data.videos || []);
-    } catch (error) {
-      console.error('Load videos error:', error);
-      toast.error('Videolar yüklenemedi');
+      console.log('📥 Blog yazıları yükleniyor...');
+      const data = await blogAPI.getAll();
+      console.log('📚 Yüklenen blog yazıları:', data);
+      setPosts(data.posts || []);
+    } catch (error: any) {
+      console.error('❌ Load posts error:', error);
+      toast.error('Blog yazıları yüklenemedi');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Bu yazıyı silmek istediğinizden emin misiniz?')) return;
+
+    try {
+      await blogAPI.delete(id);
+      toast.success('Yazı silindi');
+      loadPosts();
+    } catch (error: any) {
+      toast.error(error.message || 'Yazı silinirken hata oluştu');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedPosts.length === 0) {
+      toast.error('Lütfen en az bir yazı seçin');
+      return;
+    }
+
+    if (!confirm(`${selectedPosts.length} yazıyı silmek istediğinize emin misiniz?`)) {
+      return;
+    }
+
+    try {
+      for (const id of selectedPosts) {
+        await blogAPI.delete(id);
+      }
+      toast.success(`${selectedPosts.length} yazı silindi`);
+      setSelectedPosts([]);
+      setIsDeleteMode(false);
+      loadPosts();
+    } catch (error: any) {
+      toast.error(error.message || 'Yazılar silinirken hata oluştu');
+    }
+  };
+
+  const togglePostSelection = (id: string) => {
+    setSelectedPosts(prev =>
+      prev.includes(id) ? prev.filter(postId => postId !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedPosts.length === posts.length) {
+      setSelectedPosts([]);
+    } else {
+      setSelectedPosts(posts.map(p => p.id));
+    }
+  };
+
+  const handleTogglePublish = async (post: BlogPost) => {
+    try {
+      await blogAPI.update(post.id, { published: !post.published });
+      toast.success(post.published ? 'Yazı taslak yapıldı' : 'Yazı yayınlandı');
+      loadPosts();
+    } catch (error: any) {
+      toast.error(error.message || 'Durum güncellenemedi');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.videoUrl) {
-      toast.error('Başlık ve video URL gerekli');
+    if (!formData.title || !formData.content) {
+      toast.error('Başlık ve içerik gerekli');
       return;
     }
 
     try {
-      await videosAPI.create(formData);
-      toast.success('Video başarıyla eklendi!');
+      console.log('📝 Blog ekleme başladı:', formData);
+      const result = await blogAPI.create({
+        title: formData.title,
+        content: formData.content,
+        excerpt: formData.excerpt || formData.content.substring(0, 150) + '...',
+        category: formData.category,
+        published: formData.published,
+      });
+      console.log('✅ Blog eklendi:', result);
+      toast.success('Blog yazısı başarıyla eklendi!');
       setShowAddModal(false);
       setFormData({
         title: '',
-        description: '',
+        content: '',
+        excerpt: '',
         category: 'Bel Fıtığı',
-        videoUrl: '',
-        thumbnailUrl: '',
-        duration: '',
-        published: true // Varsayılan olarak yayınlansın
+        published: false,
       });
-      loadVideos(); // Reload videos
+      await loadPosts();
     } catch (error: any) {
-      toast.error(error.message || 'Video eklenirken hata oluştu');
+      console.error('❌ Blog ekleme hatası:', error);
+      toast.error(error.message || 'Yazı eklenirken hata oluştu');
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bu videoyu silmek istediğinize emin misiniz?')) {
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.title || !formData.content) {
+      toast.error('Başlık ve içerik gerekli');
       return;
     }
 
+    if (!editingPost) return;
+
     try {
-      await videosAPI.delete(id);
-      toast.success('Video silindi');
-      loadVideos(); // Reload videos
+      console.log('📝 Blog düzenleme başladı:', formData);
+      const result = await blogAPI.update(editingPost.id, {
+        title: formData.title,
+        content: formData.content,
+        excerpt: formData.excerpt || formData.content.substring(0, 150) + '...',
+        category: formData.category,
+        published: formData.published,
+      });
+      console.log('✅ Blog güncellendi:', result);
+      toast.success('Blog yazısı başarıyla güncellendi!');
+      setShowEditModal(false);
+      setFormData({
+        title: '',
+        content: '',
+        excerpt: '',
+        category: 'Bel Fıtığı',
+        published: false,
+      });
+      await loadPosts();
     } catch (error: any) {
-      toast.error(error.message || 'Video silinirken hata oluştu');
+      console.error('❌ Blog düzenleme hatası:', error);
+      toast.error(error.message || 'Yazı güncellenirken hata oluştu');
     }
   };
 
-  const handleTogglePublish = async (video: Video) => {
-    try {
-      await videosAPI.update(video.id, { published: !video.published });
-      toast.success(video.published ? 'Video taslak yapıldı' : 'Video yayınlandı');
-      loadVideos(); // Reload videos
-    } catch (error: any) {
-      toast.error(error.message || 'Durum güncellenemedi');
-    }
-  };
-
-  // Fix thumbnails for all videos
-  const handleFixAllThumbnails = async () => {
-    if (!confirm('Tüm videoların thumbnail\'larını YouTube\'dan otomatik çekmek ister misiniz?')) {
-      return;
-    }
-
-    try {
-      let fixedCount = 0;
-      for (const video of videos) {
-        // If thumbnail is missing or empty, extract from YouTube URL
-        if (video.videoUrl && (!video.thumbnailUrl || video.thumbnailUrl.trim() === '')) {
-          const videoId = getYouTubeVideoId(video.videoUrl);
-          if (videoId) {
-            const newThumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-            await videosAPI.update(video.id, { thumbnailUrl: newThumbnail });
-            fixedCount++;
-          }
-        }
-      }
-      toast.success(`${fixedCount} videonun thumbnail'ı güncellendi! 🎉`);
-      loadVideos();
-    } catch (error: any) {
-      toast.error('Thumbnail güncelleme hatası: ' + error.message);
-    }
+  const formatDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString('tr-TR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
   };
 
   return (
@@ -154,79 +193,126 @@ export default function AdminVideos() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">Video Yönetimi</h1>
-            <p className="text-slate-600">Tüm videoları yönetin</p>
+            <h1 className="text-4xl font-bold text-slate-900 mb-2">Blog Yönetimi</h1>
+            <p className="text-slate-600">Blog yazılarını yönetin</p>
           </div>
           <div className="flex gap-3">
-            <button
-              onClick={handleFixAllThumbnails}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-2xl hover:shadow-lg transition-all hover:scale-105"
-            >
-              <Upload className="w-5 h-5" />
-              Thumbnail Yenile
-            </button>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all hover:scale-105"
-            >
-              <Plus className="w-5 h-5" />
-              Yeni Video
-            </button>
+            {!isDeleteMode ? (
+              <>
+                <button
+                  onClick={() => setIsDeleteMode(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all hover:scale-105"
+                >
+                  <Trash2 className="w-5 h-5" />
+                  Toplu Sil
+                </button>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all hover:scale-105"
+                >
+                  <Plus className="w-5 h-5" />
+                  Yeni Yazı
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={selectedPosts.length === 0}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Trash2 className="w-5 h-5" />
+                  Seçilenleri Sil ({selectedPosts.length})
+                </button>
+                <button
+                  onClick={() => {
+                    setIsDeleteMode(false);
+                    setSelectedPosts([]);
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 bg-slate-200 text-slate-700 font-semibold rounded-2xl hover:bg-slate-300 transition-all"
+                >
+                  İptal
+                </button>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Videos Table */}
+        {/* Posts Table */}
         <div className="backdrop-blur-xl bg-white/90 border border-purple-200/30 rounded-3xl overflow-hidden">
-          {isLoading ? (
-            <div className="p-12 text-center">
-              <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-slate-600">Videolar yükleniyor...</p>
-            </div>
-          ) : videos.length === 0 ? (
-            <div className="p-12 text-center">
-              <p className="text-slate-600 mb-4">Henüz video eklenmemiş</p>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="px-6 py-3 bg-blue-500 text-white rounded-2xl hover:bg-blue-600"
-              >
-                İlk Videoyu Ekle
-              </button>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-200">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Başlık</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Kategori</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Görüntülenme</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Durum</th>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-200">
+                <tr>
+                  {isDeleteMode && (
+                    <th className="px-6 py-4 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedPosts.length === posts.length && posts.length > 0}
+                        onChange={toggleSelectAll}
+                        className="w-5 h-5 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
+                      />
+                    </th>
+                  )}
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Başlık</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Kategori</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Tarih</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Görüntülenme</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Durum</th>
+                  {!isDeleteMode && (
                     <th className="px-6 py-4 text-right text-sm font-semibold text-slate-900">İşlemler</th>
+                  )}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-4 text-center">
+                      <Loader2 className="w-5 h-5 animate-spin inline-block mr-2" />
+                      Yükleniyor...
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {videos.map((video) => (
-                    <tr key={video.id} className="hover:bg-purple-50/50 transition-colors">
+                ) : posts.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-4 text-center">
+                      <AlertCircle className="w-5 h-5 text-red-500 inline-block mr-2" />
+                      Hiç yazı bulunamadı
+                    </td>
+                  </tr>
+                ) : (
+                  posts.map((post) => (
+                    <tr key={post.id} className="hover:bg-purple-50/50 transition-colors">
+                      {isDeleteMode && (
+                        <td className="px-6 py-4 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedPosts.includes(post.id)}
+                            onChange={() => togglePostSelection(post.id)}
+                            className="w-5 h-5 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
+                          />
+                        </td>
+                      )}
                       <td className="px-6 py-4">
-                        <div className="font-medium text-slate-900">{video.title}</div>
+                        <div className="font-medium text-slate-900">{post.title}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
-                          {video.category}
+                        <span className="px-3 py-1 bg-teal-100 text-teal-700 text-xs font-semibold rounded-full">
+                          {post.category}
                         </span>
                       </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{formatDate(post.created_at)}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-slate-600">
                           <Eye className="w-4 h-4" />
-                          {video.views?.toLocaleString('tr-TR') || 0}
+                          {post.views.toLocaleString('tr-TR')}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <button
-                          onClick={() => handleTogglePublish(video)}
+                          onClick={() => handleTogglePublish(post)}
                           className="cursor-pointer"
                         >
-                          {video.published ? (
+                          {post.published ? (
                             <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">
                               Yayında
                             </span>
@@ -237,91 +323,77 @@ export default function AdminVideos() {
                           )}
                         </button>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <button className="p-2 hover:bg-blue-100 text-blue-600 rounded-xl transition-colors">
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(video.id)}
-                            className="p-2 hover:bg-red-100 text-red-600 rounded-xl transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+                      {!isDeleteMode && (
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => {
+                                setEditingPost(post);
+                                setFormData({
+                                  title: post.title,
+                                  content: post.content,
+                                  excerpt: post.excerpt,
+                                  category: post.category,
+                                  published: post.published,
+                                });
+                                setShowEditModal(true);
+                              }}
+                              className="p-2 hover:bg-teal-100 text-teal-600 rounded-xl transition-colors"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(post.id)}
+                              className="p-2 hover:bg-red-100 text-red-600 rounded-xl transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        {/* Add Modal */}
+        {/* Add Blog Modal */}
         {showAddModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="backdrop-blur-xl bg-white/95 rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">Yeni Video Ekle</h2>
+            <div className="backdrop-blur-xl bg-white/95 rounded-3xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Yeni Blog Yazısı</h2>
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">Video Başlığı *</label>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Başlık *</label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="Örn: Bel Fıtığı Egzersizleri"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="Örn: Bel Ağrısı İçin Egzersizler"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">Açıklama</label>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Özet (isteğe bağlı)</label>
                   <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[100px]"
-                    placeholder="Video hakkında kısa açıklama..."
+                    value={formData.excerpt}
+                    onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[80px]"
+                    placeholder="Kısa özet... (Boş bırakılırsa içerikten otomatik oluşturulur)"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">YouTube URL *</label>
-                  <input
-                    type="text"
-                    value={formData.videoUrl}
-                    onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="https://youtube.com/watch?v=..."
-                  />
-                  {formData.videoUrl && getYouTubeVideoId(formData.videoUrl) && (
-                    <div className="mt-3">
-                      <p className="text-xs text-slate-600 mb-2">📸 Otomatik Thumbnail Önizlemesi:</p>
-                      <img
-                        src={getYouTubeThumbnail(formData.videoUrl) || ''}
-                        alt="YouTube Thumbnail"
-                        className="w-full max-w-md rounded-xl border-2 border-slate-200"
-                        onError={(e) => {
-                          // Fallback to hqdefault if maxresdefault fails
-                          const videoId = getYouTubeVideoId(formData.videoUrl);
-                          if (videoId) {
-                            (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-                          }
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">Küçük Resim URL</label>
-                  <input
-                    type="text"
-                    value={formData.thumbnailUrl}
-                    onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="https://... (boş bırakılırsa YouTube'dan otomatik alınır)"
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">İçerik *</label>
+                  <textarea
+                    value={formData.content}
+                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[200px]"
+                    placeholder="Blog içeriği..."
                   />
                 </div>
 
@@ -331,39 +403,128 @@ export default function AdminVideos() {
                     <select 
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
                     >
-                      <option key="bel-fitigi">Bel Fıtığı</option>
-                      <option key="boyun-agrisi">Boyun Ağrısı</option>
-                      <option key="skolyoz">Skolyoz</option>
-                      <option key="postur">Postür</option>
-                      <option key="egzersiz">Egzersiz</option>
-                      <option key="genel">Genel</option>
+                      <option>Bel Fıtığı</option>
+                      <option>Boyun Ağrısı</option>
+                      <option>Skolyoz</option>
+                      <option>Postür</option>
+                      <option>Egzersiz</option>
+                      <option>Genel</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-2">Süre</label>
-                    <input
-                      type="text"
-                      value={formData.duration}
-                      onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      placeholder="Örn: 12:45"
-                    />
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">Durum</label>
+                    <select 
+                      value={formData.published ? 'published' : 'draft'}
+                      onChange={(e) => setFormData({ ...formData, published: e.target.value === 'published' })}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    >
+                      <option value="draft">Taslak</option>
+                      <option value="published">Yayınla</option>
+                    </select>
                   </div>
                 </div>
 
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all"
+                    className="flex-1 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all"
                   >
-                    Video Ekle
+                    Yazıyı Kaydet
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
+                    className="flex-1 py-3 bg-slate-100 text-slate-700 font-semibold rounded-2xl hover:bg-slate-200 transition-colors"
+                  >
+                    İptal
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Blog Modal */}
+        {showEditModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="backdrop-blur-xl bg-white/95 rounded-3xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Blog Yazısını Düzenle</h2>
+              
+              <form onSubmit={handleEditSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Başlık *</label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="Örn: Bel Ağrısı İçin Egzersizler"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Özet (isteğe bağlı)</label>
+                  <textarea
+                    value={formData.excerpt}
+                    onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[80px]"
+                    placeholder="Kısa özet... (Boş bırakılırsa içerikten otomatik oluşturulur)"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">İçerik *</label>
+                  <textarea
+                    value={formData.content}
+                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[200px]"
+                    placeholder="Blog içeriği..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">Kategori</label>
+                    <select 
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    >
+                      <option>Bel Fıtığı</option>
+                      <option>Boyun Ağrısı</option>
+                      <option>Skolyoz</option>
+                      <option>Postür</option>
+                      <option>Egzersiz</option>
+                      <option>Genel</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">Durum</label>
+                    <select 
+                      value={formData.published ? 'published' : 'draft'}
+                      onChange={(e) => setFormData({ ...formData, published: e.target.value === 'published' })}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    >
+                      <option value="draft">Taslak</option>
+                      <option value="published">Yayınla</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all"
+                  >
+                    Yazıyı Kaydet
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
                     className="flex-1 py-3 bg-slate-100 text-slate-700 font-semibold rounded-2xl hover:bg-slate-200 transition-colors"
                   >
                     İptal
