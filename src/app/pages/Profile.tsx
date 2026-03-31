@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Calendar, MessageSquare, FileText, AtSign, Loader2, Shield, Clock, Check } from 'lucide-react';
+import { User, Mail, Calendar, MessageSquare, FileText, AtSign, Loader2, Shield, Clock, Check, Edit, Key, LogOut, X, Save } from 'lucide-react';
 import { supabase, TABLES } from '../lib/supabase';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router';
+import { useAuthStore } from '../store/authStore';
 
 interface UserProfile {
   id: string;
@@ -38,6 +41,21 @@ export default function Profile() {
   const [error, setError] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
+  
+  // Edit Profile Modal
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  
+  // Change Password Modal
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const navigate = useNavigate();
+  const signout = useAuthStore((state) => state.signout);
 
   useEffect(() => {
     fetchProfile();
@@ -297,6 +315,35 @@ export default function Profile() {
               </div>
             </div>
           </div>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              onClick={() => {
+                setEditName(profile.fullName);
+                setShowEditModal(true);
+              }}
+              className="inline-flex items-center gap-2 bg-teal-600 text-white py-2 px-4 rounded-2xl hover:bg-teal-700 transition-colors"
+            >
+              <Edit className="w-4 h-4" />
+              Profili Düzenle
+            </button>
+            <button
+              onClick={() => setShowPasswordModal(true)}
+              className="inline-flex items-center gap-2 bg-amber-600 text-white py-2 px-4 rounded-2xl hover:bg-amber-700 transition-colors"
+            >
+              <Key className="w-4 h-4" />
+              Şifre Değiştir
+            </button>
+            <button
+              onClick={() => {
+                signout();
+                navigate('/giris');
+              }}
+              className="inline-flex items-center gap-2 bg-red-600 text-white py-2 px-4 rounded-2xl hover:bg-red-700 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Çıkış Yap
+            </button>
+          </div>
         </div>
 
         {/* Activity Stats */}
@@ -381,6 +428,194 @@ export default function Profile() {
           )}
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="backdrop-blur-xl bg-white/90 border border-teal-200/30 rounded-3xl p-8 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-slate-900">Profilimi Düzenle</h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-slate-500 hover:text-slate-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <AtSign className="w-4 h-4 text-teal-600" />
+                <span className="font-semibold text-teal-700">{profile.username}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <Mail className="w-4 h-4" />
+                {profile.email}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <Calendar className="w-4 h-4" />
+                Üyelik: {profile.createdAt}
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Ad Soyad
+                </label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full border border-slate-300 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  placeholder="Adınız ve Soyadınız"
+                />
+              </div>
+            </div>
+            <button
+              onClick={async () => {
+                if (!editName.trim()) {
+                  toast.error('Lütfen adınızı girin');
+                  return;
+                }
+                setIsSavingProfile(true);
+                try {
+                  const { error } = await supabase.auth.updateUser({
+                    data: { name: editName }
+                  });
+                  
+                  if (error) throw error;
+                  
+                  toast.success('Profil başarıyla güncellendi!');
+                  setShowEditModal(false);
+                  fetchProfile();
+                } catch (error: any) {
+                  toast.error('Profil güncellenirken hata: ' + error.message);
+                } finally {
+                  setIsSavingProfile(false);
+                }
+              }}
+              disabled={isSavingProfile}
+              className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-teal-600 text-white py-3 rounded-2xl hover:bg-teal-700 transition-colors disabled:opacity-50"
+            >
+              {isSavingProfile ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Kaydediliyor...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Kaydet
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="backdrop-blur-xl bg-white/90 border border-teal-200/30 rounded-3xl p-8 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-slate-900">Şifremi Değiştir</h3>
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                className="text-slate-500 hover:text-slate-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Mevcut Şifre
+                </label>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full border border-slate-300 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  placeholder="Mevcut Şifreniz"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Yeni Şifre
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full border border-slate-300 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  placeholder="Yeni Şifreniz"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Yeni Şifre (Tekrar)
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full border border-slate-300 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  placeholder="Yeni Şifrenizi Onaylayın"
+                />
+              </div>
+            </div>
+            <button
+              onClick={async () => {
+                // Validation
+                if (!newPassword || !confirmPassword) {
+                  toast.error('Lütfen tüm alanları doldurun');
+                  return;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                  toast.error('Yeni şifreler eşleşmiyor');
+                  return;
+                }
+                
+                if (newPassword.length < 6) {
+                  toast.error('Şifre en az 6 karakter olmalıdır');
+                  return;
+                }
+                
+                setIsChangingPassword(true);
+                try {
+                  const { error } = await supabase.auth.updateUser({
+                    password: newPassword
+                  });
+                  
+                  if (error) throw error;
+                  
+                  toast.success('Şifreniz başarıyla güncellendi!');
+                  setShowPasswordModal(false);
+                  setCurrentPassword('');
+                  setNewPassword('');
+                  setConfirmPassword('');
+                } catch (error: any) {
+                  toast.error('Şifre güncellenirken hata: ' + error.message);
+                } finally {
+                  setIsChangingPassword(false);
+                }
+              }}
+              disabled={isChangingPassword}
+              className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-teal-600 text-white py-3 rounded-2xl hover:bg-teal-700 transition-colors disabled:opacity-50"
+            >
+              {isChangingPassword ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Değiştiriliyor...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Şifreyi Değiştir
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
