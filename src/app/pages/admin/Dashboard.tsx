@@ -125,13 +125,19 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
           {statCards.map((stat, index) => (
             <Link
-              key={index}
+              key={stat.title}
               to={stat.link}
+              onClick={() => console.log(`🎯 Tıklanan kart: "${stat.title}" -> Link: "${stat.link}"`)}
               className="group relative backdrop-blur-xl bg-white/90 border border-purple-200/30 rounded-3xl p-6 hover:shadow-2xl transition-all hover:scale-105 overflow-hidden"
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity`}></div>
               
               <div className="relative">
+                {/* DEBUG: Kart numarası */}
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white font-bold rounded-full flex items-center justify-center text-lg z-10 shadow-lg">
+                  {index + 1}
+                </div>
+
                 <div className="flex items-start justify-between mb-4">
                   <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-2xl flex items-center justify-center`}>
                     <stat.icon className="w-6 h-6 text-white" />
