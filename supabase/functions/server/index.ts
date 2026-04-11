@@ -1294,6 +1294,46 @@ app.get("/videos/:id/like-status", async (c) => {
   }
 });
 
+// Toplu Video Silme (Admin)
+app.post("/videos/bulk-delete", async (c) => {
+  try {
+    console.log("📹 Toplu video siliniyor...");
+
+    const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized: No user token provided" }, 401);
+
+    // Admin doğrulaması
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') || '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
+    if (authError || !user) return c.json({ error: "Unauthorized: Invalid token" }, 401);
+
+    const userData = await kv.get(`user_${user.id}`);
+    if (!userData || userData.role !== 'admin') {
+      return c.json({ error: "Forbidden: Admin access required" }, 403);
+    }
+
+    // Body'den ID listesini al (Örn: { "ids": ["id1", "id2"] })
+    const { ids } = await c.req.json();
+    
+    if (!ids || !Array.isArray(ids)) {
+      return c.json({ error: "Geçersiz ID listesi" }, 400);
+    }
+
+    // KV store'dan tüm seçili videoları sil
+    await Promise.all(ids.map(id => kv.del(`video_${id}`)));
+    
+    console.log(`✅ ${ids.length} video silindi.`);
+    return c.json({ success: true, deletedCount: ids.length });
+  } catch (error) {
+    console.error("❌ Error bulk deleting videos:", error);
+    return c.json({ error: "Failed to delete videos", details: error.message }, 500);
+  }
+});
+
 // ========================================
 // QUESTION ENDPOINTS
 // ========================================
@@ -1514,7 +1554,7 @@ app.put("/blog/:id", async (c) => {
 });
 
 // Delete blog post (admin only)
-app.delete("/make-server-b69488c3/blog/:id", async (c) => {
+app.delete("/blog/:id", async (c) => {
   try {
     console.log("📝 Deleting blog post...");
 
@@ -1558,6 +1598,42 @@ app.delete("/make-server-b69488c3/blog/:id", async (c) => {
   }
 });
 
+// Toplu Blog Silme (Admin)
+app.post("/blog/bulk-delete", async (c) => {
+  try {
+    console.log("📝 Toplu blog siliniyor...");
+
+    const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized: No user token provided" }, 401);
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') || '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
+    if (authError || !user) return c.json({ error: "Unauthorized: Invalid token" }, 401);
+
+    const userData = await kv.get(`user_${user.id}`);
+    if (!userData || userData.role !== 'admin') {
+      return c.json({ error: "Forbidden: Admin access required" }, 403);
+    }
+
+    const { ids } = await c.req.json();
+    
+    if (!ids || !Array.isArray(ids)) {
+      return c.json({ error: "Geçersiz ID listesi" }, 400);
+    }
+
+    await Promise.all(ids.map(id => kv.del(`blog_${id}`)));
+    
+    console.log(`✅ ${ids.length} blog post silindi.`);
+    return c.json({ success: true, deletedCount: ids.length });
+  } catch (error) {
+    console.error("❌ Error bulk deleting blogs:", error);
+    return c.json({ error: "Failed to delete blogs", details: error.message }, 500);
+  }
+});
 
 // ========================================
 // MR TERMS ENDPOINTS

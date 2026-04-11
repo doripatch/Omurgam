@@ -15,6 +15,7 @@ interface BlogPost {
 }
 
 export default function AdminBlog() {
+  // 📝 BLOG YÖNETİMİ SAYFASI - v2.0
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -29,6 +30,11 @@ export default function AdminBlog() {
     category: 'Bel Fıtığı',
     published: false,
   });
+
+  // Debug: Component mounted
+  useEffect(() => {
+    console.log('📝 AdminBlog component mounted!');
+  }, []);
 
   useEffect(() => {
     loadPosts();
@@ -60,7 +66,7 @@ export default function AdminBlog() {
       toast.error(error.message || 'Yazı silinirken hata oluştu');
     }
   };
-  
+
   const handleBulkDelete = async () => {
     if (selectedPosts.length === 0) {
       toast.error('Lütfen en az bir yazı seçin');
@@ -71,30 +77,42 @@ export default function AdminBlog() {
       return;
     }
 
+    console.log('🗑️ TOPLU SİLME BAŞLADI - Silinecek ID\'ler:', selectedPosts);
+
     try {
+      let successCount = 0;
+      let errorCount = 0;
+      
       for (const id of selectedPosts) {
-        await blogAPI.delete(id);
+        try {
+          console.log(`🗑️ Siliniyor: ${id}`);
+          const result = await blogAPI.delete(id);
+          console.log(`✅ Silindi: ${id}`, result);
+          successCount++;
+        } catch (error: any) {
+          console.error(`❌ Silinirken hata: ${id}`, error);
+          errorCount++;
+        }
       }
-      toast.success(`${selectedPosts.length} yazı silindi`);
+      
+      console.log(`📊 SONUÇ: ${successCount} başarılı, ${errorCount} hata`);
+      
+      if (errorCount > 0) {
+        toast.error(`${errorCount} yazı silinemedi, ${successCount} yazı silindi`);
+      } else {
+        toast.success(`${successCount} yazı başarıyla silindi! 🎉`);
+      }
+      
       setSelectedPosts([]);
       setIsDeleteMode(false);
-      loadPosts();
+      
+      // Sayfayı yenile
+      console.log('🔄 Yazılar yeniden yükleniyor...');
+      await loadPosts();
+      console.log('✅ Yazılar yenilendi');
     } catch (error: any) {
+      console.error('❌ TOPLU SİLME HATASI:', error);
       toast.error(error.message || 'Yazılar silinirken hata oluştu');
-    }
-  };
-
-  const togglePostSelection = (id: string) => {
-    setSelectedPosts(prev =>
-      prev.includes(id) ? prev.filter(postId => postId !== id) : [...prev, id]
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedPosts.length === posts.length) {
-      setSelectedPosts([]);
-    } else {
-      setSelectedPosts(posts.map(p => p.id));
     }
   };
 
@@ -175,6 +193,20 @@ export default function AdminBlog() {
     } catch (error: any) {
       console.error('❌ Blog düzenleme hatası:', error);
       toast.error(error.message || 'Yazı güncellenirken hata oluştu');
+    }
+  };
+
+  const togglePostSelection = (id: string) => {
+    setSelectedPosts(prev =>
+      prev.includes(id) ? prev.filter(postId => postId !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedPosts.length === posts.length) {
+      setSelectedPosts([]);
+    } else {
+      setSelectedPosts(posts.map(p => p.id));
     }
   };
 
