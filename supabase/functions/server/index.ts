@@ -1297,12 +1297,11 @@ app.get("/videos/:id/like-status", async (c) => {
 // Toplu Video Silme (Admin)
 app.post("/videos/bulk-delete", async (c) => {
   try {
-    console.log("📹 Toplu video siliniyor...");
+    console.log("📹 Toplu video silme isteği geldi...");
 
     const userToken = c.req.header("X-User-Token");
     if (!userToken) return c.json({ error: "Unauthorized: No user token provided" }, 401);
 
-    // Admin doğrulaması
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') || '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
@@ -1316,17 +1315,29 @@ app.post("/videos/bulk-delete", async (c) => {
       return c.json({ error: "Forbidden: Admin access required" }, 403);
     }
 
-    // Body'den ID listesini al (Örn: { "ids": ["id1", "id2"] })
-    const { ids } = await c.req.json();
+    const body = await c.req.json();
+    const ids = body.ids;
+    
+    // FRONTEND'DEN NE GELDİĞİNİ GÖRMEK İÇİN LOG YAZDIRIYORUZ
+    console.log("🔍 Frontend'den gelen ham veri:", JSON.stringify(body));
+    console.log("🔍 Gelen ID listesi:", ids);
     
     if (!ids || !Array.isArray(ids)) {
-      return c.json({ error: "Geçersiz ID listesi" }, 400);
+      console.log("❌ Hata: ID listesi dizi (array) formatında değil!");
+      return c.json({ error: "Geçersiz ID listesi, dizi bekleniyor" }, 400);
     }
 
-    // KV store'dan tüm seçili videoları sil
-    await Promise.all(ids.map(id => kv.del(`video_${id}`)));
+    // Akıllı silme: ID zaten "video_" ile başlıyorsa olduğu gibi kullan, başlamıyorsa ekle.
+    await Promise.all(ids.map(id => {
+      // Eğer id bir obje olarak geldiyse (yanlışlıkla), içinden id'yi almayı dene
+      const actualId = typeof id === 'object' && id !== null ? (id.id || id._id || id) : id;
+      
+      const key = String(actualId).startsWith('video_') ? String(actualId) : `video_${actualId}`;
+      console.log(`🗑️ Veritabanından silinen anahtar (key): ${key}`);
+      return kv.del(key);
+    }));
     
-    console.log(`✅ ${ids.length} video silindi.`);
+    console.log(`✅ ${ids.length} video silme işlemi tamamlandı.`);
     return c.json({ success: true, deletedCount: ids.length });
   } catch (error) {
     console.error("❌ Error bulk deleting videos:", error);
@@ -1601,7 +1612,7 @@ app.delete("/blog/:id", async (c) => {
 // Toplu Blog Silme (Admin)
 app.post("/blog/bulk-delete", async (c) => {
   try {
-    console.log("📝 Toplu blog siliniyor...");
+    console.log("📝 Toplu blog silme isteği geldi...");
 
     const userToken = c.req.header("X-User-Token");
     if (!userToken) return c.json({ error: "Unauthorized: No user token provided" }, 401);
@@ -1619,15 +1630,29 @@ app.post("/blog/bulk-delete", async (c) => {
       return c.json({ error: "Forbidden: Admin access required" }, 403);
     }
 
-    const { ids } = await c.req.json();
+    const body = await c.req.json();
+    const ids = body.ids;
+    
+    // FRONTEND'DEN NE GELDİĞİNİ GÖRMEK İÇİN LOG YAZDIRIYORUZ
+    console.log("🔍 Frontend'den gelen ham veri:", JSON.stringify(body));
+    console.log("🔍 Gelen ID listesi:", ids);
     
     if (!ids || !Array.isArray(ids)) {
-      return c.json({ error: "Geçersiz ID listesi" }, 400);
+      console.log("❌ Hata: ID listesi dizi (array) formatında değil!");
+      return c.json({ error: "Geçersiz ID listesi, dizi bekleniyor" }, 400);
     }
 
-    await Promise.all(ids.map(id => kv.del(`blog_${id}`)));
+    // Akıllı silme: ID zaten "blog_" ile başlıyorsa olduğu gibi kullan, başlamıyorsa ekle.
+    await Promise.all(ids.map(id => {
+      // Eğer id bir obje olarak geldiyse (yanlışlıkla), içinden id'yi almayı dene
+      const actualId = typeof id === 'object' && id !== null ? (id.id || id._id || id) : id;
+      
+      const key = String(actualId).startsWith('blog_') ? String(actualId) : `blog_${actualId}`;
+      console.log(`🗑️ Veritabanından silinen anahtar (key): ${key}`);
+      return kv.del(key);
+    }));
     
-    console.log(`✅ ${ids.length} blog post silindi.`);
+    console.log(`✅ ${ids.length} blog post silme işlemi tamamlandı.`);
     return c.json({ success: true, deletedCount: ids.length });
   } catch (error) {
     console.error("❌ Error bulk deleting blogs:", error);
