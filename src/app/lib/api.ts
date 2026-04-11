@@ -13,16 +13,13 @@ export interface ApiResponse<T = any> {
 // Helper to get auth token
 const getAuthToken = async () => {
   try {
-    // Get session from Supabase - wait for it to be ready
     const { data: { session } } = await supabase.auth.getSession();
     
     if (session?.access_token) {
-      console.log('✅ Auth token found (first 30 chars):', session.access_token.substring(0, 30) + '...');
-      console.log('✅ Auth token length:', session.access_token.length);
+      console.log('✅ Auth token found');
       return session.access_token;
     } else {
       console.log('❌ No auth token found in session');
-      // Try to refresh session
       const { data: { session: refreshedSession } } = await supabase.auth.refreshSession();
       if (refreshedSession?.access_token) {
         console.log('✅ Auth token refreshed');
@@ -43,8 +40,6 @@ const makeRequest = async <T = any>(
 ): Promise<T> => {
   const token = await getAuthToken();
   
-  // Always send ANON_KEY in Authorization header for Supabase Edge Functions
-  // Send user token in custom X-User-Token header if available
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${publicAnonKey}`,
@@ -54,14 +49,11 @@ const makeRequest = async <T = any>(
 
   try {
     console.log(`🌐 API Request: ${endpoint}`);
-    console.log(`🔑 Has user token: ${!!token}`);
     
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,
     });
-
-    console.log(`📡 API Response (${endpoint}):`, response.status, response.statusText);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ 
@@ -80,14 +72,13 @@ const makeRequest = async <T = any>(
   }
 };
 
-// Auth API (placeholder - Supabase handles auth directly)
+// 🪄 SİHİRLİ DOKUNUŞ: Frontend ID'lerin başına yanlışlıkla "video_" veya "blog_" eklerse onu temizleyen kurtarıcımız
+const cleanId = (id: string | number) => String(id).replace(/^(video_|blog_|question_|term_)/, '');
+
+// Auth API 
 export const authAPI = {
-  // Sign up new user
   signup: async (email: string, password: string, name: string) => {
     try {
-      console.log('🔐 Signup attempt:', email);
-      
-      // Call backend signup endpoint with ANON_KEY
       const response = await fetch(`${API_BASE_URL}/signup`, {
         method: 'POST',
         headers: {
@@ -96,140 +87,54 @@ export const authAPI = {
         },
         body: JSON.stringify({ email, password, name }),
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Signup failed');
-      }
-
-      console.log('✅ Signup successful:', data);
+      if (!response.ok) throw new Error(data.error || 'Signup failed');
       return data;
     } catch (error: any) {
-      console.error('❌ Signup error:', error);
       throw error;
     }
   },
 
-  // Sign in existing user
   signin: async (email: string, password: string) => {
     try {
-      console.log('🔐 Signin attempt:', email);
-      
-      // Debug: Check Supabase configuration
-      console.log('🔍 Supabase URL:', `https://${projectId}.supabase.co`);
-      console.log('🔍 Anon Key length:', publicAnonKey.length);
-      console.log('🔍 Anon Key first 50 chars:', publicAnonKey.substring(0, 50));
-      
-      // USE DIRECT SUPABASE AUTH - BYPASS BACKEND!
-      console.log('✨ Using direct Supabase Auth (bypassing backend)');
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw new Error(error.message);
+      if (!data.session || !data.user) throw new Error('Login failed - no session created');
 
-      if (error) {
-        console.error('❌ Supabase Auth error:', error);
-        console.error('❌ Error code:', error.code);
-        console.error('❌ Error message:', error.message);
-        console.error('❌ Error status:', error.status);
-        throw new Error(error.message);
-      }
-
-      if (!data.session || !data.user) {
-        console.error('❌ No session/user returned from Supabase');
-        throw new Error('Login failed - no session created');
-      }
-
-      console.log('✅ Supabase Auth successful!');
-      console.log('👤 User ID:', data.user.id);
-      console.log('📧 User email:', data.user.email);
-      console.log('🔑 Session token length:', data.session.access_token.length);
-
-      // Get user metadata from Supabase user
       const role = data.user.user_metadata?.role || 'user';
       const name = data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User';
 
-      console.log('👤 User role:', role);
-      console.log('👤 User name:', name);
-
-      // Return user data in expected format
       return {
-        user: {
-          id: data.user.id,
-          email: data.user.email!,
-          name: name,
-          role: role as 'user' | 'admin',
-        },
+        user: { id: data.user.id, email: data.user.email!, name: name, role: role as 'user' | 'admin' },
         session: data.session,
       };
     } catch (error: any) {
-      console.error('❌ Signin error:', error);
       throw error;
     }
   },
 
-  // Sign out current user
   signout: async () => {
     try {
-      console.log('🔐 Signout attempt');
-      
       const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('❌ Signout error:', error);
-        throw error;
-      }
-
-      console.log('✅ Signout successful');
+      if (error) throw error;
     } catch (error: any) {
-      console.error('❌ Signout error:', error);
       throw error;
     }
   },
 
-  // Get current session
   getSession: async () => {
     try {
-      console.log('🔍 Getting session from Supabase...');
-      
-      // Get session from Supabase - BYPASS BACKEND!
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) return null;
 
-      if (sessionError) {
-        console.error('❌ Session error:', sessionError);
-        return null;
-      }
-
-      if (!session) {
-        console.log('❌ No active session');
-        return null;
-      }
-
-      console.log('✅ Active session found!');
-      console.log('👤 User ID:', session.user.id);
-      console.log('📧 User email:', session.user.email);
-
-      // Get user metadata from Supabase user (bypass backend!)
       const role = session.user.user_metadata?.role || 'user';
       const name = session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User';
 
-      console.log('👤 User role:', role);
-      console.log('👤 User name:', name);
-
-      // Return user data in expected format
       return {
-        user: {
-          id: session.user.id,
-          email: session.user.email!,
-          name: name,
-          role: role as 'user' | 'admin',
-        },
+        user: { id: session.user.id, email: session.user.email!, name: name, role: role as 'user' | 'admin' },
         session: session,
       };
     } catch (error: any) {
-      console.error('❌ Get session error:', error);
       return null;
     }
   },
@@ -238,56 +143,59 @@ export const authAPI = {
 // Videos API
 export const videosAPI = {
   getAll: () => makeRequest('/videos'),
-  getById: (id: string) => makeRequest(`/videos/${id}`),
+  getById: (id: string) => makeRequest(`/videos/${cleanId(id)}`),
   create: (video: any) => makeRequest('/videos', {
     method: 'POST',
     body: JSON.stringify(video),
   }),
-  update: (id: string, video: any) => makeRequest(`/videos/${id}`, {
+  update: (id: string, video: any) => makeRequest(`/videos/${cleanId(id)}`, {
     method: 'PUT',
     body: JSON.stringify(video),
   }),
-  delete: (id: string) => makeRequest(`/videos/${id}`, {
+  delete: (id: string) => makeRequest(`/videos/${cleanId(id)}`, {
     method: 'DELETE',
   }),
-  incrementViews: (id: string) => makeRequest(`/videos/${id}/view`, {
+  // Yeni Toplu Silme Fonksiyonumuz
+  bulkDelete: (ids: string[]) => makeRequest('/videos/bulk-delete', {
+    method: 'POST',
+    body: JSON.stringify({ ids: ids.map(cleanId) }),
+  }),
+  incrementViews: (id: string) => makeRequest(`/videos/${cleanId(id)}/view`, {
     method: 'POST',
   }),
-  // Comments
-  getComments: (id: string) => makeRequest(`/videos/${id}/comments`),
-  addComment: (id: string, text: string) => makeRequest(`/videos/${id}/comments`, {
+  getComments: (id: string) => makeRequest(`/videos/${cleanId(id)}/comments`),
+  addComment: (id: string, text: string) => makeRequest(`/videos/${cleanId(id)}/comments`, {
     method: 'POST',
     body: JSON.stringify({ text }),
   }),
-  deleteComment: (videoId: string, commentId: string) => makeRequest(`/videos/${videoId}/comments/${commentId}`, {
+  deleteComment: (videoId: string, commentId: string) => makeRequest(`/videos/${cleanId(videoId)}/comments/${cleanId(commentId)}`, {
     method: 'DELETE',
   }),
-  // Likes
-  toggleLike: (id: string) => makeRequest(`/videos/${id}/like`, {
+  toggleLike: (id: string) => makeRequest(`/videos/${cleanId(id)}/like`, {
     method: 'POST',
   }),
-  getLikeStatus: (id: string) => makeRequest(`/videos/${id}/like-status`),
+  getLikeStatus: (id: string) => makeRequest(`/videos/${cleanId(id)}/like-status`),
 };
 
 // Questions API
 export const questionsAPI = {
   getAll: () => makeRequest('/questions'),
-  getById: (id: string) => makeRequest(`/questions/${id}`),
+  getById: (id: string) => makeRequest(`/questions/${cleanId(id)}`),
   create: (question: any) => makeRequest('/questions', {
     method: 'POST',
     body: JSON.stringify(question),
   }),
-  update: (id: string, question: any) => makeRequest(`/questions/${id}`, {
+  update: (id: string, question: any) => makeRequest(`/questions/${cleanId(id)}`, {
     method: 'PUT',
     body: JSON.stringify(question),
   }),
-  delete: (id: string) => makeRequest(`/questions/${id}`, {
+  delete: (id: string) => makeRequest(`/questions/${cleanId(id)}`, {
     method: 'DELETE',
   }),
-  approve: (id: string) => makeRequest(`/questions/${id}/approve`, {
+  approve: (id: string) => makeRequest(`/questions/${cleanId(id)}/approve`, {
     method: 'POST',
   }),
-  answer: (id: string, answer: string) => makeRequest(`/questions/${id}/answer`, {
+  answer: (id: string, answer: string) => makeRequest(`/questions/${cleanId(id)}/answer`, {
     method: 'POST',
     body: JSON.stringify({ answer }),
   }),
@@ -296,19 +204,24 @@ export const questionsAPI = {
 // Blog API
 export const blogAPI = {
   getAll: () => makeRequest('/blog'),
-  getById: (id: string) => makeRequest(`/blog/${id}`),
+  getById: (id: string) => makeRequest(`/blog/${cleanId(id)}`),
   create: (post: any) => makeRequest('/blog', {
     method: 'POST',
     body: JSON.stringify(post),
   }),
-  update: (id: string, post: any) => makeRequest(`/blog/${id}`, {
+  update: (id: string, post: any) => makeRequest(`/blog/${cleanId(id)}`, {
     method: 'PUT',
     body: JSON.stringify(post),
   }),
-  delete: (id: string) => makeRequest(`/blog/${id}`, {
+  delete: (id: string) => makeRequest(`/blog/${cleanId(id)}`, {
     method: 'DELETE',
   }),
-  incrementViews: (id: string) => makeRequest(`/blog/${id}/view`, {
+  // Yeni Toplu Silme Fonksiyonumuz
+  bulkDelete: (ids: string[]) => makeRequest('/blog/bulk-delete', {
+    method: 'POST',
+    body: JSON.stringify({ ids: ids.map(cleanId) }),
+  }),
+  incrementViews: (id: string) => makeRequest(`/blog/${cleanId(id)}/view`, {
     method: 'POST',
   }),
 };
@@ -316,16 +229,16 @@ export const blogAPI = {
 // MR Terms API
 export const termsAPI = {
   getAll: () => makeRequest('/terms'),
-  getById: (id: string) => makeRequest(`/terms/${id}`),
+  getById: (id: string) => makeRequest(`/terms/${cleanId(id)}`),
   create: (term: any) => makeRequest('/terms', {
     method: 'POST',
     body: JSON.stringify(term),
   }),
-  update: (id: string, term: any) => makeRequest(`/terms/${id}`, {
+  update: (id: string, term: any) => makeRequest(`/terms/${cleanId(id)}`, {
     method: 'PUT',
     body: JSON.stringify(term),
   }),
-  delete: (id: string) => makeRequest(`/terms/${id}`, {
+  delete: (id: string) => makeRequest(`/terms/${cleanId(id)}`, {
     method: 'DELETE',
   }),
   search: (query: string) => makeRequest(`/terms/search?q=${encodeURIComponent(query)}`),
