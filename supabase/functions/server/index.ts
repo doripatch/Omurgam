@@ -1513,9 +1513,41 @@ app.put("/blog/:id", async (c) => {
   }
 });
 
-// Delete blog post
-app.delete("/blog/:id", async (c) => {
+// Delete blog post (admin only)
+app.delete("/make-server-b69488c3/blog/:id", async (c) => {
   try {
+    console.log("📝 Deleting blog post...");
+
+    // Get user token from X-User-Token header
+    const userToken = c.req.header("X-User-Token");
+
+    if (!userToken) {
+      console.error("❌ No user token found in X-User-Token header");
+      return c.json({ error: "Unauthorized: No user token provided" }, 401);
+    }
+
+    // Verify user is admin
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') || '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
+
+    if (authError || !user) {
+      console.error("❌ Auth error:", authError);
+      return c.json({ error: "Unauthorized: Invalid token" }, 401);
+    }
+
+    // Get user role from KV store
+    const userData = await kv.get(`user_${user.id}`);
+    if (!userData || userData.role !== 'admin') {
+      console.error("❌ User is not admin. Role:", userData?.role);
+      return c.json({ error: "Forbidden: Admin access required" }, 403);
+    }
+
+    console.log("✅ User is admin, proceeding with blog deletion...");
+
     const id = c.req.param("id");
     await kv.del(`blog_${id}`);
     console.log("✅ Blog post deleted:", id);
@@ -1526,25 +1558,6 @@ app.delete("/blog/:id", async (c) => {
   }
 });
 
-// Increment blog post views
-app.post("/blog/:id/view", async (c) => {
-  try {
-    const id = c.req.param("id");
-    const post = await kv.get(`blog_${id}`);
-    
-    if (!post) {
-      return c.json({ error: "Blog post not found" }, 404);
-    }
-    
-    post.views = (post.views || 0) + 1;
-    await kv.set(`blog_${id}`, post);
-    
-    return c.json({ views: post.views });
-  } catch (error) {
-    console.error("❌ Error incrementing views:", error);
-    return c.json({ error: "Failed to increment views", details: error.message }, 500);
-  }
-});
 
 // ========================================
 // MR TERMS ENDPOINTS
