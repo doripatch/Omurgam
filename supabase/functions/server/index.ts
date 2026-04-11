@@ -19,8 +19,7 @@ app.use("/*", cors({
   maxAge: 600,
 }));
 
-// OPTIONS preflight
-app.options("*", (c) => c.text("", 204));
+// (app.options satırını tamamen sildik, Hono bunu artık otomatik halledecek)
 
 // Health check
 app.get("/health", (c) => {
