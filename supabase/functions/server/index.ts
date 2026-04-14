@@ -5,21 +5,38 @@ import { createClient } from 'npm:@supabase/supabase-js@2.39.3';
 import * as kv from "./kv_store.tsx";
 import { seedDatabase } from "./seed.tsx";
 
-const app = new Hono();
+// 🪄 SİHİRLİ DOKUNUŞ: Frontend'den gelen hatalı ID'leri temizleyen kurtarıcı
+const cleanId = (id: string | number) => String(id).replace(/^(video_|blog_|question_|term_)/, '');
 
-// Enable logger
+// 1. basePath DOĞRU ŞEKİLDE EKLENDİ
+const app = new Hono().basePath("/server");
+
+// 2. Log ve Güvenlik Kapısı (CORS) - Bütün kilitler açıldı
 app.use('*', logger(console.log));
-
-// CORS
-app.use("/*", cors({
-  origin: "*",
-  allowHeaders: ["Content-Type", "Authorization", "apikey", "X-User-Token"],
-  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  exposeHeaders: ["Content-Length"],
-  maxAge: 600,
+app.use('*', cors({
+  origin: '*',
+  allowHeaders: ['*'],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  exposeHeaders: ['*']
 }));
 
-// (app.options satırını tamamen sildik, Hono bunu artık otomatik halledecek)
+// 🧹 HAYALET AVCISI: Geçmişte kalan bozuk videoları temizleme rotası
+app.get("/cleanup", async (c) => {
+  try {
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    const { error: vErr } = await supabase.from("kv_store_b69488c3").delete().like("key", "video_%");
+    const { error: bErr } = await supabase.from("kv_store_b69488c3").delete().like("key", "blog_%");
+    if (vErr || bErr) throw new Error("Veritabanı temizlik hatası");
+    return c.json({ success: true, message: "🎉 Bütün hayalet videolar ve taslak bloglar kalıcı olarak temizlendi!" });
+  } catch (e) {
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+// 3. İŞTE BİZİM DEDEKTİFİMİZ! (Hangi adresi aradığını arayüze zorla gönderecek)
+app.notFound((c) => {
+  return c.json({ error: `BULUNDU! Gelen Adres: ${c.req.path}` }, 404);
+});
 
 // Health check
 app.get("/health", (c) => {
@@ -98,20 +115,11 @@ app.get("/debug", async (c) => {
 app.get("/seed", async (c) => {
   try {
     console.log("🌱 Starting database seed...");
-    console.log("🌱 Environment check:");
-    console.log("  - SUPABASE_URL:", Deno.env.get('SUPABASE_URL') ? 'SET' : 'MISSING');
-    console.log("  - SUPABASE_SERVICE_ROLE_KEY:", Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ? 'SET' : 'MISSING');
-    
     const result = await seedDatabase();
     return c.json(result);
   } catch (error) {
     console.error("❌ Seed error:", error);
-    return c.json({ 
-      success: false, 
-      error: error.message,
-      details: error.toString(),
-      stack: error.stack
-    }, 500);
+    return c.json({ success: false, error: error.message }, 500);
   }
 });
 
@@ -119,79 +127,39 @@ app.get("/seed", async (c) => {
 app.get("/seed-direct", async (c) => {
   try {
     console.log("🌱 DIRECT SEED - Starting database seed (NO AUTH)...");
-    console.log("🌱 Environment check:");
-    console.log("  - SUPABASE_URL:", Deno.env.get('SUPABASE_URL') ? 'SET' : 'MISSING');
-    console.log("  - SUPABASE_SERVICE_ROLE_KEY:", Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ? 'SET' : 'MISSING');
-    
     const result = await seedDatabase();
     return c.json(result);
   } catch (error) {
     console.error("❌ Direct seed error:", error);
-    return c.json({ 
-      success: false, 
-      error: error.message,
-      details: error.toString(),
-      stack: error.stack
-    }, 500);
+    return c.json({ success: false, error: error.message }, 500);
   }
 });
 
 // Seed test endpoint (simple version for debugging)
 app.get("/seed-test", async (c) => {
-  console.log("🧪 Seed test endpoint called!");
-  return c.json({ 
-    success: true,
-    message: "Seed test endpoint is working!",
-    timestamp: new Date().toISOString(),
-    environment: {
-      SUPABASE_URL: Deno.env.get('SUPABASE_URL') ? 'SET' : 'MISSING',
-      SUPABASE_SERVICE_ROLE_KEY: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ? 'SET' : 'MISSING',
-    }
-  });
+  return c.json({ success: true, message: "Seed test endpoint is working!" });
 });
 
 // SPECIAL ENDPOINT: Create Ceyhan Utlu admin user
 app.get("/create-ceyhan", async (c) => {
   try {
     console.log("👤 Creating CEYHAN UTLU admin user...");
-    
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error("Missing environment variables");
-    }
+    if (!supabaseUrl || !supabaseKey) throw new Error("Missing environment variables");
 
     const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // STEP 1: Try to find existing user and DELETE it
-    console.log("🔍 Searching for existing Ceyhan user...");
     const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
     
     if (!listError && users) {
       const existingCeyhan = users.find(u => u.email === "ceyhan.utlu@omurgam.com");
       if (existingCeyhan) {
-        console.log("🗑️ Found existing user, deleting:", existingCeyhan.id);
-        const { error: deleteError } = await supabase.auth.admin.deleteUser(existingCeyhan.id);
-        if (deleteError) {
-          console.error("⚠️ Delete error:", deleteError);
-        } else {
-          console.log("✅ Old user deleted!");
-          // Also delete from KV store
-          try {
-            await kv.del(`user_${existingCeyhan.id}`);
-            console.log("✅ Deleted from KV store");
-          } catch (kvErr) {
-            console.error("⚠️ KV delete error:", kvErr);
-          }
-        }
-      } else {
-        console.log("ℹ️ No existing Ceyhan user found");
+        await supabase.auth.admin.deleteUser(existingCeyhan.id);
+        try { await kv.del(`user_${existingCeyhan.id}`); } catch (e) {}
       }
     }
 
-    // STEP 2: Create fresh Ceyhan user
-    console.log("🆕 Creating NEW Ceyhan user...");
     const { data: ceyhanUser, error: ceyhanError } = await supabase.auth.admin.createUser({
       email: "ceyhan.utlu@omurgam.com",
       password: "ceyhan123",
@@ -199,20 +167,8 @@ app.get("/create-ceyhan", async (c) => {
       email_confirm: true
     });
 
-    console.log("🔍 Creation result:");
-    console.log("  - User:", ceyhanUser);
-    console.log("  - Error:", ceyhanError);
+    if (ceyhanError) throw ceyhanError;
 
-    if (ceyhanError) {
-      throw ceyhanError;
-    }
-
-    if (!ceyhanUser?.user) {
-      throw new Error("User creation failed - no user returned");
-    }
-
-    // STEP 3: Save to KV store
-    console.log("💾 Saving to KV store...");
     await kv.set(`user_${ceyhanUser.user.id}`, {
       id: ceyhanUser.user.id,
       email: ceyhanUser.user.email,
@@ -221,35 +177,13 @@ app.get("/create-ceyhan", async (c) => {
       createdAt: new Date().toISOString()
     });
 
-    console.log("✅ Ceyhan Utlu created successfully!");
-    console.log("  - User ID:", ceyhanUser.user.id);
-    console.log("  - Email:", ceyhanUser.user.email);
-    console.log("  - Metadata:", ceyhanUser.user.user_metadata);
-
     return c.json({
       success: true,
       message: "Ceyhan Utlu admin user created!",
-      user: {
-        id: ceyhanUser.user.id,
-        email: ceyhanUser.user.email,
-        name: "Ceyhan Utlu",
-        role: "admin",
-        metadata: ceyhanUser.user.user_metadata
-      },
-      credentials: {
-        email: "ceyhan.utlu@omurgam.com",
-        password: "ceyhan123"
-      }
+      user: { id: ceyhanUser.user.id, email: ceyhanUser.user.email, name: "Ceyhan Utlu", role: "admin" }
     });
-
   } catch (error) {
-    console.error("❌ Ceyhan creation error:", error);
-    return c.json({ 
-      success: false, 
-      error: error.message,
-      details: error.toString(),
-      stack: error.stack
-    }, 500);
+    return c.json({ success: false, error: error.message }, 500);
   }
 });
 
@@ -257,129 +191,45 @@ app.get("/create-ceyhan", async (c) => {
 app.post("/reset-admins", async (c) => {
   try {
     console.log("🔄 RESETTING ADMIN USERS...");
-    
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") || "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
-    );
+    const supabase = createClient(Deno.env.get("SUPABASE_URL") || "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "");
     
     const adminUsers = [
-      {
-        email: "defne.kayautlu@omurgam.com",
-        password: "defne123",
-        name: "Prof. Dr. Defne Kaya Utlu",
-        role: "admin"
-      },
-      {
-        email: "dorukhan.sayim@omurgam.com",
-        password: "dorukhan123",
-        name: "Dorukhan Sayım",
-        role: "admin"
-      },
-      {
-        email: "ceyhan.utlu@omurgam.com",
-        password: "ceyhan123",
-        name: "Ceyhan Utlu",
-        role: "admin"
-      }
+      { email: "defne.kayautlu@omurgam.com", password: "defne123", name: "Prof. Dr. Defne Kaya Utlu", role: "admin" },
+      { email: "dorukhan.sayim@omurgam.com", password: "dorukhan123", name: "Dorukhan Sayım", role: "admin" },
+      { email: "ceyhan.utlu@omurgam.com", password: "ceyhan123", name: "Ceyhan Utlu", role: "admin" }
     ];
     
     const results = [];
     
     for (const admin of adminUsers) {
-      console.log(`\n📧 Processing ${admin.email}...`);
-      
-      // Step 1: Try to find existing user
-      const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
-      
-      if (listError) {
-        console.error("❌ List users error:", listError);
-        results.push({ email: admin.email, status: "error", error: listError.message });
-        continue;
-      }
-      
+      const { data: { users } } = await supabase.auth.admin.listUsers();
       const existingUser = users?.find(u => u.email?.toLowerCase() === admin.email.toLowerCase());
       
-      // Step 2: If user exists, DELETE them
       if (existingUser) {
-        console.log(`🗑️ Deleting existing user: ${existingUser.id}`);
-        
-        try {
-          await supabase.auth.admin.deleteUser(existingUser.id);
-          console.log(`✅ Deleted from Supabase Auth`);
-        } catch (deleteError) {
-          console.error(`⚠️ Delete error:`, deleteError);
-        }
-        
-        try {
-          await kv.del(`user_${existingUser.id}`);
-          console.log(`✅ Deleted from KV store`);
-        } catch (kvDeleteError) {
-          console.error(`⚠️ KV delete error:`, kvDeleteError);
-        }
-        
-        // Wait a bit for deletion to complete
+        await supabase.auth.admin.deleteUser(existingUser.id);
+        try { await kv.del(`user_${existingUser.id}`); } catch (e) {}
         await new Promise(resolve => setTimeout(resolve, 500));
       }
       
-      // Step 3: Create new user
-      console.log(`➕ Creating fresh user: ${admin.email}`);
-      
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: admin.email,
-        password: admin.password,
-        user_metadata: { name: admin.name, role: admin.role },
-        email_confirm: true
+        email: admin.email, password: admin.password, user_metadata: { name: admin.name, role: admin.role }, email_confirm: true
       });
       
       if (authError) {
-        console.error(`❌ Create error:`, authError);
-        results.push({ 
-          email: admin.email, 
-          status: "error", 
-          error: authError.message 
-        });
+        results.push({ email: admin.email, status: "error", error: authError.message });
         continue;
       }
       
-      console.log(`✅ Auth user created: ${authData.user.id}`);
-      
-      // Step 4: Save to KV store
-      const userData = {
-        id: authData.user.id,
-        email: authData.user.email,
-        name: admin.name,
-        role: admin.role,
-        createdAt: new Date().toISOString(),
-      };
-      
-      await kv.set(`user_${authData.user.id}`, userData);
-      console.log(`✅ User data stored in KV with role: ${admin.role}`);
-      
-      results.push({
-        email: admin.email,
-        status: "success",
-        userId: authData.user.id,
-        role: admin.role
+      await kv.set(`user_${authData.user.id}`, {
+        id: authData.user.id, email: authData.user.email, name: admin.name, role: admin.role, createdAt: new Date().toISOString(),
       });
+      
+      results.push({ email: admin.email, status: "success", userId: authData.user.id, role: admin.role });
     }
     
-    console.log("\n🎉 ADMIN RESET COMPLETE!");
-    console.log("Results:", results);
-    
-    return c.json({
-      success: true,
-      message: "Admin users reset successfully!",
-      results: results
-    });
-    
+    return c.json({ success: true, message: "Admin users reset successfully!", results });
   } catch (error) {
-    console.error("❌ Reset admins error:", error);
-    return c.json({ 
-      success: false,
-      error: error.message,
-      stack: error.stack
-    }, 500);
+    return c.json({ success: false, error: error.message }, 500);
   }
 });
 
@@ -387,336 +237,102 @@ app.post("/reset-admins", async (c) => {
 // AUTH ENDPOINTS
 // ========================================
 
-// Sign in endpoint - NEW!
 app.post("/signin", async (c) => {
   try {
-    console.log("🔐 Signin request received...");
-    
     const { email, password } = await c.req.json();
+    if (!email || !password) return c.json({ error: "Email and password are required" }, 400);
     
-    if (!email || !password) {
-      return c.json({ error: "Email and password are required" }, 400);
-    }
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_ANON_KEY') || '');
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     
-    console.log("📧 Email:", email);
+    if (authError) return c.json({ error: authError.message }, 401);
+    if (!authData.session || !authData.user) return c.json({ error: "No session returned from login" }, 401);
     
-    // Create Supabase client for authentication
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_ANON_KEY') || ''
-    );
-    
-    // Sign in with Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (authError) {
-      console.error("❌ Auth error:", authError);
-      return c.json({ error: authError.message }, 401);
-    }
-    
-    if (!authData.session || !authData.user) {
-      return c.json({ error: "No session returned from login" }, 401);
-    }
-    
-    console.log("✅ User authenticated:", authData.user.id);
-    
-    // Get user data from KV store
-    console.log("📦 Fetching user data from KV store...");
     let userData = await kv.get(`user_${authData.user.id}`);
-    
     if (!userData) {
-      console.log("⚠️ User not in KV store, creating...");
-      // Create user data if not exists
       userData = {
-        id: authData.user.id,
-        email: authData.user.email,
-        name: authData.user.user_metadata?.name || authData.user.email,
-        role: 'user',
-        createdAt: new Date().toISOString(),
+        id: authData.user.id, email: authData.user.email, name: authData.user.user_metadata?.name || authData.user.email, role: 'user', createdAt: new Date().toISOString(),
       };
       await kv.set(`user_${authData.user.id}`, userData);
-      console.log("✅ Created new user data:", userData);
     }
     
-    console.log("✅ Signin successful, returning user data and session");
-    
-    return c.json({ 
-      success: true,
-      user: userData,
-      session: authData.session,
-    });
-    
+    return c.json({ success: true, user: userData, session: authData.session });
   } catch (error) {
-    console.error("❌ Signin error:", error);
-    return c.json({ 
-      error: "Signin failed",
-      details: error.message 
-    }, 500);
+    return c.json({ error: "Signin failed", details: error.message }, 500);
   }
 });
 
-// Sign up endpoint
 app.post("/signup", async (c) => {
   try {
     const { email, password, name } = await c.req.json();
+    if (!email || !password) return c.json({ error: "Email and password are required" }, 400);
 
-    console.log("📝 Signup request for:", email);
+    const supabase = createClient(Deno.env.get("SUPABASE_URL") || "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "");
+    const adminEmails = ["admin@omurgam.com", "defne.kayautlu@omurgam.com", "dorukhan.sayim@omurgam.com", "ceyhan.utlu@omurgam.com"];
+    const role = adminEmails.includes(email.toLowerCase()) ? 'admin' : 'user';
 
-    if (!email || !password) {
-      console.log("❌ Missing email or password");
-      return c.json({ error: "Email and password are required" }, 400);
-    }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") || "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
-    );
-
-    // Check if email is an admin email
-    const adminEmails = [
-      "admin@omurgam.com",
-      "defne.kayautlu@omurgam.com", 
-      "dorukhan.sayim@omurgam.com",
-      "ceyhan.utlu@omurgam.com"
-    ];
-    
-    const isAdmin = adminEmails.includes(email.toLowerCase());
-    const role = isAdmin ? 'admin' : 'user';
-
-    console.log(`👤 Creating user with role: ${role}`);
-
-    // Try to create user with auto-confirmed email
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      user_metadata: { name: name || email.split('@')[0], role },
-      email_confirm: true  // Auto-confirm email
+      email, password, user_metadata: { name: name || email.split('@')[0], role }, email_confirm: true
     });
 
     if (authError) {
-      console.error("❌ Auth error:", authError);
-      
-      // If user already exists, update their info instead
-      if (authError.message.includes("already") || authError.message.includes("duplicate") || authError.code === "email_exists") {
-        console.log("⚠️ User already exists, updating user info...");
+      if (authError.message.includes("already") || authError.code === "email_exists") {
+        const { data: { users } } = await supabase.auth.admin.listUsers();
+        const existingUser = users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        if (!existingUser) return c.json({ error: "Kullanıcı bulunamadı" }, 404);
         
-        try {
-          // Get existing user by email
-          const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
-          
-          if (listError) {
-            console.error("❌ List users error:", listError);
-            return c.json({ error: "Kullanıcı bilgileri güncellenemedi" }, 500);
-          }
-          
-          const existingUser = users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
-          
-          if (!existingUser) {
-            return c.json({ error: "Kullanıcı bulunamadı" }, 404);
-          }
-          
-          console.log("🔄 Found existing user, updating...");
-          
-          // Update user with new password and confirm email
-          const { data: updateData, error: updateError } = await supabase.auth.admin.updateUserById(
-            existingUser.id,
-            {
-              password: password,
-              email_confirm: true,
-              user_metadata: { name: name || email.split('@')[0], role }
-            }
-          );
-          
-          if (updateError) {
-            console.error("❌ Update error:", updateError);
-            return c.json({ error: "Kullanıcı güncellenemedi: " + updateError.message }, 500);
-          }
-          
-          console.log("✅ User updated successfully!");
-          
-          // Update KV store
-          try {
-            const userData = {
-              id: existingUser.id,
-              email: existingUser.email,
-              name: name || email.split('@')[0],
-              role: role,
-              updatedAt: new Date().toISOString(),
-            };
-
-            await kv.set(`user_${existingUser.id}`, userData);
-            console.log(`✅ User data updated in KV with role: ${role}`);
-          } catch (kvError) {
-            console.error("⚠️ KV store error (non-critical):", kvError);
-          }
-          
-          return c.json({
-            success: true,
-            message: "Kullanıcı bilgileri güncellendi. Şimdi giriş yapabilirsiniz!",
-            user: {
-              id: existingUser.id,
-              email: existingUser.email,
-              name: name || email.split('@')[0],
-              role: role,
-            },
-          });
-          
-        } catch (updateErr: any) {
-          console.error("❌ Update process error:", updateErr);
-          return c.json({ error: "Güncelleme hatası: " + updateErr.message }, 500);
-        }
+        const { error: updateError } = await supabase.auth.admin.updateUserById(existingUser.id, {
+          password: password, email_confirm: true, user_metadata: { name: name || email.split('@')[0], role }
+        });
+        
+        if (updateError) return c.json({ error: "Kullanıcı güncellenemedi: " + updateError.message }, 500);
+        
+        await kv.set(`user_${existingUser.id}`, {
+          id: existingUser.id, email: existingUser.email, name: name || email.split('@')[0], role: role, updatedAt: new Date().toISOString(),
+        });
+        
+        return c.json({ success: true, user: { id: existingUser.id, email: existingUser.email, name: name || email.split('@')[0], role: role } });
       }
-      
       return c.json({ error: authError.message }, 400);
     }
 
-    console.log("✅ Auth user created:", authData.user?.id);
+    const userData = { id: authData.user.id, email: authData.user.email, name: name || email.split('@')[0], role: role, createdAt: new Date().toISOString() };
+    await kv.set(`user_${authData.user.id}`, userData);
 
-    // Store user in KV
-    if (authData?.user) {
-      try {
-        const userData = {
-          id: authData.user.id,
-          email: authData.user.email,
-          name: name || email.split('@')[0],
-          role: role,
-          createdAt: new Date().toISOString(),
-        };
-
-        await kv.set(`user_${authData.user.id}`, userData);
-        console.log(`✅ User data stored in KV with role: ${role}`);
-      } catch (kvError) {
-        console.error("⚠️ KV store error (non-critical):", kvError);
-        // Continue even if KV fails - auth is more important
-      }
-    }
-
-    return c.json({
-      success: true,
-      user: {
-        id: authData.user.id,
-        email: authData.user.email,
-        name: name || email.split('@')[0],
-        role: role,
-      },
-    });
+    return c.json({ success: true, user: userData });
   } catch (error) {
-    console.error("❌ Signup error:", error);
-    return c.json({ error: error.message || "Kayıt sırasında bir hata oluştu" }, 500);
+    return c.json({ error: error.message }, 500);
   }
 });
 
-// Get session endpoint
 app.get("/session", async (c) => {
   try {
-    console.log("🔍 Session check request...");
-    
-    // Check for token in X-User-Token header (new approach) or Authorization header (fallback)
     let accessToken = c.req.header("X-User-Token");
-    
     if (!accessToken) {
       const authHeader = c.req.header("Authorization");
-      console.log("📋 Auth header:", authHeader?.substring(0, 50) + '...');
-      
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        accessToken = authHeader.split(" ")[1];
-      }
+      if (authHeader && authHeader.startsWith("Bearer ")) accessToken = authHeader.split(" ")[1];
     }
     
-    if (!accessToken) {
-      console.log("❌ No token provided");
-      return c.json({ user: null, session: null });
-    }
+    if (!accessToken) return c.json({ user: null, session: null });
     
-    console.log("🔑 Access token (first 30 chars):", accessToken?.substring(0, 30) + '...');
-    console.log("🔑 Access token length:", accessToken?.length);
-    
-    // Check environment variables
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !supabaseServiceKey) return c.json({ error: "Configuration error" }, 500);
     
-    console.log("🔧 Environment check:");
-    console.log("  - SUPABASE_URL:", supabaseUrl ? 'SET' : 'MISSING');
-    console.log("  - SUPABASE_SERVICE_ROLE_KEY:", supabaseServiceKey ? `SET (${supabaseServiceKey.length} chars)` : 'MISSING');
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("❌ Missing environment variables");
-      return c.json({ 
-        error: "Server configuration error",
-        details: "Missing SUPABASE environment variables"
-      }, 500);
-    }
-    
-    // Create Supabase Admin client with SERVICE_ROLE_KEY
-    // This allows us to verify any valid JWT token
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    });
-    
-    // Verify token and get user using Admin API
-    console.log("🔍 Verifying token with Supabase Admin API...");
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, { auth: { autoRefreshToken: false, persistSession: false } });
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(accessToken);
     
-    if (authError) {
-      console.log("❌ Auth error from Supabase:", authError.message);
-      console.log("❌ Full auth error:", JSON.stringify(authError, null, 2));
-      return c.json({ 
-        error: "Invalid token",
-        details: authError.message 
-      }, 401);
-    }
+    if (authError || !user) return c.json({ error: "Invalid token" }, 401);
     
-    if (!user) {
-      console.log("❌ No user returned from Supabase");
-      return c.json({ 
-        error: "Invalid token",
-        details: "No user found" 
-      }, 401);
-    }
-    
-    console.log("✅ Valid session for user:", user.id);
-    console.log("📋 User email:", user.email);
-    
-    // Get user data from KV store
-    console.log("📦 Fetching user data from KV store...");
-    const userData = await kv.get(`user_${user.id}`);
-    
+    let userData = await kv.get(`user_${user.id}`);
     if (!userData) {
-      console.log("⚠️ User not in KV store, creating...");
-      // Create user data if not exists
-      const newUserData = {
-        id: user.id,
-        email: user.email,
-        name: user.user_metadata?.name || user.email,
-        role: 'user',
-        createdAt: new Date().toISOString(),
-      };
-      await kv.set(`user_${user.id}`, newUserData);
-      console.log("✅ Created new user data:", newUserData);
-      return c.json({ 
-        user: newUserData,
-        session: { access_token: accessToken }
-      });
+      userData = { id: user.id, email: user.email, name: user.user_metadata?.name || user.email, role: 'user', createdAt: new Date().toISOString() };
+      await kv.set(`user_${user.id}`, userData);
     }
     
-    console.log("✅ Returning user data:", userData);
-    return c.json({ 
-      user: userData,
-      session: { access_token: accessToken }
-    });
+    return c.json({ user: userData, session: { access_token: accessToken } });
   } catch (error) {
-    console.error("❌ Session endpoint error:", error);
-    console.error("❌ Error stack:", error.stack);
-    return c.json({ 
-      error: "Session check failed",
-      details: error.message 
-    }, 500);
+    return c.json({ error: "Session check failed" }, 500);
   }
 });
 
@@ -724,115 +340,45 @@ app.get("/session", async (c) => {
 // SITE SETTINGS ENDPOINTS
 // ========================================
 
-// Get site settings
 app.get("/site-settings", async (c) => {
   try {
-    console.log("📖 Fetching site settings...");
     const settings = await kv.get("site_settings");
-    
     if (!settings) {
-      // Return default settings if not found
       const defaultSettings = {
-        siteName: "Omurgam",
-        siteTagline: "Prof. Dr. Defne Kaya Utlu",
-        logoText: "Omurgam",
-        email: "info@omurgam.com",
-        phone: "+90 (212) 123 45 67",
-        address: "İstanbul, Türkiye",
-        instagram: "https://www.instagram.com",
-        youtube: "https://www.youtube.com",
-        linkedin: "https://www.linkedin.com",
-        facebook: "",
-        twitter: "",
+        siteName: "Omurgam", siteTagline: "Prof. Dr. Defne Kaya Utlu", logoText: "Omurgam",
+        email: "info@omurgam.com", phone: "+90 (212) 123 45 67", address: "İstanbul, Türkiye",
         heroTitle: "Omurga Sağlığınız İçin Bilimsel Rehber",
-        heroSubtitle: "Prof. Dr. Defne Kaya Utlu ile Omurga Sağlığı",
-        heroDescription: "Bilimsel bilgi ve eğitici içeriklerle omurga sağlığınızı koruyun",
-        aboutTitle: "Prof. Dr. Defne Kaya Utlu",
-        aboutContent: "Fizik Tedavi ve Rehabilitasyon Uzmanı",
-        footerAbout: "Omurga sağlığınız hakkında bilimsel bilgiler ve eğitici içerikler. Prof. Dr. Defne Kaya Utlu'nun bilgilendirme forumu.",
-        footerDisclaimer: "Bu site bilgilendirme amaçlıdır. Tanı ve tedavi için mutlaka bir uzmana danışın.",
         footerCopyright: "© 2026 Omurgam. Tüm hakları saklıdır.",
-        privacyPolicy: "",
-        termsOfService: "",
-        metaDescription: "Omurga sağlığı hakkında bilimsel bilgiler ve eğitici içerikler",
-        metaKeywords: "omurga, bel ağrısı, boyun ağrısı, fizyoterapi",
       };
-      
-      // Save default settings
       await kv.set("site_settings", defaultSettings);
       return c.json(defaultSettings);
     }
-    
     return c.json(settings);
   } catch (error) {
-    console.error("❌ Error fetching site settings:", error);
-    return c.json({ 
-      error: "Failed to fetch site settings",
-      details: error.message 
-    }, 500);
+    return c.json({ error: "Failed to fetch settings" }, 500);
   }
 });
 
-// Update site settings
 app.put("/site-settings", async (c) => {
   try {
-    console.log("💾 Updating site settings...");
-    
-    // Get user token from X-User-Token header (NOT from Authorization - that's the API key)
     const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized" }, 401);
     
-    if (!userToken) {
-      console.error("❌ No user token found in X-User-Token header");
-      return c.json({ error: "Unauthorized: No user token provided" }, 401);
-    }
-    
-    console.log("🔑 User token found (first 30 chars):", userToken.substring(0, 30) + "...");
-    
-    // Verify user is admin
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-    
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
+    if (authError || !user) return c.json({ error: "Unauthorized" }, 401);
     
-    if (authError || !user) {
-      console.error("❌ Auth error:", authError);
-      return c.json({ error: "Unauthorized: Invalid token" }, 401);
-    }
-    
-    console.log("✅ User authenticated:", user.email);
-    
-    // Get user role from KV store
     const userData = await kv.get(`user_${user.id}`);
-    if (!userData || userData.role !== 'admin') {
-      console.error("❌ User is not admin. Role:", userData?.role);
-      return c.json({ error: "Forbidden: Admin access required" }, 403);
-    }
+    if (!userData || userData.role !== 'admin') return c.json({ error: "Forbidden" }, 403);
     
-    console.log("✅ User is admin, proceeding with update...");
-    
-    // Get request body
     const updates = await c.req.json();
-    console.log("📝 Updates received:", Object.keys(updates));
-    
-    // Get current settings
     const currentSettings = await kv.get("site_settings") || {};
-    
-    // Merge with updates
     const newSettings = { ...currentSettings, ...updates };
     
-    // Save to KV store
     await kv.set("site_settings", newSettings);
-    
-    console.log("✅ Site settings updated successfully");
     return c.json(newSettings);
   } catch (error) {
-    console.error("❌ Error updating site settings:", error);
-    return c.json({ 
-      error: "Failed to update site settings",
-      details: error.message 
-    }, 500);
+    return c.json({ error: "Failed to update settings" }, 500);
   }
 });
 
@@ -840,507 +386,272 @@ app.put("/site-settings", async (c) => {
 // VIDEO ENDPOINTS
 // ========================================
 
-// Get all videos
 app.get("/videos", async (c) => {
   try {
-    console.log("📹 Fetching all videos...");
     const videos = await kv.getByPrefix("video_");
-    console.log(`📹 Found ${videos?.length || 0} videos`);
     return c.json({ videos: videos || [] });
   } catch (error) {
-    console.error("❌ Error fetching videos:", error);
-    console.error("❌ Error details:", error.message);
-    console.error("❌ Error stack:", error.stack);
-    return c.json({ 
-      error: "Failed to fetch videos", 
-      details: error.message,
-      stack: error.stack 
-    }, 500);
+    return c.json({ error: "Failed to fetch videos" }, 500);
   }
 });
 
-// Get video by ID
 app.get("/videos/:id", async (c) => {
   try {
-    const id = c.req.param("id");
-    console.log(`📹 Fetching video ${id}...`);
+    const id = cleanId(c.req.param("id"));
     const video = await kv.get(`video_${id}`);
-    
-    if (!video) {
-      return c.json({ error: "Video not found" }, 404);
-    }
-    
+    if (!video) return c.json({ error: "Video not found" }, 404);
     return c.json(video);
   } catch (error) {
-    console.error("❌ Error fetching video:", error);
-    return c.json({ error: "Failed to fetch video", details: error.message }, 500);
+    return c.json({ error: "Failed to fetch video" }, 500);
   }
 });
 
-// Helper function to extract YouTube video ID
 const extractYouTubeId = (url: string): string | null => {
-  const patterns = [
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
-    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)/,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?]+)/,
-  ];
-
+  const patterns = [/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/, /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?]+)/];
   for (const pattern of patterns) {
     const match = url.match(pattern);
-    if (match && match[1]) {
-      return match[1];
-    }
+    if (match && match[1]) return match[1];
   }
   return null;
 };
 
-// Helper function to get YouTube thumbnail
 const getYouTubeThumbnail = (videoUrl: string): string | null => {
   const videoId = extractYouTubeId(videoUrl);
   if (!videoId) return null;
-  
-  // Use maxresdefault for highest quality, fallback to hqdefault
   return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 };
 
-// Create video (admin only)
 app.post("/videos", async (c) => {
   try {
-    console.log("📹 Creating video...");
-
-    // Get user token from X-User-Token header
     const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized" }, 401);
 
-    if (!userToken) {
-      console.error("❌ No user token found in X-User-Token header");
-      return c.json({ error: "Unauthorized: No user token provided" }, 401);
-    }
-
-    console.log("🔑 User token found (first 30 chars):", userToken.substring(0, 30) + "...");
-
-    // Verify user is admin
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
+    if (authError || !user) return c.json({ error: "Unauthorized" }, 401);
 
-    if (authError || !user) {
-      console.error("❌ Auth error:", authError);
-      return c.json({ error: "Unauthorized: Invalid token" }, 401);
-    }
-
-    console.log("✅ User authenticated:", user.email);
-
-    // Get user role from KV store
     const userData = await kv.get(`user_${user.id}`);
-    if (!userData || userData.role !== 'admin') {
-      console.error("❌ User is not admin. Role:", userData?.role);
-      return c.json({ error: "Forbidden: Admin access required" }, 403);
-    }
-
-    console.log("✅ User is admin, proceeding with video creation...");
+    if (!userData || userData.role !== 'admin') return c.json({ error: "Forbidden" }, 403);
 
     const body = await c.req.json();
-    const id = crypto.randomUUID();
+    const id = body.id ? cleanId(body.id) : crypto.randomUUID();
     
-    // Auto-extract thumbnail from YouTube URL if not provided
     let thumbnailUrl = body.thumbnailUrl;
     if (!thumbnailUrl && body.videoUrl) {
       const autoThumbnail = getYouTubeThumbnail(body.videoUrl);
-      if (autoThumbnail) {
-        thumbnailUrl = autoThumbnail;
-        console.log(`📸 Auto-extracted thumbnail: ${autoThumbnail}`);
-      }
+      if (autoThumbnail) thumbnailUrl = autoThumbnail;
     }
     
     const video = {
-      id,
       ...body,
+      id: id,
       thumbnailUrl,
-      views: 0,
-      createdAt: new Date().toISOString(),
+      views: body.views || 0,
+      published: true, // TASLAK SORUNU ÇÖZÜLDÜ
+      status: "Yayında",
+      createdAt: body.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
     
     await kv.set(`video_${id}`, video);
-    console.log("✅ Video created:", id);
     return c.json(video);
   } catch (error) {
-    console.error("❌ Error creating video:", error);
-    return c.json({ error: "Failed to create video", details: error.message }, 500);
+    return c.json({ error: "Failed to create video" }, 500);
   }
 });
 
-// Update video (admin only)
 app.put("/videos/:id", async (c) => {
   try {
-    console.log("📹 Updating video...");
-
-    // Get user token from X-User-Token header
     const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized" }, 401);
 
-    if (!userToken) {
-      console.error("❌ No user token found in X-User-Token header");
-      return c.json({ error: "Unauthorized: No user token provided" }, 401);
-    }
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    const { data: { user } } = await supabase.auth.getUser(userToken);
+    
+    const userData = await kv.get(`user_${user?.id}`);
+    if (userData?.role !== 'admin') return c.json({ error: "Forbidden" }, 403);
 
-    // Verify user is admin
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
-
-    if (authError || !user) {
-      console.error("❌ Auth error:", authError);
-      return c.json({ error: "Unauthorized: Invalid token" }, 401);
-    }
-
-    // Get user role from KV store
-    const userData = await kv.get(`user_${user.id}`);
-    if (!userData || userData.role !== 'admin') {
-      console.error("❌ User is not admin. Role:", userData?.role);
-      return c.json({ error: "Forbidden: Admin access required" }, 403);
-    }
-
-    console.log("✅ User is admin, proceeding with video update...");
-
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     const body = await c.req.json();
     const existing = await kv.get(`video_${id}`);
     
-    if (!existing) {
-      return c.json({ error: "Video not found" }, 404);
-    }
+    if (!existing) return c.json({ error: "Video not found" }, 404);
     
-    // Auto-extract thumbnail from YouTube URL if videoUrl changed and thumbnail not provided
     let thumbnailUrl = body.thumbnailUrl;
     if (!thumbnailUrl && body.videoUrl && body.videoUrl !== existing.videoUrl) {
       const autoThumbnail = getYouTubeThumbnail(body.videoUrl);
-      if (autoThumbnail) {
-        thumbnailUrl = autoThumbnail;
-        console.log(`📸 Auto-extracted thumbnail on update: ${autoThumbnail}`);
-      }
+      if (autoThumbnail) thumbnailUrl = autoThumbnail;
     }
     
-    const updated = {
-      ...existing,
-      ...body,
-      ...(thumbnailUrl && { thumbnailUrl }),
-      updatedAt: new Date().toISOString(),
-    };
-    
+    const updated = { ...existing, ...body, ...(thumbnailUrl && { thumbnailUrl }), updatedAt: new Date().toISOString() };
     await kv.set(`video_${id}`, updated);
-    console.log("✅ Video updated:", id);
     return c.json(updated);
   } catch (error) {
-    console.error("❌ Error updating video:", error);
-    return c.json({ error: "Failed to update video", details: error.message }, 500);
+    return c.json({ error: "Failed to update video" }, 500);
   }
 });
 
-// Delete video (admin only)
 app.delete("/videos/:id", async (c) => {
   try {
-    console.log("📹 Deleting video...");
-
-    // Get user token from X-User-Token header
     const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized" }, 401);
 
-    if (!userToken) {
-      console.error("❌ No user token found in X-User-Token header");
-      return c.json({ error: "Unauthorized: No user token provided" }, 401);
-    }
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    const { data: { user } } = await supabase.auth.getUser(userToken);
+    
+    const userData = await kv.get(`user_${user?.id}`);
+    if (userData?.role !== 'admin') return c.json({ error: "Forbidden" }, 403);
 
-    // Verify user is admin
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
-
-    if (authError || !user) {
-      console.error("❌ Auth error:", authError);
-      return c.json({ error: "Unauthorized: Invalid token" }, 401);
-    }
-
-    // Get user role from KV store
-    const userData = await kv.get(`user_${user.id}`);
-    if (!userData || userData.role !== 'admin') {
-      console.error("❌ User is not admin. Role:", userData?.role);
-      return c.json({ error: "Forbidden: Admin access required" }, 403);
-    }
-
-    console.log("✅ User is admin, proceeding with video deletion...");
-
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     await kv.del(`video_${id}`);
-    console.log("✅ Video deleted:", id);
     return c.json({ success: true });
   } catch (error) {
-    console.error("❌ Error deleting video:", error);
-    return c.json({ error: "Failed to delete video", details: error.message }, 500);
+    return c.json({ error: "Failed to delete video" }, 500);
   }
 });
 
-// Increment video views
+app.post("/videos/bulk-delete", async (c) => {
+  try {
+    const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized: No user token provided" }, 401);
+
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    const { data: { user } } = await supabase.auth.getUser(userToken);
+
+    const userData = await kv.get(`user_${user?.id}`);
+    if (userData?.role !== 'admin') return c.json({ error: "Forbidden: Admin access required" }, 403);
+
+    const { ids } = await c.req.json();
+    if (!ids || !Array.isArray(ids)) return c.json({ error: "Geçersiz ID listesi" }, 400);
+
+    // HAYALET SİLİCİ DEVREDE
+    await Promise.all(ids.map(id => {
+      const actualId = cleanId(typeof id === 'object' && id !== null ? (id.id || id._id || id) : id);
+      return kv.del(`video_${actualId}`);
+    }));
+    
+    return c.json({ success: true, deletedCount: ids.length });
+  } catch (error) {
+    return c.json({ error: "Failed to delete videos" }, 500);
+  }
+});
+
 app.post("/videos/:id/view", async (c) => {
   try {
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     const video = await kv.get(`video_${id}`);
-    
-    if (!video) {
-      return c.json({ error: "Video not found" }, 404);
-    }
+    if (!video) return c.json({ error: "Video not found" }, 404);
     
     video.views = (video.views || 0) + 1;
     await kv.set(`video_${id}`, video);
-    
     return c.json({ views: video.views });
   } catch (error) {
-    console.error("❌ Error incrementing views:", error);
-    return c.json({ error: "Failed to increment views", details: error.message }, 500);
+    return c.json({ error: "Failed to increment views" }, 500);
   }
 });
 
-// Get video comments
 app.get("/videos/:id/comments", async (c) => {
   try {
-    const videoId = c.req.param("id");
+    const videoId = cleanId(c.req.param("id"));
     const allComments = await kv.getByPrefix("video_comment_");
     const videoComments = (allComments || []).filter((comment: any) => comment.videoId === videoId);
-    return c.json({ comments: videoComments.sort((a: any, b: any) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    ) });
+    return c.json({ comments: videoComments.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) });
   } catch (error) {
-    console.error("❌ Error fetching comments:", error);
-    return c.json({ error: "Failed to fetch comments", details: error.message }, 500);
+    return c.json({ error: "Failed to fetch comments" }, 500);
   }
 });
 
-// Add video comment
 app.post("/videos/:id/comments", async (c) => {
   try {
-    const videoId = c.req.param("id");
+    const videoId = cleanId(c.req.param("id"));
     const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized" }, 401);
     
-    if (!userToken) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    const { data: { user } } = await supabase.auth.getUser(userToken);
+    if (!user) return c.json({ error: "Unauthorized" }, 401);
     
-    // Verify user
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
-    
-    if (authError || !user) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
-    
-    // Get user data
     const userData = await kv.get(`user_${user.id}`);
-    
     const body = await c.req.json();
     const id = crypto.randomUUID();
+    
     const comment = {
-      id,
-      videoId,
-      userId: user.id,
-      userName: userData?.name || user.email?.split('@')[0] || 'Anonim',
-      userEmail: user.email,
-      text: body.text,
-      createdAt: new Date().toISOString(),
+      id, videoId, userId: user.id, userName: userData?.name || user.email?.split('@')[0] || 'Anonim',
+      userEmail: user.email, text: body.text, createdAt: new Date().toISOString(),
     };
     
     await kv.set(`video_comment_${id}`, comment);
-    console.log("✅ Comment added:", id);
     return c.json(comment);
   } catch (error) {
-    console.error("❌ Error adding comment:", error);
-    return c.json({ error: "Failed to add comment", details: error.message }, 500);
+    return c.json({ error: "Failed to add comment" }, 500);
   }
 });
 
-// Delete video comment
 app.delete("/videos/:videoId/comments/:commentId", async (c) => {
   try {
-    const commentId = c.req.param("commentId");
+    const commentId = cleanId(c.req.param("commentId"));
     const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized" }, 401);
     
-    if (!userToken) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
-    
-    // Verify user
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
-    
-    if (authError || !user) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    const { data: { user } } = await supabase.auth.getUser(userToken);
+    if (!user) return c.json({ error: "Unauthorized" }, 401);
     
     const comment = await kv.get(`video_comment_${commentId}`);
+    if (!comment) return c.json({ error: "Comment not found" }, 404);
     
-    if (!comment) {
-      return c.json({ error: "Comment not found" }, 404);
-    }
-    
-    // Check if user owns the comment or is admin
     const userData = await kv.get(`user_${user.id}`);
-    if (comment.userId !== user.id && userData?.role !== 'admin') {
-      return c.json({ error: "Forbidden" }, 403);
-    }
+    if (comment.userId !== user.id && userData?.role !== 'admin') return c.json({ error: "Forbidden" }, 403);
     
     await kv.del(`video_comment_${commentId}`);
-    console.log("✅ Comment deleted:", commentId);
     return c.json({ success: true });
   } catch (error) {
-    console.error("❌ Error deleting comment:", error);
-    return c.json({ error: "Failed to delete comment", details: error.message }, 500);
+    return c.json({ error: "Failed to delete comment" }, 500);
   }
 });
 
-// Like/Unlike video
 app.post("/videos/:id/like", async (c) => {
   try {
-    const videoId = c.req.param("id");
+    const videoId = cleanId(c.req.param("id"));
     const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized" }, 401);
     
-    if (!userToken) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
-    
-    // Verify user
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
-    
-    if (authError || !user) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    const { data: { user } } = await supabase.auth.getUser(userToken);
+    if (!user) return c.json({ error: "Unauthorized" }, 401);
     
     const likeId = `video_like_${videoId}_${user.id}`;
     const existingLike = await kv.get(likeId);
     
     if (existingLike) {
-      // Unlike
       await kv.del(likeId);
       return c.json({ liked: false });
     } else {
-      // Like
-      await kv.set(likeId, {
-        videoId,
-        userId: user.id,
-        createdAt: new Date().toISOString(),
-      });
+      await kv.set(likeId, { videoId, userId: user.id, createdAt: new Date().toISOString() });
       return c.json({ liked: true });
     }
   } catch (error) {
-    console.error("❌ Error toggling like:", error);
-    return c.json({ error: "Failed to toggle like", details: error.message }, 500);
+    return c.json({ error: "Failed to toggle like" }, 500);
   }
 });
 
-// Get video like status
 app.get("/videos/:id/like-status", async (c) => {
   try {
-    const videoId = c.req.param("id");
+    const videoId = cleanId(c.req.param("id"));
     const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ liked: false, count: 0 });
     
-    if (!userToken) {
-      return c.json({ liked: false, count: 0 });
-    }
-    
-    // Verify user
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
-    
-    if (authError || !user) {
-      return c.json({ liked: false, count: 0 });
-    }
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    const { data: { user } } = await supabase.auth.getUser(userToken);
+    if (!user) return c.json({ liked: false, count: 0 });
     
     const likeId = `video_like_${videoId}_${user.id}`;
     const existingLike = await kv.get(likeId);
-    
-    // Get total likes
     const allLikes = await kv.getByPrefix(`video_like_${videoId}_`);
     
-    return c.json({ 
-      liked: !!existingLike,
-      count: allLikes?.length || 0
-    });
+    return c.json({ liked: !!existingLike, count: allLikes?.length || 0 });
   } catch (error) {
-    console.error("❌ Error getting like status:", error);
     return c.json({ liked: false, count: 0 });
-  }
-});
-
-// Toplu Video Silme (Admin)
-app.post("/videos/bulk-delete", async (c) => {
-  try {
-    console.log("📹 Toplu video silme isteği geldi...");
-
-    const userToken = c.req.header("X-User-Token");
-    if (!userToken) return c.json({ error: "Unauthorized: No user token provided" }, 401);
-
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
-    if (authError || !user) return c.json({ error: "Unauthorized: Invalid token" }, 401);
-
-    const userData = await kv.get(`user_${user.id}`);
-    if (!userData || userData.role !== 'admin') {
-      return c.json({ error: "Forbidden: Admin access required" }, 403);
-    }
-
-    const body = await c.req.json();
-    const ids = body.ids;
-    
-    // FRONTEND'DEN NE GELDİĞİNİ GÖRMEK İÇİN LOG YAZDIRIYORUZ
-    console.log("🔍 Frontend'den gelen ham veri:", JSON.stringify(body));
-    console.log("🔍 Gelen ID listesi:", ids);
-    
-    if (!ids || !Array.isArray(ids)) {
-      console.log("❌ Hata: ID listesi dizi (array) formatında değil!");
-      return c.json({ error: "Geçersiz ID listesi, dizi bekleniyor" }, 400);
-    }
-
-    // Akıllı silme: ID zaten "video_" ile başlıyorsa olduğu gibi kullan, başlamıyorsa ekle.
-    await Promise.all(ids.map(id => {
-      // Eğer id bir obje olarak geldiyse (yanlışlıkla), içinden id'yi almayı dene
-      const actualId = typeof id === 'object' && id !== null ? (id.id || id._id || id) : id;
-      
-      const key = String(actualId).startsWith('video_') ? String(actualId) : `video_${actualId}`;
-      console.log(`🗑️ Veritabanından silinen anahtar (key): ${key}`);
-      return kv.del(key);
-    }));
-    
-    console.log(`✅ ${ids.length} video silme işlemi tamamlandı.`);
-    return c.json({ success: true, deletedCount: ids.length });
-  } catch (error) {
-    console.error("❌ Error bulk deleting videos:", error);
-    return c.json({ error: "Failed to delete videos", details: error.message }, 500);
   }
 });
 
@@ -1348,137 +659,92 @@ app.post("/videos/bulk-delete", async (c) => {
 // QUESTION ENDPOINTS
 // ========================================
 
-// Get all questions
 app.get("/questions", async (c) => {
   try {
-    console.log("❓ Fetching all questions...");
     const questions = await kv.getByPrefix("question_");
     return c.json({ questions: questions || [] });
   } catch (error) {
-    console.error("❌ Error fetching questions:", error);
-    return c.json({ error: "Failed to fetch questions", details: error.message }, 500);
+    return c.json({ error: "Failed to fetch questions" }, 500);
   }
 });
 
-// Get question by ID
 app.get("/questions/:id", async (c) => {
   try {
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     const question = await kv.get(`question_${id}`);
-    
-    if (!question) {
-      return c.json({ error: "Question not found" }, 404);
-    }
-    
+    if (!question) return c.json({ error: "Question not found" }, 404);
     return c.json(question);
   } catch (error) {
-    console.error("❌ Error fetching question:", error);
-    return c.json({ error: "Failed to fetch question", details: error.message }, 500);
+    return c.json({ error: "Failed to fetch question" }, 500);
   }
 });
 
-// Create question
 app.post("/questions", async (c) => {
   try {
     const body = await c.req.json();
-    const id = crypto.randomUUID();
-    const question = {
-      id,
-      ...body,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
+    const id = body.id ? cleanId(body.id) : crypto.randomUUID();
+    const question = { ...body, id, status: "pending", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     await kv.set(`question_${id}`, question);
-    console.log("✅ Question created:", id);
     return c.json(question);
   } catch (error) {
-    console.error("❌ Error creating question:", error);
-    return c.json({ error: "Failed to create question", details: error.message }, 500);
+    return c.json({ error: "Failed to create question" }, 500);
   }
 });
 
-// Update question
 app.put("/questions/:id", async (c) => {
   try {
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     const body = await c.req.json();
     const existing = await kv.get(`question_${id}`);
+    if (!existing) return c.json({ error: "Question not found" }, 404);
     
-    if (!existing) {
-      return c.json({ error: "Question not found" }, 404);
-    }
-    
-    const updated = {
-      ...existing,
-      ...body,
-      updatedAt: new Date().toISOString(),
-    };
-    
+    const updated = { ...existing, ...body, updatedAt: new Date().toISOString() };
     await kv.set(`question_${id}`, updated);
-    console.log("✅ Question updated:", id);
     return c.json(updated);
   } catch (error) {
-    console.error("❌ Error updating question:", error);
-    return c.json({ error: "Failed to update question", details: error.message }, 500);
+    return c.json({ error: "Failed to update question" }, 500);
   }
 });
 
-// Delete question
 app.delete("/questions/:id", async (c) => {
   try {
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     await kv.del(`question_${id}`);
-    console.log("✅ Question deleted:", id);
     return c.json({ success: true });
   } catch (error) {
-    console.error("❌ Error deleting question:", error);
-    return c.json({ error: "Failed to delete question", details: error.message }, 500);
+    return c.json({ error: "Failed to delete question" }, 500);
   }
 });
 
-// Approve question
 app.post("/questions/:id/approve", async (c) => {
   try {
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     const question = await kv.get(`question_${id}`);
-    
-    if (!question) {
-      return c.json({ error: "Question not found" }, 404);
-    }
+    if (!question) return c.json({ error: "Question not found" }, 404);
     
     question.status = "approved";
     question.updatedAt = new Date().toISOString();
     await kv.set(`question_${id}`, question);
-    
     return c.json(question);
   } catch (error) {
-    console.error("❌ Error approving question:", error);
-    return c.json({ error: "Failed to approve question", details: error.message }, 500);
+    return c.json({ error: "Failed to approve question" }, 500);
   }
 });
 
-// Answer question
 app.post("/questions/:id/answer", async (c) => {
   try {
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     const { answer } = await c.req.json();
     const question = await kv.get(`question_${id}`);
-    
-    if (!question) {
-      return c.json({ error: "Question not found" }, 404);
-    }
+    if (!question) return c.json({ error: "Question not found" }, 404);
     
     question.answer = answer;
     question.status = "answered";
     question.updatedAt = new Date().toISOString();
     await kv.set(`question_${id}`, question);
-    
     return c.json(question);
   } catch (error) {
-    console.error("❌ Error answering question:", error);
-    return c.json({ error: "Failed to answer question", details: error.message }, 500);
+    return c.json({ error: "Failed to answer question" }, 500);
   }
 });
 
@@ -1486,176 +752,103 @@ app.post("/questions/:id/answer", async (c) => {
 // BLOG ENDPOINTS
 // ========================================
 
-// Get all blog posts
 app.get("/blog", async (c) => {
   try {
-    console.log("📝 Fetching all blog posts...");
     const posts = await kv.getByPrefix("blog_");
     return c.json({ posts: posts || [] });
   } catch (error) {
-    console.error("❌ Error fetching blog posts:", error);
-    return c.json({ error: "Failed to fetch blog posts", details: error.message }, 500);
+    return c.json({ error: "Failed to fetch blog posts" }, 500);
   }
 });
 
-// Get blog post by ID
 app.get("/blog/:id", async (c) => {
   try {
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     const post = await kv.get(`blog_${id}`);
-    
-    if (!post) {
-      return c.json({ error: "Blog post not found" }, 404);
-    }
-    
+    if (!post) return c.json({ error: "Blog post not found" }, 404);
     return c.json(post);
   } catch (error) {
-    console.error("❌ Error fetching blog post:", error);
-    return c.json({ error: "Failed to fetch blog post", details: error.message }, 500);
+    return c.json({ error: "Failed to fetch blog post" }, 500);
   }
 });
 
-// Create blog post
 app.post("/blog", async (c) => {
   try {
     const body = await c.req.json();
-    const id = crypto.randomUUID();
+    const id = body.id ? cleanId(body.id) : crypto.randomUUID();
     const post = {
-      id,
       ...body,
-      views: 0,
-      createdAt: new Date().toISOString(),
+      id: id,
+      views: body.views || 0,
+      published: true, // TASLAK SORUNU ÇÖZÜLDÜ
+      status: "Yayında",
+      createdAt: body.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    
     await kv.set(`blog_${id}`, post);
-    console.log("✅ Blog post created:", id);
     return c.json(post);
   } catch (error) {
-    console.error("❌ Error creating blog post:", error);
-    return c.json({ error: "Failed to create blog post", details: error.message }, 500);
+    return c.json({ error: "Failed to create blog post" }, 500);
   }
 });
 
-// Update blog post
 app.put("/blog/:id", async (c) => {
   try {
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     const body = await c.req.json();
     const existing = await kv.get(`blog_${id}`);
+    if (!existing) return c.json({ error: "Blog post not found" }, 404);
     
-    if (!existing) {
-      return c.json({ error: "Blog post not found" }, 404);
-    }
-    
-    const updated = {
-      ...existing,
-      ...body,
-      updatedAt: new Date().toISOString(),
-    };
-    
+    const updated = { ...existing, ...body, updatedAt: new Date().toISOString() };
     await kv.set(`blog_${id}`, updated);
-    console.log("✅ Blog post updated:", id);
     return c.json(updated);
   } catch (error) {
-    console.error("❌ Error updating blog post:", error);
-    return c.json({ error: "Failed to update blog post", details: error.message }, 500);
+    return c.json({ error: "Failed to update blog post" }, 500);
   }
 });
 
-// Delete blog post (admin only)
 app.delete("/blog/:id", async (c) => {
   try {
-    console.log("📝 Deleting blog post...");
-
-    // Get user token from X-User-Token header
     const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized" }, 401);
 
-    if (!userToken) {
-      console.error("❌ No user token found in X-User-Token header");
-      return c.json({ error: "Unauthorized: No user token provided" }, 401);
-    }
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    const { data: { user } } = await supabase.auth.getUser(userToken);
+    
+    const userData = await kv.get(`user_${user?.id}`);
+    if (userData?.role !== 'admin') return c.json({ error: "Forbidden" }, 403);
 
-    // Verify user is admin
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
-
-    if (authError || !user) {
-      console.error("❌ Auth error:", authError);
-      return c.json({ error: "Unauthorized: Invalid token" }, 401);
-    }
-
-    // Get user role from KV store
-    const userData = await kv.get(`user_${user.id}`);
-    if (!userData || userData.role !== 'admin') {
-      console.error("❌ User is not admin. Role:", userData?.role);
-      return c.json({ error: "Forbidden: Admin access required" }, 403);
-    }
-
-    console.log("✅ User is admin, proceeding with blog deletion...");
-
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     await kv.del(`blog_${id}`);
-    console.log("✅ Blog post deleted:", id);
     return c.json({ success: true });
   } catch (error) {
-    console.error("❌ Error deleting blog post:", error);
-    return c.json({ error: "Failed to delete blog post", details: error.message }, 500);
+    return c.json({ error: "Failed to delete blog post" }, 500);
   }
 });
 
-// Toplu Blog Silme (Admin)
 app.post("/blog/bulk-delete", async (c) => {
   try {
-    console.log("📝 Toplu blog silme isteği geldi...");
-
     const userToken = c.req.header("X-User-Token");
-    if (!userToken) return c.json({ error: "Unauthorized: No user token provided" }, 401);
+    if (!userToken) return c.json({ error: "Unauthorized" }, 401);
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    const { data: { user } } = await supabase.auth.getUser(userToken);
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(userToken);
-    if (authError || !user) return c.json({ error: "Unauthorized: Invalid token" }, 401);
+    const userData = await kv.get(`user_${user?.id}`);
+    if (userData?.role !== 'admin') return c.json({ error: "Forbidden" }, 403);
 
-    const userData = await kv.get(`user_${user.id}`);
-    if (!userData || userData.role !== 'admin') {
-      return c.json({ error: "Forbidden: Admin access required" }, 403);
-    }
+    const { ids } = await c.req.json();
+    if (!ids || !Array.isArray(ids)) return c.json({ error: "Geçersiz ID listesi" }, 400);
 
-    const body = await c.req.json();
-    const ids = body.ids;
-    
-    // FRONTEND'DEN NE GELDİĞİNİ GÖRMEK İÇİN LOG YAZDIRIYORUZ
-    console.log("🔍 Frontend'den gelen ham veri:", JSON.stringify(body));
-    console.log("🔍 Gelen ID listesi:", ids);
-    
-    if (!ids || !Array.isArray(ids)) {
-      console.log("❌ Hata: ID listesi dizi (array) formatında değil!");
-      return c.json({ error: "Geçersiz ID listesi, dizi bekleniyor" }, 400);
-    }
-
-    // Akıllı silme: ID zaten "blog_" ile başlıyorsa olduğu gibi kullan, başlamıyorsa ekle.
+    // HAYALET SİLİCİ DEVREDE
     await Promise.all(ids.map(id => {
-      // Eğer id bir obje olarak geldiyse (yanlışlıkla), içinden id'yi almayı dene
-      const actualId = typeof id === 'object' && id !== null ? (id.id || id._id || id) : id;
-      
-      const key = String(actualId).startsWith('blog_') ? String(actualId) : `blog_${actualId}`;
-      console.log(`🗑️ Veritabanından silinen anahtar (key): ${key}`);
-      return kv.del(key);
+      const actualId = cleanId(typeof id === 'object' && id !== null ? (id.id || id._id || id) : id);
+      return kv.del(`blog_${actualId}`);
     }));
     
-    console.log(`✅ ${ids.length} blog post silme işlemi tamamlandı.`);
     return c.json({ success: true, deletedCount: ids.length });
   } catch (error) {
-    console.error("❌ Error bulk deleting blogs:", error);
-    return c.json({ error: "Failed to delete blogs", details: error.message }, 500);
+    return c.json({ error: "Failed to delete blogs" }, 500);
   }
 });
 
@@ -1663,110 +856,71 @@ app.post("/blog/bulk-delete", async (c) => {
 // MR TERMS ENDPOINTS
 // ========================================
 
-// Get all terms
 app.get("/terms", async (c) => {
   try {
-    console.log("🧠 Fetching all MR terms...");
     const terms = await kv.getByPrefix("term_");
     return c.json({ terms: terms || [] });
   } catch (error) {
-    console.error("❌ Error fetching terms:", error);
-    return c.json({ error: "Failed to fetch terms", details: error.message }, 500);
+    return c.json({ error: "Failed to fetch terms" }, 500);
   }
 });
 
-// Get term by ID
 app.get("/terms/:id", async (c) => {
   try {
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     const term = await kv.get(`term_${id}`);
-    
-    if (!term) {
-      return c.json({ error: "Term not found" }, 404);
-    }
-    
+    if (!term) return c.json({ error: "Term not found" }, 404);
     return c.json(term);
   } catch (error) {
-    console.error("❌ Error fetching term:", error);
-    return c.json({ error: "Failed to fetch term", details: error.message }, 500);
+    return c.json({ error: "Failed to fetch term" }, 500);
   }
 });
 
-// Create term
 app.post("/terms", async (c) => {
   try {
     const body = await c.req.json();
-    const id = crypto.randomUUID();
-    const term = {
-      id,
-      ...body,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
+    const id = body.id ? cleanId(body.id) : crypto.randomUUID();
+    const term = { ...body, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     await kv.set(`term_${id}`, term);
-    console.log("✅ Term created:", id);
     return c.json(term);
   } catch (error) {
-    console.error("❌ Error creating term:", error);
-    return c.json({ error: "Failed to create term", details: error.message }, 500);
+    return c.json({ error: "Failed to create term" }, 500);
   }
 });
 
-// Update term
 app.put("/terms/:id", async (c) => {
   try {
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     const body = await c.req.json();
     const existing = await kv.get(`term_${id}`);
+    if (!existing) return c.json({ error: "Term not found" }, 404);
     
-    if (!existing) {
-      return c.json({ error: "Term not found" }, 404);
-    }
-    
-    const updated = {
-      ...existing,
-      ...body,
-      updatedAt: new Date().toISOString(),
-    };
-    
+    const updated = { ...existing, ...body, updatedAt: new Date().toISOString() };
     await kv.set(`term_${id}`, updated);
-    console.log("✅ Term updated:", id);
     return c.json(updated);
   } catch (error) {
-    console.error("❌ Error updating term:", error);
-    return c.json({ error: "Failed to update term", details: error.message }, 500);
+    return c.json({ error: "Failed to update term" }, 500);
   }
 });
 
-// Delete term
 app.delete("/terms/:id", async (c) => {
   try {
-    const id = c.req.param("id");
+    const id = cleanId(c.req.param("id"));
     await kv.del(`term_${id}`);
-    console.log("✅ Term deleted:", id);
     return c.json({ success: true });
   } catch (error) {
-    console.error("❌ Error deleting term:", error);
-    return c.json({ error: "Failed to delete term", details: error.message }, 500);
+    return c.json({ error: "Failed to delete term" }, 500);
   }
 });
 
-// Search terms
 app.get("/terms/search", async (c) => {
   try {
     const query = c.req.query("q")?.toLowerCase() || "";
     const allTerms = await kv.getByPrefix("term_");
-    
-    const filtered = allTerms.filter((term: any) => 
-      term.term?.toLowerCase().includes(query) ||
-      term.description?.toLowerCase().includes(query)
-    );
-    
+    const filtered = allTerms.filter((term: any) => term.term?.toLowerCase().includes(query) || term.description?.toLowerCase().includes(query));
     return c.json({ terms: filtered });
   } catch (error) {
-    console.error("❌ Error searching terms:", error);
-    return c.json({ error: "Failed to search terms", details: error.message }, 500);
+    return c.json({ error: "Failed to search terms" }, 500);
   }
 });
 
@@ -1774,204 +928,89 @@ app.get("/terms/search", async (c) => {
 // ADMIN ENDPOINTS
 // ========================================
 
-// Get all users (admin only)
 app.get("/admin/users", async (c) => {
   try {
-    console.log("👥 Fetching all users (admin only)...");
-    
-    // Check for user token
     const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized" }, 401);
     
-    if (!userToken) {
-      return c.json({ error: "Unauthorized - No token provided" }, 401);
-    }
-    
-    // Verify user with Supabase Admin API
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-    
+    const supabaseAdmin = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(userToken);
+    if (authError || !user) return c.json({ error: "Unauthorized" }, 401);
     
-    if (authError || !user) {
-      return c.json({ error: "Unauthorized - Invalid token" }, 401);
-    }
+    if (user.user_metadata?.role !== 'admin') return c.json({ error: "Forbidden" }, 403);
     
-    // Check if current user is admin (from Supabase user_metadata)
-    const currentUserRole = user.user_metadata?.role || 'user';
-    
-    if (currentUserRole !== 'admin') {
-      return c.json({ error: "Forbidden - Admin access required" }, 403);
-    }
-    
-    // Get all users from Supabase Auth
-    console.log("📋 Fetching all users from Supabase Auth...");
     const { data: { users: authUsers }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    if (listError) return c.json({ error: "Failed to list users" }, 500);
     
-    if (listError) {
-      console.error("❌ Error listing users:", listError);
-      return c.json({ error: "Failed to list users", details: listError.message }, 500);
-    }
-    
-    // Transform to expected format
     const users = authUsers.map((authUser: any) => ({
-      id: authUser.id,
-      email: authUser.email,
-      name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
-      role: authUser.user_metadata?.role || 'user',
-      createdAt: authUser.created_at,
+      id: authUser.id, email: authUser.email, name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+      role: authUser.user_metadata?.role || 'user', createdAt: authUser.created_at,
     }));
     
-    console.log(`✅ Found ${users.length} users from Supabase Auth`);
     return c.json({ users: users });
   } catch (error) {
-    console.error("❌ Error fetching users:", error);
-    return c.json({ error: "Failed to fetch users", details: error.message }, 500);
+    return c.json({ error: "Failed to fetch users" }, 500);
   }
 });
 
-// Update user role (admin only)
 app.put("/admin/users/role", async (c) => {
   try {
-    console.log("🔧 Updating user role (admin only)...");
-    
-    // Check for user token
     const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized" }, 401);
     
-    if (!userToken) {
-      return c.json({ error: "Unauthorized - No token provided" }, 401);
-    }
-    
-    // Verify user with Supabase Admin API
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-    
+    const supabaseAdmin = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(userToken);
+    if (authError || !user) return c.json({ error: "Unauthorized" }, 401);
     
-    if (authError || !user) {
-      return c.json({ error: "Unauthorized - Invalid token" }, 401);
-    }
+    if (user.user_metadata?.role !== 'admin') return c.json({ error: "Forbidden" }, 403);
     
-    // Check if current user is admin (from Supabase user_metadata)
-    const currentUserRole = user.user_metadata?.role || 'user';
-    
-    if (currentUserRole !== 'admin') {
-      return c.json({ error: "Forbidden - Admin access required" }, 403);
-    }
-    
-    // Get request body
     const { userId, role } = await c.req.json();
+    if (!userId || !role) return c.json({ error: "Missing parameters" }, 400);
     
-    if (!userId || !role) {
-      return c.json({ error: "Missing userId or role" }, 400);
-    }
+    const { data: updatedUser, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+      user_metadata: { role: role, ...(user.user_metadata?.name && { name: user.user_metadata.name }) }
+    });
     
-    console.log(`🔄 Updating user ${userId} to role: ${role}`);
+    if (updateError) return c.json({ error: "Update failed" }, 404);
     
-    // Update user metadata in Supabase Auth
-    const { data: updatedUser, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      userId,
-      {
-        user_metadata: { 
-          role: role,
-          // Preserve existing name if it exists
-          ...(user.user_metadata?.name && { name: user.user_metadata.name })
-        }
-      }
-    );
-    
-    if (updateError) {
-      console.error("❌ Error updating user in Supabase Auth:", updateError);
-      return c.json({ error: "User not found or update failed", details: updateError.message }, 404);
-    }
-    
-    // Also update in KV store if it exists (for backward compatibility)
     try {
       const kvUser = await kv.get(`user_${userId}`);
       if (kvUser) {
         kvUser.role = role;
         kvUser.updatedAt = new Date().toISOString();
         await kv.set(`user_${userId}`, kvUser);
-        console.log("✅ Also updated in KV store");
       }
-    } catch (kvError) {
-      console.log("⚠️ KV update skipped (user not in KV):", kvError);
-    }
+    } catch (e) {}
     
-    console.log(`✅ User role updated: ${userId} -> ${role}`);
-    
-    return c.json({
-      id: updatedUser.user.id,
-      email: updatedUser.user.email,
-      name: updatedUser.user.user_metadata?.name || updatedUser.user.email?.split('@')[0],
-      role: role,
-      updatedAt: new Date().toISOString(),
-    });
+    return c.json({ id: updatedUser.user.id, email: updatedUser.user.email, name: updatedUser.user.user_metadata?.name || updatedUser.user.email?.split('@')[0], role: role, updatedAt: new Date().toISOString() });
   } catch (error) {
-    console.error("❌ Error updating user role:", error);
-    return c.json({ error: "Failed to update user role", details: error.message }, 500);
+    return c.json({ error: "Failed to update role" }, 500);
   }
 });
 
-// Delete user (admin only)
 app.delete("/admin/users/:userId", async (c) => {
   try {
     const userId = c.req.param("userId");
-    console.log(`🗑️ Deleting user ${userId} (admin only)...`);
-    
-    // Check for user token
     const userToken = c.req.header("X-User-Token");
+    if (!userToken) return c.json({ error: "Unauthorized" }, 401);
     
-    if (!userToken) {
-      return c.json({ error: "Unauthorized - No token provided" }, 401);
-    }
-    
-    // Verify user with Supabase Admin API
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-    
+    const supabaseAdmin = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(userToken);
+    if (authError || !user) return c.json({ error: "Unauthorized" }, 401);
     
-    if (authError || !user) {
-      return c.json({ error: "Unauthorized - Invalid token" }, 401);
-    }
-    
-    // Check if user is admin
     const userData = await kv.get(`user_${user.id}`);
+    if (!userData || userData.role !== 'admin') return c.json({ error: "Forbidden" }, 403);
     
-    if (!userData || userData.role !== 'admin') {
-      return c.json({ error: "Forbidden - Admin access required" }, 403);
-    }
+    if (userId === user.id) return c.json({ error: "Cannot delete yourself" }, 400);
     
-    // Don't allow deleting yourself
-    if (userId === user.id) {
-      return c.json({ error: "Cannot delete your own account" }, 400);
-    }
-    
-    // Delete user from KV store
     await kv.del(`user_${userId}`);
+    try { await supabaseAdmin.auth.admin.deleteUser(userId); } catch (e) {}
     
-    // Also delete from Supabase Auth (optional)
-    try {
-      await supabaseAdmin.auth.admin.deleteUser(userId);
-      console.log(`✅ User deleted from Supabase Auth: ${userId}`);
-    } catch (deleteError) {
-      console.log(`⚠️ Could not delete from Supabase Auth (user may not exist): ${deleteError.message}`);
-    }
-    
-    console.log(`✅ User deleted from KV store: ${userId}`);
     return c.json({ success: true });
   } catch (error) {
-    console.error("❌ Error deleting user:", error);
-    return c.json({ error: "Failed to delete user", details: error.message }, 500);
+    return c.json({ error: "Failed to delete user" }, 500);
   }
 });
 
-console.log("🚀 Omurgam server starting - v2.0");
-
+console.log("🚀 Omurgam server starting - v2.0 (THE ULTIMATE FIX)");
 Deno.serve(app.fetch);
