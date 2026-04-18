@@ -64,9 +64,13 @@ export default function Root() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-amber-600 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:shadow-amber-500/50 transition-all group-hover:scale-105">
-                <Heart className="w-6 h-6 text-white" />
-              </div>
+              <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all group-hover:scale-105">
+  <img 
+    src="/assets/logo.svg" 
+    alt="Omurgam Logo" 
+    className="w-full h-full object-contain" 
+  />
+</div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-amber-800 to-orange-700 bg-clip-text text-transparent">
                   {settings?.logoText || 'Omurgam'}
