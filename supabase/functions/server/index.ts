@@ -8,7 +8,7 @@ import { seedDatabase } from "./seed.tsx";
 // 🪄 SİHİRLİ DOKUNUŞ: Frontend'den gelen hatalı ID'leri temizleyen kurtarıcı
 const cleanId = (id: string | number) => {
   // Frontend'den gelen prefix'leri temizle
-  const cleaned = String(id).replace(/^(video_|blog:|question_|term_)/, '');
+  String(id).replace(/^(video:|blog:|question_|term_)/, '');
   return cleaned;
 };
 
