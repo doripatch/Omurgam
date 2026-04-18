@@ -99,7 +99,7 @@ export default function AdminVideos() {
         duration: '',
         published: true // Varsayılan olarak yayınlansın
       });
-      loadVideos(); // Reload videos
+      await loadVideos(); // Reload videos
     } catch (error: any) {
       toast.error(error.message || 'Video eklenirken hata oluştu');
     }
@@ -113,7 +113,7 @@ export default function AdminVideos() {
     try {
       await videosAPI.delete(id);
       toast.success('Video silindi');
-      loadVideos(); // Reload videos
+      await loadVideos(); // Reload videos
     } catch (error: any) {
       toast.error(error.message || 'Video silinirken hata oluştu');
     }
@@ -136,7 +136,7 @@ export default function AdminVideos() {
       toast.success(`${selectedVideos.length} video silindi`);
       setSelectedVideos([]);
       setIsDeleteMode(false);
-      loadVideos();
+      await loadVideos();
     } catch (error: any) {
       toast.error(error.message || 'Videolar silinirken hata oluştu');
     }
@@ -160,7 +160,7 @@ export default function AdminVideos() {
     try {
       await videosAPI.update(video.id, { published: !video.published });
       toast.success(video.published ? 'Video taslak yapıldı' : 'Video yayınlandı');
-      loadVideos(); // Reload videos
+      await loadVideos(); // Reload videos
     } catch (error: any) {
       toast.error(error.message || 'Durum güncellenemedi');
     }
@@ -186,7 +186,7 @@ export default function AdminVideos() {
         }
       }
       toast.success(`${fixedCount} videonun thumbnail'ı güncellendi! 🎉`);
-      loadVideos();
+      await loadVideos();
     } catch (error: any) {
       toast.error('Thumbnail güncelleme hatası: ' + error.message);
     }

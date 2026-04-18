@@ -61,7 +61,7 @@ export default function AdminBlog() {
     try {
       await blogAPI.delete(id);
       toast.success('Yazı silindi');
-      loadPosts();
+      await loadPosts();
     } catch (error: any) {
       toast.error(error.message || 'Yazı silinirken hata oluştu');
     }
@@ -120,7 +120,7 @@ export default function AdminBlog() {
     try {
       await blogAPI.update(post.id, { published: !post.published });
       toast.success(post.published ? 'Yazı taslak yapıldı' : 'Yazı yayınlandı');
-      loadPosts();
+      await loadPosts();
     } catch (error: any) {
       toast.error(error.message || 'Durum güncellenemedi');
     }
