@@ -402,7 +402,7 @@ app.get("/videos", async (c) => {
 app.get("/videos/:id", async (c) => {
   try {
     const id = cleanId(c.req.param("id"));
-    const video = await kv.get(`video_${id}`);
+    const video = await kv.get(`video:${id}`);
     if (!video) return c.json({ error: "Video not found" }, 404);
     return c.json(video);
   } catch (error) {
@@ -457,7 +457,7 @@ app.post("/videos", async (c) => {
       updatedAt: new Date().toISOString(),
     };
     
-    await kv.set(`video_${id}`, video);
+    await kv.set(`video:${id}`, video);
     return c.json(video);
   } catch (error) {
     return c.json({ error: "Failed to create video" }, 500);
@@ -488,7 +488,7 @@ app.put("/videos/:id", async (c) => {
     }
     
     const updated = { ...existing, ...body, ...(thumbnailUrl && { thumbnailUrl }), updatedAt: new Date().toISOString() };
-    await kv.set(`video_${id}`, updated);
+    await kv.set(`video:${id}`, updated);
     return c.json(updated);
   } catch (error) {
     return c.json({ error: "Failed to update video" }, 500);
@@ -543,11 +543,11 @@ app.post("/videos/bulk-delete", async (c) => {
 app.post("/videos/:id/view", async (c) => {
   try {
     const id = cleanId(c.req.param("id"));
-    const video = await kv.get(`video_${id}`);
+    const video = await kv.get(`video:${id}`);
     if (!video) return c.json({ error: "Video not found" }, 404);
     
     video.views = (video.views || 0) + 1;
-    await kv.set(`video_${id}`, video);
+    await kv.set(`video:${id}`, video);
     return c.json({ views: video.views });
   } catch (error) {
     return c.json({ error: "Failed to increment views" }, 500);
@@ -768,7 +768,7 @@ app.get("/blog", async (c) => {
 app.get("/blog/:id", async (c) => {
   try {
     const id = cleanId(c.req.param("id"));
-    const post = await kv.get(`blog_${id}`);
+    const post = await kv.get(`blog:${id}`);
     if (!post) return c.json({ error: "Blog post not found" }, 404);
     return c.json(post);
   } catch (error) {
@@ -789,7 +789,7 @@ app.post("/blog", async (c) => {
       createdAt: body.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    await kv.set(`blog_${id}`, post);
+    await kv.set(`blog:${id}`, post);
     return c.json(post);
   } catch (error) {
     return c.json({ error: "Failed to create blog post" }, 500);
@@ -800,11 +800,11 @@ app.put("/blog/:id", async (c) => {
   try {
     const id = cleanId(c.req.param("id"));
     const body = await c.req.json();
-    const existing = await kv.get(`blog_${id}`);
+    const existing = await kv.get(`blog:${id}`);
     if (!existing) return c.json({ error: "Blog post not found" }, 404);
     
     const updated = { ...existing, ...body, updatedAt: new Date().toISOString() };
-    await kv.set(`blog_${id}`, updated);
+    await kv.set(`blog:${id}`, updated);
     return c.json(updated);
   } catch (error) {
     return c.json({ error: "Failed to update blog post" }, 500);
