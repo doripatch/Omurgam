@@ -6,7 +6,11 @@ import * as kv from "./kv_store.tsx";
 import { seedDatabase } from "./seed.tsx";
 
 // 🪄 SİHİRLİ DOKUNUŞ: Frontend'den gelen hatalı ID'leri temizleyen kurtarıcı
-const cleanId = (id: string | number) => String(id).replace(/^(video_|blog_|question_|term_)/, '');
+const cleanId = (id: string | number) => {
+  // Frontend'den gelen prefix'leri temizle
+  const cleaned = String(id).replace(/^(video_|blog_|question_|term_)/, '');
+  return cleaned;
+};
 
 // 1. basePath DOĞRU ŞEKİLDE EKLENDİ
 const app = new Hono().basePath("/server");
@@ -503,7 +507,7 @@ app.delete("/videos/:id", async (c) => {
     if (userData?.role !== 'admin') return c.json({ error: "Forbidden" }, 403);
 
     const id = cleanId(c.req.param("id"));
-    await kv.del(`video_${id}`);
+    await kv.del(`video:${id}`); // COLON kullan!
     return c.json({ success: true });
   } catch (error) {
     return c.json({ error: "Failed to delete video" }, 500);
@@ -819,7 +823,7 @@ app.delete("/blog/:id", async (c) => {
     if (userData?.role !== 'admin') return c.json({ error: "Forbidden" }, 403);
 
     const id = cleanId(c.req.param("id"));
-    await kv.del(`blog_${id}`);
+    await kv.del(`blog:${id}`); // COLON kullan!
     return c.json({ success: true });
   } catch (error) {
     return c.json({ error: "Failed to delete blog post" }, 500);
