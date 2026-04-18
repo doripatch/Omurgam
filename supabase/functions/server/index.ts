@@ -8,7 +8,7 @@ import { seedDatabase } from "./seed.tsx";
 // 🪄 SİHİRLİ DOKUNUŞ: Frontend'den gelen hatalı ID'leri temizleyen kurtarıcı
 const cleanId = (id: string | number) => {
   // Frontend'den gelen prefix'leri temizle
-  const cleaned = String(id).replace(/^(video_|blog_|question_|term_)/, '');
+  const cleaned = String(id).replace(/^(video_|blog:|question_|term_)/, '');
   return cleaned;
 };
 
@@ -28,8 +28,8 @@ app.use('*', cors({
 app.get("/cleanup", async (c) => {
   try {
     const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
-    const { error: vErr } = await supabase.from("kv_store_b69488c3").delete().like("key", "video_%");
-    const { error: bErr } = await supabase.from("kv_store_b69488c3").delete().like("key", "blog_%");
+    const { error: vErr } = await supabase.from("kv_store_b69488c3").delete().like("key", "video:%");
+    const { error: bErr } = await supabase.from("kv_store_b69488c3").delete().like("key", "blog:%");
     if (vErr || bErr) throw new Error("Veritabanı temizlik hatası");
     return c.json({ success: true, message: "🎉 Bütün hayalet videolar ve taslak bloglar kalıcı olarak temizlendi!" });
   } catch (e) {
@@ -77,9 +77,9 @@ app.get("/debug", async (c) => {
     let videoCount = 0;
     let userCount = 0;
     try {
-      const videos = await kv.getByPrefix("video_");
+      const videos = await kv.getByPrefix("video:");
       videoCount = videos?.length || 0;
-      const users = await kv.getByPrefix("user_");
+      const users = await kv.getByPrefix("user:");
       userCount = users?.length || 0;
       kvStatus = 'CONNECTED';
     } catch (error) {
@@ -392,7 +392,7 @@ app.put("/site-settings", async (c) => {
 
 app.get("/videos", async (c) => {
   try {
-    const videos = await kv.getByPrefix("video_");
+    const videos = await kv.getByPrefix("video:");
     return c.json({ videos: videos || [] });
   } catch (error) {
     return c.json({ error: "Failed to fetch videos" }, 500);
@@ -477,7 +477,7 @@ app.put("/videos/:id", async (c) => {
 
     const id = cleanId(c.req.param("id"));
     const body = await c.req.json();
-    const existing = await kv.get(`video_${id}`);
+    const existing = await kv.get(`video:${id}`);
     
     if (!existing) return c.json({ error: "Video not found" }, 404);
     
@@ -531,7 +531,7 @@ app.post("/videos/bulk-delete", async (c) => {
     // HAYALET SİLİCİ DEVREDE
     await Promise.all(ids.map(id => {
       const actualId = cleanId(typeof id === 'object' && id !== null ? (id.id || id._id || id) : id);
-      return kv.del(`video_${actualId}`);
+      return kv.del(`video:${actualId}`);
     }));
     
     return c.json({ success: true, deletedCount: ids.length });
@@ -758,7 +758,7 @@ app.post("/questions/:id/answer", async (c) => {
 
 app.get("/blog", async (c) => {
   try {
-    const posts = await kv.getByPrefix("blog_");
+    const posts = await kv.getByPrefix("blog:");
     return c.json({ posts: posts || [] });
   } catch (error) {
     return c.json({ error: "Failed to fetch blog posts" }, 500);
@@ -847,7 +847,7 @@ app.post("/blog/bulk-delete", async (c) => {
     // HAYALET SİLİCİ DEVREDE
     await Promise.all(ids.map(id => {
       const actualId = cleanId(typeof id === 'object' && id !== null ? (id.id || id._id || id) : id);
-      return kv.del(`blog_${actualId}`);
+      return kv.del(`blog:${actualId}`);
     }));
     
     return c.json({ success: true, deletedCount: ids.length });
