@@ -29,7 +29,7 @@ export default function About() {
   {settings?.aboutTitle || 'Prof. Dr. Defne Kaya Utlu'}
 </h1>
 <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-  {settings?.aboutContent || 'Fizyoterapi Profesörü'}
+  {settings?.aboutContent?.replace(/<[^>]*>/g, '') || 'Fizyoterapi Profesörü'}
 </p>
         </div>
 

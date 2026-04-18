@@ -770,7 +770,7 @@ app.get("/blog/:id", async (c) => {
     const id = cleanId(c.req.param("id"));
     const post = await kv.get(`blog:${id}`);
     if (!post) return c.json({ error: "Blog post not found" }, 404);
-    return c.json(post);
+    return c.json({ post });
   } catch (error) {
     return c.json({ error: "Failed to fetch blog post" }, 500);
   }
