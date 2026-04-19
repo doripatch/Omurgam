@@ -249,10 +249,20 @@ export default function Root() {
               >
                 İletişim
               </Link>
-              <div className="pt-3 border-t border-amber-500/10">
+              <div className="pt-3 border-t border-amber-500/10 space-y-3">
+                {isAuthenticated && isAdmin && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 py-2 text-sm font-medium text-purple-600"
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    Admin Paneli
+                  </Link>
+                )}
                 {!isAuthenticated && (
-                  <Link 
-                    to="/giris" 
+                  <Link
+                    to="/giris"
                     onClick={() => setMobileMenuOpen(false)}
                     className="block bg-gradient-to-r from-amber-600 to-orange-600 text-white px-4 py-2.5 rounded-full text-sm font-medium text-center"
                   >
@@ -260,6 +270,7 @@ export default function Root() {
                   </Link>
                 )}
               </div>
+
             </nav>
           )}
         </div>
