@@ -8,7 +8,7 @@ import { seedDatabase } from "./seed.tsx";
 // 🪄 SİHİRLİ DOKUNUŞ: Frontend'den gelen hatalı ID'leri temizleyen kurtarıcı
 const cleanId = (id: string | number) => {
   // Frontend'den gelen prefix'leri temizle
-  String(id).replace(/^(video:|blog:|question_|term_)/, '');
+  const cleaned = String(id).replace(/^(video_|blog:|question_|term_)/, '');
   return cleaned;
 };
 
@@ -28,8 +28,8 @@ app.use('*', cors({
 app.get("/cleanup", async (c) => {
   try {
     const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
-    const { error: vErr } = await supabase.from("kv_store_b69488c3").delete().like("key", "video_%");
-    const { error: bErr } = await supabase.from("kv_store_b69488c3").delete().like("key", "blog_%");
+    const { error: vErr } = await supabase.from("kv_store_b69488c3").delete().like("key", "video:%");
+    const { error: bErr } = await supabase.from("kv_store_b69488c3").delete().like("key", "blog:%");
     if (vErr || bErr) throw new Error("Veritabanı temizlik hatası");
     return c.json({ success: true, message: "🎉 Bütün hayalet videolar ve taslak bloglar kalıcı olarak temizlendi!" });
   } catch (e) {

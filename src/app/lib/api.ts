@@ -73,7 +73,7 @@ const makeRequest = async <T = any>(
 };
 
 // 🪄 SİHİRLİ DOKUNUŞ: Frontend ID'lerin başına yanlışlıkla "video_" veya "blog_" eklerse onu temizleyen kurtarıcımız
-const cleanId = (id: string | number) => String(id).replace(/^(video:|blog:|question_|term_)/, '');
+const cleanId = (id: string | number) => String(id).replace(/^(video_|blog_|question_|term_)/, '');
 
 // Auth API 
 export const authAPI = {
