@@ -191,18 +191,18 @@ export default function Root() {
                       Admin
                     </Link>
                   )}
-                  <Link 
+                  <Link
                     to="/profil"
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors whitespace-nowrap"
                   >
-                    <User className="w-4 h-4" />
-                    <span className="font-medium">{user?.name || 'Profilim'}</span>
+                    <User className="w-4 h-4 flex-shrink-0" />
+                    <span className="font-medium truncate max-w-[140px]">{user?.name || 'Profilim'}</span>
                   </Link>
-                  <button 
+                  <button
                     onClick={handleSignout}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors whitespace-nowrap flex-shrink-0"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="w-4 h-4 flex-shrink-0" />
                     <span>Çıkış Yap</span>
                   </button>
                 </div>
