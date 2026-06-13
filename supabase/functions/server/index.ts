@@ -56,6 +56,21 @@ async function requireUser(c: any) {
   }
 }
 
+// 🔔 Bir kullanıcıya bildirim ekleyen yardımcı (sunucu tarafı).
+async function addNotification(userId: string, notif: { title: string; message?: string; link?: string }) {
+  if (!userId) return;
+  const key = `notifications_${userId}`;
+  const rec = (await kv.get(key)) || { userId, items: [] };
+  rec.items.unshift({
+    id: crypto.randomUUID(),
+    read: false,
+    createdAt: new Date().toISOString(),
+    ...notif,
+  });
+  rec.items = rec.items.slice(0, 50);
+  await kv.set(key, rec);
+}
+
 // 🧹 HAYALET AVCISI: Geçmişte kalan bozuk videoları temizleme rotası (SADECE ADMIN)
 app.get("/cleanup", async (c) => {
   try {
@@ -788,6 +803,16 @@ app.post("/questions/:id/answer", async (c) => {
     question.status = "answered";
     question.updatedAt = new Date().toISOString();
     await kv.set(`question_${id}`, question);
+
+    // Soruyu sorana bildirim gönder (kullanıcı kimliği kayıtlıysa)
+    if (question.userId) {
+      await addNotification(question.userId, {
+        title: 'Sorunuz yanıtlandı 🎉',
+        message: (question.question || '').toString().slice(0, 90),
+        link: `/soru/${id}`,
+      });
+    }
+
     return c.json(question);
   } catch (error) {
     return c.json({ error: "Failed to answer question" }, 500);
@@ -1282,6 +1307,37 @@ app.delete("/favorites", async (c) => {
     return c.json({ success: true, favorites: rec.items });
   } catch (error) {
     return c.json({ error: "Failed to remove favorite" }, 500);
+  }
+});
+
+// ========================================
+// BİLDİRİMLER ENDPOINTS (kullanıcıya özel)
+// KV key: notifications_<userId>
+// ========================================
+
+app.get("/notifications", async (c) => {
+  try {
+    const user = await requireUser(c);
+    if (!user) return c.json({ error: "Unauthorized" }, 401);
+    const rec = await kv.get(`notifications_${user.id}`);
+    return c.json({ notifications: rec?.items || [] });
+  } catch (error) {
+    return c.json({ error: "Failed to fetch notifications" }, 500);
+  }
+});
+
+app.post("/notifications/mark-read", async (c) => {
+  try {
+    const user = await requireUser(c);
+    if (!user) return c.json({ error: "Unauthorized" }, 401);
+    const body = await c.req.json().catch(() => ({}));
+    const id = body.id;
+    const rec = (await kv.get(`notifications_${user.id}`)) || { userId: user.id, items: [] };
+    rec.items = rec.items.map((n: any) => (!id || n.id === id ? { ...n, read: true } : n));
+    await kv.set(`notifications_${user.id}`, rec);
+    return c.json({ success: true, notifications: rec.items });
+  } catch (error) {
+    return c.json({ error: "Failed to mark read" }, 500);
   }
 });
 

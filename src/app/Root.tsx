@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router';
-import { Heart, Menu, X, User, LogOut, LayoutDashboard, Facebook, Twitter, Instagram, Youtube, Linkedin, Search } from 'lucide-react';
+import { Heart, Menu, X, User, LogOut, LayoutDashboard, Facebook, Twitter, Instagram, Youtube, Linkedin, Search, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import DarkModeToggle from './components/DarkModeToggle';
 import FloatingActionButton from './components/FloatingActionButton';
@@ -7,6 +7,7 @@ import GlobalSearch from './components/GlobalSearch';
 import CookieConsent from './components/CookieConsent';
 import { trackPageview } from './lib/analytics';
 import { newsletterAPI } from './lib/api';
+import { useNotificationsStore } from './store/notificationsStore';
 import { useAuthStore } from './store/authStore';
 import { useSiteSettingsStore } from './store/siteSettingsStore';
 import { toast } from 'sonner';
@@ -16,6 +17,9 @@ export default function Root() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const { items: notifItems, load: loadNotifs, loaded: notifLoaded, markRead: markNotifRead, markAllRead: markAllNotifsRead } = useNotificationsStore();
+  const unreadNotifs = notifItems.filter((n) => !n.read).length;
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +56,11 @@ export default function Root() {
   useEffect(() => {
     trackPageview(location.pathname + location.search);
   }, [location.pathname, location.search]);
+
+  // Giriş yapan kullanıcının bildirimlerini yükle
+  useEffect(() => {
+    if (isAuthenticated && !notifLoaded) loadNotifs();
+  }, [isAuthenticated, notifLoaded, loadNotifs]);
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -198,9 +207,55 @@ export default function Root() {
               
               {isAuthenticated ? (
                 <div className="flex items-center gap-3">
+                  {/* Bildirim Zili */}
+                  <div className="relative">
+                    <button
+                      onClick={() => { setNotifOpen((o) => !o); if (!notifOpen) loadNotifs(); }}
+                      className="relative p-2 rounded-full hover:bg-amber-50 dark:hover:bg-slate-800 transition-colors"
+                      title="Bildirimler"
+                    >
+                      <Bell className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+                      {unreadNotifs > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                          {unreadNotifs}
+                        </span>
+                      )}
+                    </button>
+                    {notifOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+                        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+                            <span className="font-semibold text-slate-900 dark:text-white">Bildirimler</span>
+                            {unreadNotifs > 0 && (
+                              <button onClick={() => markAllNotifsRead()} className="text-xs text-amber-600 hover:underline">
+                                Tümünü okundu işaretle
+                              </button>
+                            )}
+                          </div>
+                          <div className="max-h-96 overflow-y-auto">
+                            {notifItems.length === 0 ? (
+                              <div className="p-6 text-center text-sm text-slate-500">Henüz bildiriminiz yok</div>
+                            ) : (
+                              notifItems.map((n) => (
+                                <button
+                                  key={n.id}
+                                  onClick={() => { markNotifRead(n.id); setNotifOpen(false); if (n.link) navigate(n.link); }}
+                                  className={`w-full text-left px-4 py-3 border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${!n.read ? 'bg-amber-50/60 dark:bg-amber-900/10' : ''}`}
+                                >
+                                  <div className="font-medium text-sm text-slate-900 dark:text-white">{n.title}</div>
+                                  {n.message && <div className="text-xs text-slate-500 truncate mt-0.5">{n.message}</div>}
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
                   {isAdmin && (
-                    <Link 
-                      to="/admin" 
+                    <Link
+                      to="/admin"
                       className="text-sm font-medium text-purple-600 hover:text-purple-700 flex items-center gap-1"
                     >
                       <LayoutDashboard className="w-4 h-4" />

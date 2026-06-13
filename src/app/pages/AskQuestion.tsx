@@ -37,6 +37,9 @@ export default function AskQuestion() {
         question: formData.question,
         excerpt,
         category: formData.category,
+        userId: user.id,
+        userName: user.name,
+        userEmail: user.email,
       });
 
       toast.success('Sorunuz başarıyla gönderildi! Admin onayından sonra yayınlanacaktır.');

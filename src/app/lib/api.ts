@@ -256,6 +256,15 @@ export const medicalTermsAPI = {
   search: (query: string) => makeRequest(`/medical-terms/search?q=${encodeURIComponent(query)}`),
 };
 
+// Bildirimler API (kullanıcıya özel)
+export const notificationsAPI = {
+  getAll: () => makeRequest('/notifications'),
+  markRead: (id?: string) => makeRequest('/notifications/mark-read', {
+    method: 'POST',
+    body: JSON.stringify(id ? { id } : {}),
+  }),
+};
+
 // Favoriler API (kullanıcıya özel)
 export const favoritesAPI = {
   getAll: () => makeRequest('/favorites'),
