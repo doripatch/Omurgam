@@ -79,7 +79,7 @@ export default function MedicalGlossary() {
   const categoryChips = ['Tümü', ...MEDICAL_CATEGORIES];
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20">
+    <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Hero Header */}
       <div className="relative bg-gradient-to-br from-amber-700 via-orange-800 to-amber-900 text-white py-12 md:py-20 px-4 overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-400/20 rounded-full blur-3xl"></div>
@@ -139,7 +139,7 @@ export default function MedicalGlossary() {
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                 activeCategory === cat
                   ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg shadow-amber-500/30'
-                  : 'bg-white text-slate-700 border border-slate-200 hover:border-amber-300 hover:text-amber-700'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-300 hover:text-amber-700'
               }`}
             >
               {cat}
@@ -159,7 +159,7 @@ export default function MedicalGlossary() {
             </div>
             {allTerms.length === 0 ? (
               <>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                   Sözlük yakında dolacak
                 </h3>
                 <p className="text-slate-600 max-w-md mx-auto">
@@ -168,7 +168,7 @@ export default function MedicalGlossary() {
               </>
             ) : (
               <>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">Sonuç bulunamadı</h3>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Sonuç bulunamadı</h3>
                 <p className="text-slate-600 mb-4">
                   Aradığınız terim sözlüğümüzde henüz yok. Farklı bir kelime deneyin.
                 </p>
@@ -201,7 +201,7 @@ export default function MedicalGlossary() {
                     return (
                       <div
                         key={term.id}
-                        className="backdrop-blur-xl bg-white/80 border border-amber-200/40 rounded-2xl overflow-hidden transition-all hover:shadow-lg"
+                        className="backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 border border-amber-200/40 dark:border-slate-700 rounded-2xl overflow-hidden transition-all hover:shadow-lg"
                       >
                         <button
                           onClick={() => setOpenId(isOpen ? null : term.id)}
@@ -209,7 +209,7 @@ export default function MedicalGlossary() {
                         >
                           <div className="flex-1">
                             <div className="flex items-center gap-3 flex-wrap">
-                              <h3 className="text-lg md:text-xl font-bold text-slate-900">
+                              <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
                                 {term.term}
                               </h3>
                               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full">
@@ -232,9 +232,9 @@ export default function MedicalGlossary() {
 
                         {isOpen && (
                           <div className="px-4 md:px-5 pb-5 -mt-1">
-                            <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl">
-                              <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                              <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+                            <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-700/50 dark:to-slate-700/30 rounded-xl">
+                              <Info className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                              <p className="text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">
                                 {term.definition}
                               </p>
                             </div>

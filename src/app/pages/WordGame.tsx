@@ -315,20 +315,20 @@ export default function WordGame() {
     const s = letterStatus[k];
     if (s === 'correct') return 'bg-emerald-500 text-white';
     if (s === 'present') return 'bg-amber-400 text-white';
-    if (s === 'absent') return 'bg-slate-300 text-slate-500';
-    return 'bg-white text-slate-800 hover:bg-amber-50';
+    if (s === 'absent') return 'bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400';
+    return 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 hover:bg-amber-50 dark:hover:bg-slate-600';
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 px-4 py-8">
+    <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4 py-8">
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-800 rounded-full text-sm font-semibold mb-3">
             <BookOpen className="w-4 h-4" /> GÜNÜN TERİMİ
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-slate-900">Kelime Oyunu</h1>
-          <p className="text-slate-600 mt-2 text-sm">
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white">Kelime Oyunu</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-2 text-sm">
             Günün tıbbi terimini {MAX_GUESSES} denemede bul. Her gün yeni bir kelime!
           </p>
           <div className="flex items-center justify-center gap-4 mt-3 text-sm">
@@ -364,8 +364,8 @@ export default function WordGame() {
                       const cls = isSubmitted
                         ? tileColor(res[col])
                         : ch
-                        ? 'border-slate-400 bg-white text-slate-900'
-                        : 'border-slate-200 bg-white text-slate-900';
+                        ? 'border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white'
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white';
                       return (
                         <div key={col} className={`${base} ${cls}`}>{ch}</div>
                       );
@@ -378,14 +378,14 @@ export default function WordGame() {
             {/* İpucu */}
             <div className="text-center mb-4">
               {showHint || status !== 'playing' ? (
-                <div className="inline-block bg-white border border-amber-200 rounded-2xl px-4 py-3 text-sm text-slate-700 max-w-md">
-                  <span className="font-semibold text-amber-700">İpucu ({answer.category || 'Terim'}):</span>{' '}
+                <div className="inline-block bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm text-slate-700 dark:text-slate-200 max-w-md">
+                  <span className="font-semibold text-amber-700 dark:text-amber-400">İpucu ({answer.category || 'Terim'}):</span>{' '}
                   {answer.clue || 'Bu terimi tahmin et.'}
                 </div>
               ) : (
                 <button
                   onClick={() => setShowHint(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-amber-200 text-amber-700 rounded-full text-sm font-semibold hover:bg-amber-50 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 text-amber-700 dark:text-amber-400 rounded-full text-sm font-semibold hover:bg-amber-50 dark:hover:bg-slate-700 transition-colors"
                 >
                   <Lightbulb className="w-4 h-4" /> İpucu göster
                 </button>
@@ -451,15 +451,15 @@ export default function WordGame() {
         {/* İstatistik modalı */}
         {showStats && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowStats(false)}>
-            <div className="bg-white rounded-3xl p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-              <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-amber-500" /> İstatistiklerin
               </h2>
               <div className="grid grid-cols-4 gap-2 text-center mb-4">
-                <div><div className="text-2xl font-black text-slate-900">{stats.played}</div><div className="text-xs text-slate-500">Oynanan</div></div>
-                <div><div className="text-2xl font-black text-slate-900">{stats.played ? Math.round((stats.wins / stats.played) * 100) : 0}%</div><div className="text-xs text-slate-500">Başarı</div></div>
-                <div><div className="text-2xl font-black text-slate-900">{stats.currentStreak}</div><div className="text-xs text-slate-500">Seri</div></div>
-                <div><div className="text-2xl font-black text-slate-900">{stats.maxStreak}</div><div className="text-xs text-slate-500">En İyi</div></div>
+                <div><div className="text-2xl font-black text-slate-900 dark:text-white">{stats.played}</div><div className="text-xs text-slate-500">Oynanan</div></div>
+                <div><div className="text-2xl font-black text-slate-900 dark:text-white">{stats.played ? Math.round((stats.wins / stats.played) * 100) : 0}%</div><div className="text-xs text-slate-500">Başarı</div></div>
+                <div><div className="text-2xl font-black text-slate-900 dark:text-white">{stats.currentStreak}</div><div className="text-xs text-slate-500">Seri</div></div>
+                <div><div className="text-2xl font-black text-slate-900 dark:text-white">{stats.maxStreak}</div><div className="text-xs text-slate-500">En İyi</div></div>
               </div>
               <div className="space-y-1 mb-4">
                 {stats.dist.map((count, i) => {

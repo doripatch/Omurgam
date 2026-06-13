@@ -114,14 +114,14 @@ export default function Home() {
             </motion.div>
 
             <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-black tracking-tighter mb-6 leading-[0.9]">
-              <span className="block text-slate-900">{c.title}</span>
+              <span className="block text-slate-900 dark:text-white">{c.title}</span>
             </h1>
 
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.8 }}
-              className="text-2xl md:text-4xl font-light text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed"
+              className="text-2xl md:text-4xl font-light text-slate-600 dark:text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
               {c.subtitlePrefix}{' '}
               <span className="font-bold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
@@ -181,7 +181,7 @@ export default function Home() {
       </section>
 
       {/* STATS BAR */}
-      <section className="py-12 px-4 bg-white border-y border-slate-200">
+      <section className="py-12 px-4 bg-white dark:bg-slate-800 border-y border-slate-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {(c.stats || []).map((stat, i) => (
@@ -193,8 +193,8 @@ export default function Home() {
                 transition={{ delay: i * 0.1, duration: 0.6 }}
                 className="text-center"
               >
-                <div className="text-4xl md:text-5xl font-black text-slate-900 mb-2">{stat.number}</div>
-                <div className="text-sm text-slate-600 font-medium">{stat.label}</div>
+                <div className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-2">{stat.number}</div>
+                <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -492,13 +492,13 @@ export default function Home() {
               <span className="inline-block px-4 py-2 bg-amber-100 text-amber-900 font-bold rounded-full mb-6 text-sm uppercase tracking-wide">
                 {c.whyBadge}
               </span>
-              <h2 className="text-5xl md:text-6xl font-black text-slate-900 mb-6 leading-tight">
+              <h2 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 leading-tight">
                 {c.whyTitleLine1}<br />
                 <span className="bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
                   {c.whyTitleHighlight}
                 </span>
               </h2>
-              <p className="text-xl text-slate-600 leading-relaxed mb-8">
+              <p className="text-xl text-slate-600 dark:text-slate-300 leading-relaxed mb-8">
                 {c.whyDesc}
               </p>
               <div className="space-y-4">
@@ -514,7 +514,7 @@ export default function Home() {
                     <div className="w-6 h-6 bg-amber-600 rounded-full flex items-center justify-center flex-shrink-0">
                       <Check className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-slate-700 font-medium">{item}</span>
+                    <span className="text-slate-700 dark:text-slate-300 font-medium">{item}</span>
                   </motion.div>
                 ))}
               </div>
@@ -595,10 +595,10 @@ export default function Home() {
       </section>
 
       {/* DISCLAIMER */}
-      <section className="py-12 px-4 bg-amber-50 border-t border-amber-200">
+      <section className="py-12 px-4 bg-amber-50 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-sm text-slate-700 leading-relaxed">
-            <strong className="font-bold text-slate-900">{disclaimerParts.head}</strong>
+          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+            <strong className="font-bold text-slate-900 dark:text-white">{disclaimerParts.head}</strong>
             {disclaimerParts.rest}
           </p>
         </div>
