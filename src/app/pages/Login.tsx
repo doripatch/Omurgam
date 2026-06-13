@@ -38,6 +38,22 @@ export default function Login() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error('Lütfen önce e-posta adresinizi yazın');
+      return;
+    }
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/giris`,
+      });
+      if (error) throw error;
+      toast.success('Şifre sıfırlama bağlantısı e-postanıza gönderildi');
+    } catch (error: any) {
+      toast.error(error.message || 'İşlem başarısız oldu');
+    }
+  };
+
   const handleSocialLogin = async (provider: 'google' | 'facebook' | 'apple') => {
     try {
       setIsLoading(true);
@@ -175,9 +191,13 @@ export default function Login() {
                   <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500" />
                   <span className="text-sm text-slate-600">Beni hatırla</span>
                 </label>
-                <a href="#" className="text-sm font-semibold text-teal-600 hover:text-teal-700">
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  className="text-sm font-semibold text-teal-600 hover:text-teal-700"
+                >
                   Şifremi Unuttum
-                </a>
+                </button>
               </div>
 
               {/* Submit Button */}

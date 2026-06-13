@@ -186,8 +186,8 @@ export default function Register() {
             <label className="flex items-start gap-3 cursor-pointer">
               <input type="checkbox" required className="mt-1 w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500" />
               <span className="text-sm text-slate-600">
-                <a href="#" className="font-semibold text-teal-600 hover:text-teal-700">Kullanım Koşullarını</a> ve{' '}
-                <a href="#" className="font-semibold text-teal-600 hover:text-teal-700">Gizlilik Politikasını</a> okudum, kabul ediyorum.
+                <Link to="/kullanim-kosullari" className="font-semibold text-teal-600 hover:text-teal-700">Kullanım Koşullarını</Link> ve{' '}
+                <Link to="/gizlilik" className="font-semibold text-teal-600 hover:text-teal-700">Gizlilik Politikasını</Link> okudum, kabul ediyorum.
               </span>
             </label>
 

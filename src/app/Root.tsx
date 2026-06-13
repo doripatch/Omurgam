@@ -25,6 +25,24 @@ export default function Root() {
     fetchSettings();
   }, [fetchSettings]);
 
+  // Site ayarlarından sekme başlığı + meta açıklamayı güncelle (SEO)
+  useEffect(() => {
+    if (settings?.siteName) {
+      const tagline = settings.siteTagline ? ` — ${settings.siteTagline}` : '';
+      document.title = `${settings.siteName}${tagline}`;
+    }
+    const desc = settings?.metaDescription;
+    if (desc) {
+      let tag = document.querySelector('meta[name="description"]');
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('name', 'description');
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', desc);
+    }
+  }, [settings]);
+
   const isActive = (path: string) => {
     return location.pathname === path;
   };

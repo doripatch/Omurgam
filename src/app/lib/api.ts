@@ -16,13 +16,10 @@ const getAuthToken = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (session?.access_token) {
-      console.log('✅ Auth token found');
       return session.access_token;
     } else {
-      console.log('❌ No auth token found in session');
       const { data: { session: refreshedSession } } = await supabase.auth.refreshSession();
       if (refreshedSession?.access_token) {
-        console.log('✅ Auth token refreshed');
         return refreshedSession.access_token;
       }
       return null;
@@ -48,23 +45,20 @@ const makeRequest = async <T = any>(
   };
 
   try {
-    console.log(`🌐 API Request: ${endpoint}`);
-    
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ 
-        error: `HTTP ${response.status}: ${response.statusText}` 
+      const errorData = await response.json().catch(() => ({
+        error: `HTTP ${response.status}: ${response.statusText}`
       }));
-      console.error(`❌ API Error (${endpoint}):`, errorData);
+      console.error(`API Error (${endpoint}):`, errorData);
       throw new Error(errorData.error || errorData.details || errorData.message || `HTTP ${response.status}`);
     }
 
     const data = await response.json();
-    console.log(`✅ API Success (${endpoint}):`, data);
     return data;
   } catch (error) {
     console.error(`❌ API Request failed (${endpoint}):`, error);
@@ -260,6 +254,18 @@ export const medicalTermsAPI = {
     method: 'DELETE',
   }),
   search: (query: string) => makeRequest(`/medical-terms/search?q=${encodeURIComponent(query)}`),
+};
+
+// İletişim Mesajları API
+export const contactAPI = {
+  send: (msg: { name: string; email: string; subject: string; message: string }) =>
+    makeRequest('/contact-messages', { method: 'POST', body: JSON.stringify(msg) }),
+  getAll: () => makeRequest('/contact-messages'),
+  markRead: (id: string) => makeRequest(`/contact-messages/${cleanId(id)}`, {
+    method: 'PUT',
+    body: JSON.stringify({ read: true }),
+  }),
+  delete: (id: string) => makeRequest(`/contact-messages/${cleanId(id)}`, { method: 'DELETE' }),
 };
 
 // SSS (Sıkça Sorulan Sorular) API

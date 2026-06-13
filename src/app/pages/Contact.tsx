@@ -2,6 +2,7 @@ import { Mail, Phone, MapPin, Send, Clock, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
+import { contactAPI } from '../lib/api';
 
 export default function Contact() {
   const settings = useSiteSettingsStore((s) => s.settings);
@@ -19,11 +20,16 @@ export default function Contact() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      await contactAPI.send(formData);
       toast.success(t.successToast);
       setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error: any) {
+      console.error('İletişim formu hatası:', error);
+      toast.error(error.message || 'Mesaj gönderilemedi, lütfen tekrar deneyin.');
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

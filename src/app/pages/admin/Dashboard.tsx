@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
-import { Video, MessageSquare, FileText, Users, TrendingUp, Eye, Clock, CheckCircle, Brain, Settings, BookOpen, HelpCircle } from 'lucide-react';
+import { Video, MessageSquare, FileText, Users, TrendingUp, Eye, Clock, CheckCircle, Brain, Settings, BookOpen, HelpCircle, Inbox } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { videosAPI, questionsAPI, blogAPI, adminAPI, termsAPI, medicalTermsAPI, faqAPI } from '../../lib/api';
+import { videosAPI, questionsAPI, blogAPI, adminAPI, termsAPI, medicalTermsAPI, faqAPI, contactAPI } from '../../lib/api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -12,6 +12,7 @@ export default function AdminDashboard() {
     mrTerms: 0,
     medicalTerms: 0,
     faqCount: 0,
+    unreadMessages: 0,
     totalViews: 0,
     answeredQuestions: 0,
   });
@@ -27,14 +28,15 @@ export default function AdminDashboard() {
       setIsLoading(true);
       
       // Load all data in parallel
-      const [videosData, questionsData, blogData, usersData, termsData, medicalTermsData, faqData] = await Promise.all([
+      const [videosData, questionsData, blogData, usersData, termsData, medicalTermsData, faqData, messagesData] = await Promise.all([
         videosAPI.getAll(),
         questionsAPI.getAll(),
         blogAPI.getAll(),
         adminAPI.getUsers().catch(() => ({ users: [] })),
         termsAPI.getAll().catch(() => ({ terms: [] })),
         medicalTermsAPI.getAll().catch(() => ({ terms: [] })),
-        faqAPI.getAll().catch(() => ({ items: [] }))
+        faqAPI.getAll().catch(() => ({ items: [] })),
+        contactAPI.getAll().catch(() => ({ messages: [] }))
       ]);
 
       setStats({
@@ -45,6 +47,7 @@ export default function AdminDashboard() {
         mrTerms: termsData.terms?.length || 0,
         medicalTerms: medicalTermsData.terms?.length || 0,
         faqCount: faqData.items?.length || 0,
+        unreadMessages: (messagesData.messages || []).filter((m: any) => !m.read).length,
         totalViews: videosData.videos?.reduce((acc: number, video: any) => acc + video.views, 0) || 0,
         answeredQuestions: questionsData.questions?.filter((q: any) => q.isAnswered).length || 0,
       });
@@ -112,6 +115,14 @@ export default function AdminDashboard() {
       link: '/admin/sss'
     },
     {
+      title: 'Gelen Mesajlar',
+      value: stats.unreadMessages.toString(),
+      change: `${stats.unreadMessages} okunmamış`,
+      icon: Inbox,
+      color: 'from-rose-500 to-pink-600',
+      link: '/admin/mesajlar'
+    },
+    {
       title: 'Kayıtlı Kullanıcı',
       value: stats.users.toString(),
       change: `${stats.users} kullanıcı`,
@@ -149,17 +160,11 @@ export default function AdminDashboard() {
             <Link
               key={stat.title}
               to={stat.link}
-              onClick={() => console.log(`🎯 Tıklanan kart: "${stat.title}" -> Link: "${stat.link}"`)}
               className="group relative backdrop-blur-xl bg-white/90 border border-purple-200/30 rounded-3xl p-6 hover:shadow-2xl transition-all hover:scale-105 overflow-hidden"
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity`}></div>
-              
-              <div className="relative">
-                {/* DEBUG: Kart numarası */}
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white font-bold rounded-full flex items-center justify-center text-lg z-10 shadow-lg">
-                  {index + 1}
-                </div>
 
+              <div className="relative">
                 <div className="flex items-start justify-between mb-4">
                   <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-2xl flex items-center justify-center`}>
                     <stat.icon className="w-6 h-6 text-white" />

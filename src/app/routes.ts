@@ -14,8 +14,6 @@ import WordGame from "./pages/WordGame";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-import ProfileDebug from "./pages/ProfileDebug";
-import CreateTestUser from "./pages/CreateTestUser";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
@@ -28,6 +26,7 @@ import AdminBlog from "./pages/admin/Blog";
 import AdminTerms from "./pages/admin/Terms";
 import AdminMedicalTerms from "./pages/admin/MedicalTerms";
 import AdminFAQ from "./pages/admin/FAQ";
+import AdminMessages from "./pages/admin/Messages";
 import AdminUsers from "./pages/admin/Users";
 import AdminSiteSettings from "./pages/admin/SiteSettings";
 import NotFound from "./pages/NotFound";
@@ -56,8 +55,6 @@ export const router = createBrowserRouter([
       { path: "giris", Component: Login },
       { path: "kayit", Component: Register },
       { path: "profil", Component: Profile },
-      { path: "profil-debug", Component: ProfileDebug },
-      { path: "test-kullanici-olustur", Component: CreateTestUser },
       { path: "admin", Component: AdminDashboard },
       { path: "admin/videolar", Component: AdminVideos },
       { path: "admin/sorular", Component: AdminQuestions },
@@ -65,6 +62,7 @@ export const router = createBrowserRouter([
       { path: "admin/kosullar", Component: AdminTerms },
       { path: "admin/saglik-sozlugu", Component: AdminMedicalTerms },
       { path: "admin/sss", Component: AdminFAQ },
+      { path: "admin/mesajlar", Component: AdminMessages },
       { path: "admin/kullanicilar", Component: AdminUsers },
       { path: "admin/site-ayarlari", Component: AdminSiteSettings },
       { path: "*", Component: NotFound },

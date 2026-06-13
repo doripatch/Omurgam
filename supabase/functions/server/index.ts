@@ -24,9 +24,28 @@ app.use('*', cors({
   exposeHeaders: ['*']
 }));
 
-// 🧹 HAYALET AVCISI: Geçmişte kalan bozuk videoları temizleme rotası
+// 🔐 GÜVENLİK: İsteği yapanın admin olduğunu doğrulayan yardımcı.
+// X-User-Token başlığındaki JWT'yi doğrular, kullanıcının admin rolünü kontrol eder.
+async function requireAdmin(c: any) {
+  try {
+    const userToken = c.req.header("X-User-Token");
+    if (!userToken) return null;
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    const { data: { user }, error } = await supabase.auth.getUser(userToken);
+    if (error || !user) return null;
+    if (user.user_metadata?.role === 'admin') return user;
+    const userData = await kv.get(`user_${user.id}`);
+    if (userData?.role === 'admin') return user;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// 🧹 HAYALET AVCISI: Geçmişte kalan bozuk videoları temizleme rotası (SADECE ADMIN)
 app.get("/cleanup", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
     const { error: vErr } = await supabase.from("kv_store_b69488c3").delete().like("key", "video:%");
     const { error: bErr } = await supabase.from("kv_store_b69488c3").delete().like("key", "blog:%");
@@ -60,6 +79,7 @@ app.get("/test", (c) => {
 // Debug endpoint - Check environment and database
 app.get("/debug", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     console.log("🔍 Debug endpoint called");
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -119,6 +139,7 @@ app.get("/debug", async (c) => {
 // Seed database endpoint
 app.get("/seed", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     console.log("🌱 Starting database seed...");
     const result = await seedDatabase();
     return c.json(result);
@@ -148,6 +169,7 @@ app.get("/seed-test", async (c) => {
 // SPECIAL ENDPOINT: Create Ceyhan Utlu admin user
 app.get("/create-ceyhan", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     console.log("👤 Creating CEYHAN UTLU admin user...");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -195,6 +217,7 @@ app.get("/create-ceyhan", async (c) => {
 // Reset admin users - DELETE ALL AND RECREATE
 app.post("/reset-admins", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     console.log("🔄 RESETTING ADMIN USERS...");
     const supabase = createClient(Deno.env.get("SUPABASE_URL") || "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "");
     
@@ -698,6 +721,7 @@ app.post("/questions", async (c) => {
 
 app.put("/questions/:id", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const id = cleanId(c.req.param("id"));
     const body = await c.req.json();
     const existing = await kv.get(`question_${id}`);
@@ -713,6 +737,7 @@ app.put("/questions/:id", async (c) => {
 
 app.delete("/questions/:id", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const id = cleanId(c.req.param("id"));
     await kv.del(`question_${id}`);
     return c.json({ success: true });
@@ -723,6 +748,7 @@ app.delete("/questions/:id", async (c) => {
 
 app.post("/questions/:id/approve", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const id = cleanId(c.req.param("id"));
     const question = await kv.get(`question_${id}`);
     if (!question) return c.json({ error: "Question not found" }, 404);
@@ -738,6 +764,7 @@ app.post("/questions/:id/approve", async (c) => {
 
 app.post("/questions/:id/answer", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const id = cleanId(c.req.param("id"));
     const { answer } = await c.req.json();
     const question = await kv.get(`question_${id}`);
@@ -883,6 +910,7 @@ app.get("/terms/:id", async (c) => {
 
 app.post("/terms", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const body = await c.req.json();
     const id = body.id ? cleanId(body.id) : crypto.randomUUID();
     const term = { ...body, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
@@ -895,6 +923,7 @@ app.post("/terms", async (c) => {
 
 app.put("/terms/:id", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const id = cleanId(c.req.param("id"));
     const body = await c.req.json();
     const existing = await kv.get(`term_${id}`);
@@ -910,6 +939,7 @@ app.put("/terms/:id", async (c) => {
 
 app.delete("/terms/:id", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const id = cleanId(c.req.param("id"));
     await kv.del(`term_${id}`);
     return c.json({ success: true });
@@ -973,6 +1003,7 @@ app.get("/medical-terms/:id", async (c) => {
 
 app.post("/medical-terms", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const body = await c.req.json();
     const id = body.id ? cleanId(body.id) : crypto.randomUUID();
     const term = { ...body, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
@@ -985,6 +1016,7 @@ app.post("/medical-terms", async (c) => {
 
 app.put("/medical-terms/:id", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const id = cleanId(c.req.param("id"));
     const body = await c.req.json();
     const existing = await kv.get(`medterm_${id}`);
@@ -1000,6 +1032,7 @@ app.put("/medical-terms/:id", async (c) => {
 
 app.delete("/medical-terms/:id", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const id = cleanId(c.req.param("id"));
     await kv.del(`medterm_${id}`);
     return c.json({ success: true });
@@ -1035,6 +1068,7 @@ app.get("/faq/:id", async (c) => {
 
 app.post("/faq", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const body = await c.req.json();
     const id = body.id ? cleanId(body.id) : crypto.randomUUID();
     const item = { ...body, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
@@ -1047,6 +1081,7 @@ app.post("/faq", async (c) => {
 
 app.put("/faq/:id", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const id = cleanId(c.req.param("id"));
     const body = await c.req.json();
     const existing = await kv.get(`faq_${id}`);
@@ -1061,11 +1096,76 @@ app.put("/faq/:id", async (c) => {
 
 app.delete("/faq/:id", async (c) => {
   try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
     const id = cleanId(c.req.param("id"));
     await kv.del(`faq_${id}`);
     return c.json({ success: true });
   } catch (error) {
     return c.json({ error: "Failed to delete faq item" }, 500);
+  }
+});
+
+// ========================================
+// İLETİŞİM MESAJLARI ENDPOINTS
+// KV prefix: contactmsg_
+// ========================================
+
+// Mesaj gönder (HERKESE AÇIK)
+app.post("/contact-messages", async (c) => {
+  try {
+    const body = await c.req.json();
+    const name = (body.name || '').toString().trim().slice(0, 200);
+    const email = (body.email || '').toString().trim().slice(0, 200);
+    const subject = (body.subject || '').toString().trim().slice(0, 300);
+    const message = (body.message || '').toString().trim().slice(0, 5000);
+    if (!name || !email || !message) {
+      return c.json({ error: "Ad, e-posta ve mesaj zorunludur" }, 400);
+    }
+    const id = crypto.randomUUID();
+    const item = { id, name, email, subject, message, read: false, createdAt: new Date().toISOString() };
+    await kv.set(`contactmsg_${id}`, item);
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to save message" }, 500);
+  }
+});
+
+// Mesajları listele (ADMIN)
+app.get("/contact-messages", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const items = await kv.getByPrefix("contactmsg_");
+    return c.json({ messages: items || [] });
+  } catch (error) {
+    return c.json({ error: "Failed to fetch messages" }, 500);
+  }
+});
+
+// Mesajı okundu işaretle (ADMIN)
+app.put("/contact-messages/:id", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const id = cleanId(c.req.param("id"));
+    const existing = await kv.get(`contactmsg_${id}`);
+    if (!existing) return c.json({ error: "Not found" }, 404);
+    const body = await c.req.json().catch(() => ({}));
+    const updated = { ...existing, ...body, id };
+    await kv.set(`contactmsg_${id}`, updated);
+    return c.json(updated);
+  } catch (error) {
+    return c.json({ error: "Failed to update message" }, 500);
+  }
+});
+
+// Mesajı sil (ADMIN)
+app.delete("/contact-messages/:id", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const id = cleanId(c.req.param("id"));
+    await kv.del(`contactmsg_${id}`);
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to delete message" }, 500);
   }
 });
 
