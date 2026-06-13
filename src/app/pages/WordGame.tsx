@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { Delete, Share2, Lightbulb, Trophy, Flame, BarChart3, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { termsAPI, medicalTermsAPI } from '../lib/api';
+import Seo from '../components/Seo';
 
 // ---- Türkçe yardımcılar ----
 const TR_UPPER = (s: string) => (s || '').toLocaleUpperCase('tr-TR');
@@ -321,6 +322,10 @@ export default function WordGame() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4 py-8">
+      <Seo
+        title="Günün Terimi — Kelime Oyunu"
+        description="Her gün yeni bir tıbbi terim! Omurga ve sağlık terimlerini tahmin et, serini koru. Omurgam'ın günlük kelime oyunu."
+      />
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="text-center mb-6">

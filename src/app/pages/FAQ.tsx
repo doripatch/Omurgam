@@ -2,6 +2,7 @@ import { HelpCircle, Plus, Minus, Search, MessageCircle, Loader2 } from 'lucide-
 import { useState, useEffect, useMemo } from 'react';
 import { faqAPI } from '../lib/api';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
+import Seo from '../components/Seo';
 
 interface FAQItem {
   id: string;
@@ -57,8 +58,19 @@ export default function FAQ() {
     });
   }, [items, searchQuery, selectedCategory]);
 
+  const faqJsonLd = items.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.slice(0, 50).map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  } : null;
+
   return (
     <div className="w-full bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-16 px-4">
+      <Seo title={t.title || 'Sıkça Sorulan Sorular'} description={t.subtitle} jsonLd={faqJsonLd} />
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

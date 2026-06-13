@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router';
 import { useState, useEffect } from 'react';
 import { blogAPI } from '../lib/api';
 import { toast } from 'sonner';
+import Seo from '../components/Seo';
 
 interface BlogPostData {
   id: string;
@@ -22,7 +23,6 @@ export default function BlogPost() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('🔍 BlogPost ID:', id);
     if (id) {
       loadPost(id);
     } else {
@@ -35,9 +35,7 @@ export default function BlogPost() {
     try {
       setIsLoading(true);
       setError(null);
-      console.log('📥 Blog yazısı yükleniyor, ID:', postId);
       const data = await blogAPI.getById(postId);
-      console.log('✅ Blog yazısı yüklendi:', data);
       setPost(data.post);
     } catch (error: any) {
       console.error('❌ Blog yükleme hatası:', error);
@@ -59,6 +57,20 @@ export default function BlogPost() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 py-12 px-4">
+      <Seo
+        title={post?.title || 'Blog'}
+        description={post?.excerpt || (post?.content ? post.content.slice(0, 155) : 'Omurga sağlığı hakkında blog yazıları.')}
+        type="article"
+        jsonLd={post ? {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: post.title,
+          articleSection: post.category,
+          datePublished: post.created_at,
+          author: { '@type': 'Person', name: 'Prof. Dr. Defne Kaya Utlu' },
+          publisher: { '@type': 'Organization', name: 'Omurgam', logo: { '@type': 'ImageObject', url: 'https://omurgam.com/assets/logo.svg' } },
+        } : null}
+      />
       <div className="max-w-4xl mx-auto">
         <Link to="/blog" className="inline-flex items-center gap-2 text-amber-700 hover:text-amber-800 mb-8">
           <ArrowLeft className="w-4 h-4" />

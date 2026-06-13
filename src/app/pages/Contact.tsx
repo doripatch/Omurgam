@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
 import { contactAPI } from '../lib/api';
+import Seo from '../components/Seo';
 
 export default function Contact() {
   const settings = useSiteSettingsStore((s) => s.settings);
@@ -43,6 +44,7 @@ export default function Contact() {
 
   return (
     <div className="w-full bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-16 px-4">
+      <Seo title={t.title || 'İletişim'} description={t.subtitle} />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

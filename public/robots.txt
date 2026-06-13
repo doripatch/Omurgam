@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Yönetim ve özel sayfalar dizine eklenmesin
+Disallow: /admin
+Disallow: /profil
+Disallow: /giris
+Disallow: /kayit
+
+Sitemap: https://omurgam.com/sitemap.xml

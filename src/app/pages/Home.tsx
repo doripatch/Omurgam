@@ -5,6 +5,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useState, useEffect } from 'react';
 import { supabase, TABLES } from '../lib/supabase';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
+import Seo from '../components/Seo';
 
 interface Question {
   id: string;
@@ -87,6 +88,23 @@ export default function Home() {
 
   return (
     <div className="w-full bg-stone-50 dark:bg-slate-900">
+      <Seo
+        title={`${settings.siteName} — Omurga Sağlığı Platformu`}
+        description={settings.metaDescription}
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'MedicalOrganization',
+          name: settings.siteName || 'Omurgam',
+          url: 'https://omurgam.com',
+          logo: 'https://omurgam.com/assets/logo.svg',
+          description: settings.metaDescription,
+          founder: {
+            '@type': 'Person',
+            name: 'Prof. Dr. Defne Kaya Utlu',
+            jobTitle: 'Fizyoterapi Profesörü',
+          },
+        }}
+      />
       {/* HERO */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 py-20">
         <div className="absolute inset-0 opacity-[0.02]">

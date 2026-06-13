@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Search, BookOpen, Info, Tag, ChevronDown, Sparkles } from 'lucide-react';
 import { medicalTermsAPI } from '../lib/api';
 import { toast } from 'sonner';
+import Seo from '../components/Seo';
 
 interface MedicalTerm {
   id: string;
@@ -80,6 +81,10 @@ export default function MedicalGlossary() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <Seo
+        title="Sağlık Sözlüğü — Tıbbi ve Tedavi Terimleri"
+        description="Çimentolu alçı, atel, traksiyon, ödem gibi tıbbi ve tedavi terimlerinin sade Türkçe açıklamaları. Omurgam Sağlık Sözlüğü."
+      />
       {/* Hero Header */}
       <div className="relative bg-gradient-to-br from-amber-700 via-orange-800 to-amber-900 text-white py-12 md:py-20 px-4 overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-400/20 rounded-full blur-3xl"></div>

@@ -1,6 +1,7 @@
 import { GraduationCap, Award, Briefcase, Heart, BookOpen, Globe, Users, Trophy, Building2 } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
+import Seo from '../components/Seo';
 
 export default function About() {
   const { settings, isLoading } = useSiteSettingsStore();  // 
@@ -18,6 +19,11 @@ export default function About() {
 
   return (
     <div className="w-full bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-16 px-4">
+      <Seo
+        title={`${settings?.aboutTitle || 'Prof. Dr. Defne Kaya Utlu'} — Hakkımda`}
+        description="Prof. Dr. Defne Kaya Utlu — fizyoterapi profesörü. Akademik özgeçmiş, uluslararası deneyim, kitap editörlükleri ve çalışma alanları."
+        type="profile"
+      />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
