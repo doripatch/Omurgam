@@ -244,6 +244,24 @@ export const termsAPI = {
   search: (query: string) => makeRequest(`/terms/search?q=${encodeURIComponent(query)}`),
 };
 
+// Sağlık Sözlüğü (Genel Tıbbi & Tedavi Terimleri) API
+export const medicalTermsAPI = {
+  getAll: () => makeRequest('/medical-terms'),
+  getById: (id: string) => makeRequest(`/medical-terms/${cleanId(id)}`),
+  create: (term: any) => makeRequest('/medical-terms', {
+    method: 'POST',
+    body: JSON.stringify(term),
+  }),
+  update: (id: string, term: any) => makeRequest(`/medical-terms/${cleanId(id)}`, {
+    method: 'PUT',
+    body: JSON.stringify(term),
+  }),
+  delete: (id: string) => makeRequest(`/medical-terms/${cleanId(id)}`, {
+    method: 'DELETE',
+  }),
+  search: (query: string) => makeRequest(`/medical-terms/search?q=${encodeURIComponent(query)}`),
+};
+
 // Admin API
 export const adminAPI = {
   getUsers: () => makeRequest('/admin/users'),

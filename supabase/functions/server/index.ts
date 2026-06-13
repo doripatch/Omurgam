@@ -101,6 +101,7 @@ app.get("/debug", async (c) => {
         questions: ['/questions', '/questions/:id'],
         blog: ['/blog', '/blog/:id'],
         terms: ['/terms', '/terms/:id'],
+        medicalTerms: ['/medical-terms', '/medical-terms/:id', '/medical-terms/search'],
         admin: ['/admin/users', '/admin/users/role', '/admin/users/:userId'],
         siteSettings: ['/site-settings'],
       }
@@ -925,6 +926,85 @@ app.get("/terms/search", async (c) => {
     return c.json({ terms: filtered });
   } catch (error) {
     return c.json({ error: "Failed to search terms" }, 500);
+  }
+});
+
+// ========================================
+// SAĞLIK SÖZLÜĞÜ (GENEL TIBBİ & TEDAVİ TERİMLERİ) ENDPOINTS
+// KV prefix: medterm_
+// ========================================
+
+// Arama rotası ":id" rotasından ÖNCE tanımlandı (statik segment önceliği)
+app.get("/medical-terms/search", async (c) => {
+  try {
+    const query = c.req.query("q")?.toLowerCase().trim() || "";
+    const allTerms = await kv.getByPrefix("medterm_");
+    if (!query) return c.json({ terms: allTerms || [] });
+    const filtered = (allTerms || []).filter((t: any) =>
+      t.term?.toLowerCase().includes(query) ||
+      t.definition?.toLowerCase().includes(query) ||
+      t.category?.toLowerCase().includes(query)
+    );
+    return c.json({ terms: filtered });
+  } catch (error) {
+    return c.json({ error: "Failed to search medical terms" }, 500);
+  }
+});
+
+app.get("/medical-terms", async (c) => {
+  try {
+    const terms = await kv.getByPrefix("medterm_");
+    return c.json({ terms: terms || [] });
+  } catch (error) {
+    return c.json({ error: "Failed to fetch medical terms" }, 500);
+  }
+});
+
+app.get("/medical-terms/:id", async (c) => {
+  try {
+    const id = cleanId(c.req.param("id"));
+    const term = await kv.get(`medterm_${id}`);
+    if (!term) return c.json({ error: "Medical term not found" }, 404);
+    return c.json(term);
+  } catch (error) {
+    return c.json({ error: "Failed to fetch medical term" }, 500);
+  }
+});
+
+app.post("/medical-terms", async (c) => {
+  try {
+    const body = await c.req.json();
+    const id = body.id ? cleanId(body.id) : crypto.randomUUID();
+    const term = { ...body, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    await kv.set(`medterm_${id}`, term);
+    return c.json(term);
+  } catch (error) {
+    return c.json({ error: "Failed to create medical term" }, 500);
+  }
+});
+
+app.put("/medical-terms/:id", async (c) => {
+  try {
+    const id = cleanId(c.req.param("id"));
+    const body = await c.req.json();
+    const existing = await kv.get(`medterm_${id}`);
+    if (!existing) return c.json({ error: "Medical term not found" }, 404);
+
+    const updated = { ...existing, ...body, id, updatedAt: new Date().toISOString() };
+    await kv.set(`medterm_${id}`, updated);
+    return c.json(updated);
+  } catch (error) {
+    return c.json({ error: "Failed to update medical term" }, 500);
+  }
+});
+
+app.delete("/medical-terms/:id", async (c) => {
+  try {
+    const id = cleanId(c.req.param("id"));
+    await kv.del(`medterm_${id}`);
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to delete medical term" }, 500);
   }
 });
 

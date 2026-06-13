@@ -9,6 +9,7 @@ import AskQuestion from "./pages/AskQuestion";
 import QuestionDetail from "./pages/QuestionDetail";
 import Forum from "./pages/Forum";
 import MRAnalyzer from "./pages/MRAnalyzer";
+import MedicalGlossary from "./pages/MedicalGlossary";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
@@ -24,6 +25,7 @@ import AdminVideos from "./pages/admin/Videos";
 import AdminQuestions from "./pages/admin/Questions";
 import AdminBlog from "./pages/admin/Blog";
 import AdminTerms from "./pages/admin/Terms";
+import AdminMedicalTerms from "./pages/admin/MedicalTerms";
 import AdminUsers from "./pages/admin/Users";
 import AdminSiteSettings from "./pages/admin/SiteSettings";
 import NotFound from "./pages/NotFound";
@@ -42,6 +44,7 @@ export const router = createBrowserRouter([
       { path: "soru/:id", Component: QuestionDetail },
       { path: "forum", Component: Forum },
       { path: "mr-analiz", Component: MRAnalyzer },
+      { path: "saglik-sozlugu", Component: MedicalGlossary },
       { path: "hakkimizda", Component: About },
       { path: "iletisim", Component: Contact },
       { path: "gizlilik", Component: Privacy },
@@ -57,6 +60,7 @@ export const router = createBrowserRouter([
       { path: "admin/sorular", Component: AdminQuestions },
       { path: "admin/blog", Component: AdminBlog },
       { path: "admin/kosullar", Component: AdminTerms },
+      { path: "admin/saglik-sozlugu", Component: AdminMedicalTerms },
       { path: "admin/kullanicilar", Component: AdminUsers },
       { path: "admin/site-ayarlari", Component: AdminSiteSettings },
       { path: "*", Component: NotFound },
