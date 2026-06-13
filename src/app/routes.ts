@@ -16,6 +16,7 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Appointment from "./pages/Appointment";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import FAQ from "./pages/FAQ";
@@ -28,6 +29,7 @@ import AdminMedicalTerms from "./pages/admin/MedicalTerms";
 import AdminFAQ from "./pages/admin/FAQ";
 import AdminMessages from "./pages/admin/Messages";
 import AdminSubscribers from "./pages/admin/Subscribers";
+import AdminAppointments from "./pages/admin/Appointments";
 import AdminUsers from "./pages/admin/Users";
 import AdminSiteSettings from "./pages/admin/SiteSettings";
 import NotFound from "./pages/NotFound";
@@ -50,6 +52,7 @@ export const router = createBrowserRouter([
       { path: "gunun-terimi", Component: WordGame },
       { path: "hakkimizda", Component: About },
       { path: "iletisim", Component: Contact },
+      { path: "randevu", Component: Appointment },
       { path: "gizlilik", Component: Privacy },
       { path: "kullanim-kosullari", Component: Terms },
       { path: "sorular", Component: FAQ },
@@ -65,6 +68,7 @@ export const router = createBrowserRouter([
       { path: "admin/sss", Component: AdminFAQ },
       { path: "admin/mesajlar", Component: AdminMessages },
       { path: "admin/aboneler", Component: AdminSubscribers },
+      { path: "admin/randevular", Component: AdminAppointments },
       { path: "admin/kullanicilar", Component: AdminUsers },
       { path: "admin/site-ayarlari", Component: AdminSiteSettings },
       { path: "*", Component: NotFound },

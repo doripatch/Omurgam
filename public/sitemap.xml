@@ -10,6 +10,7 @@
   <url><loc>https://omurgam.com/hakkimizda</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://omurgam.com/sorular</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://omurgam.com/iletisim</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://omurgam.com/randevu</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://omurgam.com/gizlilik</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://omurgam.com/kullanim-kosullari</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>

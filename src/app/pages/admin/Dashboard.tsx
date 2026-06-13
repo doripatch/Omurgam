@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
-import { Video, MessageSquare, FileText, Users, TrendingUp, Eye, Clock, CheckCircle, Brain, Settings, BookOpen, HelpCircle, Inbox } from 'lucide-react';
+import { Video, MessageSquare, FileText, Users, TrendingUp, Eye, Clock, CheckCircle, Brain, Settings, BookOpen, HelpCircle, Inbox, CalendarCheck } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { videosAPI, questionsAPI, blogAPI, adminAPI, termsAPI, medicalTermsAPI, faqAPI, contactAPI, newsletterAPI } from '../../lib/api';
+import { videosAPI, questionsAPI, blogAPI, adminAPI, termsAPI, medicalTermsAPI, faqAPI, contactAPI, newsletterAPI, appointmentsAPI } from '../../lib/api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -14,6 +14,7 @@ export default function AdminDashboard() {
     faqCount: 0,
     unreadMessages: 0,
     subscribers: 0,
+    newAppointments: 0,
     totalViews: 0,
     answeredQuestions: 0,
   });
@@ -29,7 +30,7 @@ export default function AdminDashboard() {
       setIsLoading(true);
       
       // Load all data in parallel
-      const [videosData, questionsData, blogData, usersData, termsData, medicalTermsData, faqData, messagesData, subscribersData] = await Promise.all([
+      const [videosData, questionsData, blogData, usersData, termsData, medicalTermsData, faqData, messagesData, subscribersData, appointmentsData] = await Promise.all([
         videosAPI.getAll(),
         questionsAPI.getAll(),
         blogAPI.getAll(),
@@ -38,7 +39,8 @@ export default function AdminDashboard() {
         medicalTermsAPI.getAll().catch(() => ({ terms: [] })),
         faqAPI.getAll().catch(() => ({ items: [] })),
         contactAPI.getAll().catch(() => ({ messages: [] })),
-        newsletterAPI.getAll().catch(() => ({ subscribers: [] }))
+        newsletterAPI.getAll().catch(() => ({ subscribers: [] })),
+        appointmentsAPI.getAll().catch(() => ({ appointments: [] }))
       ]);
 
       setStats({
@@ -51,6 +53,7 @@ export default function AdminDashboard() {
         faqCount: faqData.items?.length || 0,
         unreadMessages: (messagesData.messages || []).filter((m: any) => !m.read).length,
         subscribers: subscribersData.subscribers?.length || 0,
+        newAppointments: (appointmentsData.appointments || []).filter((a: any) => a.status === 'new').length,
         totalViews: videosData.videos?.reduce((acc: number, video: any) => acc + video.views, 0) || 0,
         answeredQuestions: questionsData.questions?.filter((q: any) => q.isAnswered).length || 0,
       });
@@ -132,6 +135,14 @@ export default function AdminDashboard() {
       icon: Users,
       color: 'from-emerald-500 to-teal-600',
       link: '/admin/aboneler'
+    },
+    {
+      title: 'Randevu Talepleri',
+      value: stats.newAppointments.toString(),
+      change: `${stats.newAppointments} yeni`,
+      icon: CalendarCheck,
+      color: 'from-orange-500 to-amber-600',
+      link: '/admin/randevular'
     },
     {
       title: 'Kayıtlı Kullanıcı',

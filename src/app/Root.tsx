@@ -173,7 +173,13 @@ export default function Root() {
               >
                 İletişim
               </Link>
-              
+              <Link
+                to="/randevu"
+                className="text-sm font-semibold px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-colors whitespace-nowrap"
+              >
+                Randevu
+              </Link>
+
               {/* Dark Mode Toggle */}
               <DarkModeToggle />
               
@@ -311,6 +317,15 @@ export default function Root() {
               >
                 İletişim
               </Link>
+              <Link
+                to="/randevu"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block py-2 text-sm font-medium ${
+                  isActive('/randevu') ? 'text-amber-700' : 'text-slate-700'
+                }`}
+              >
+                Randevu / Danışma
+              </Link>
               <div className="pt-3 border-t border-amber-500/10 space-y-3">
                 {isAuthenticated && isAdmin && (
                   <Link
@@ -410,6 +425,7 @@ export default function Root() {
                 <li><Link to="/mr-analiz" className="hover:text-amber-300 transition-colors">MR Terim Sözlüğü</Link></li>
                 <li><Link to="/saglik-sozlugu" className="hover:text-amber-300 transition-colors">Sağlık Sözlüğü</Link></li>
                 <li><Link to="/gunun-terimi" className="hover:text-amber-300 transition-colors">Günün Terimi (Oyun)</Link></li>
+                <li><Link to="/randevu" className="hover:text-amber-300 transition-colors">Randevu / Danışma</Link></li>
                 <li><Link to="/soru-sor" className="hover:text-amber-300 transition-colors">Soru Sor</Link></li>
                 <li><Link to="/sorular" className="hover:text-amber-300 transition-colors">Sıkça Sorulan Sorular</Link></li>
               </ul>

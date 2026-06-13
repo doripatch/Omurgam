@@ -1218,6 +1218,72 @@ app.delete("/contact-messages/:id", async (c) => {
 });
 
 // ========================================
+// RANDEVU / DANIŞMA TALEPLERİ ENDPOINTS
+// KV prefix: appointment_
+// ========================================
+
+// Talep gönder (HERKESE AÇIK)
+app.post("/appointments", async (c) => {
+  try {
+    const body = await c.req.json();
+    const name = (body.name || '').toString().trim().slice(0, 200);
+    const phone = (body.phone || '').toString().trim().slice(0, 50);
+    const email = (body.email || '').toString().trim().slice(0, 200);
+    const subject = (body.subject || '').toString().trim().slice(0, 300);
+    const preferredDate = (body.preferredDate || '').toString().trim().slice(0, 100);
+    const message = (body.message || '').toString().trim().slice(0, 3000);
+    if (!name || !phone) {
+      return c.json({ error: "Ad ve telefon zorunludur" }, 400);
+    }
+    const id = crypto.randomUUID();
+    const item = { id, name, phone, email, subject, preferredDate, message, status: 'new', createdAt: new Date().toISOString() };
+    await kv.set(`appointment_${id}`, item);
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to save appointment request" }, 500);
+  }
+});
+
+// Talepleri listele (ADMIN)
+app.get("/appointments", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const items = await kv.getByPrefix("appointment_");
+    return c.json({ appointments: items || [] });
+  } catch (error) {
+    return c.json({ error: "Failed to fetch appointments" }, 500);
+  }
+});
+
+// Talep durumunu güncelle (ADMIN)
+app.put("/appointments/:id", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const id = cleanId(c.req.param("id"));
+    const existing = await kv.get(`appointment_${id}`);
+    if (!existing) return c.json({ error: "Not found" }, 404);
+    const body = await c.req.json().catch(() => ({}));
+    const updated = { ...existing, ...body, id };
+    await kv.set(`appointment_${id}`, updated);
+    return c.json(updated);
+  } catch (error) {
+    return c.json({ error: "Failed to update appointment" }, 500);
+  }
+});
+
+// Talep sil (ADMIN)
+app.delete("/appointments/:id", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const id = cleanId(c.req.param("id"));
+    await kv.del(`appointment_${id}`);
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to delete appointment" }, 500);
+  }
+});
+
+// ========================================
 // ADMIN ENDPOINTS
 // ========================================
 

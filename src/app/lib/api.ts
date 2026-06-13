@@ -256,6 +256,18 @@ export const medicalTermsAPI = {
   search: (query: string) => makeRequest(`/medical-terms/search?q=${encodeURIComponent(query)}`),
 };
 
+// Randevu / Danışma Talepleri API
+export const appointmentsAPI = {
+  send: (data: { name: string; phone: string; email?: string; subject?: string; preferredDate?: string; message?: string }) =>
+    makeRequest('/appointments', { method: 'POST', body: JSON.stringify(data) }),
+  getAll: () => makeRequest('/appointments'),
+  update: (id: string, data: any) => makeRequest(`/appointments/${cleanId(id)}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (id: string) => makeRequest(`/appointments/${cleanId(id)}`, { method: 'DELETE' }),
+};
+
 // E-bülten API
 export const newsletterAPI = {
   subscribe: (email: string) => makeRequest('/newsletter', {
