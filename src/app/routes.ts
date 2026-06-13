@@ -10,6 +10,7 @@ import QuestionDetail from "./pages/QuestionDetail";
 import Forum from "./pages/Forum";
 import MRAnalyzer from "./pages/MRAnalyzer";
 import MedicalGlossary from "./pages/MedicalGlossary";
+import WordGame from "./pages/WordGame";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       { path: "forum", Component: Forum },
       { path: "mr-analiz", Component: MRAnalyzer },
       { path: "saglik-sozlugu", Component: MedicalGlossary },
+      { path: "gunun-terimi", Component: WordGame },
       { path: "hakkimizda", Component: About },
       { path: "iletisim", Component: Contact },
       { path: "gizlilik", Component: Privacy },

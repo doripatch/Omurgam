@@ -114,6 +114,14 @@ export default function Root() {
                 Sözlük
               </Link>
               <Link
+                to="/gunun-terimi"
+                className={`text-sm font-medium transition-colors ${
+                  isActive('/gunun-terimi') ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-400'
+                }`}
+              >
+                Oyun
+              </Link>
+              <Link
                 to="/hakkimizda"
                 className={`text-sm font-medium transition-colors ${
                   isActive('/hakkimizda') ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-400'
@@ -239,6 +247,15 @@ export default function Root() {
               >
                 Sağlık Sözlüğü
               </Link>
+              <Link
+                to="/gunun-terimi"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block py-2 text-sm font-medium ${
+                  isActive('/gunun-terimi') ? 'text-amber-700' : 'text-slate-700'
+                }`}
+              >
+                Günün Terimi (Oyun)
+              </Link>
               <Link 
                 to="/hakkimizda" 
                 onClick={() => setMobileMenuOpen(false)}
@@ -337,6 +354,7 @@ export default function Root() {
                 <li><Link to="/blog" className="hover:text-amber-300 transition-colors">Blog</Link></li>
                 <li><Link to="/mr-analiz" className="hover:text-amber-300 transition-colors">MR Terim Sözlüğü</Link></li>
                 <li><Link to="/saglik-sozlugu" className="hover:text-amber-300 transition-colors">Sağlık Sözlüğü</Link></li>
+                <li><Link to="/gunun-terimi" className="hover:text-amber-300 transition-colors">Günün Terimi (Oyun)</Link></li>
                 <li><Link to="/soru-sor" className="hover:text-amber-300 transition-colors">Soru Sor</Link></li>
                 <li><Link to="/sorular" className="hover:text-amber-300 transition-colors">Sıkça Sorulan Sorular</Link></li>
               </ul>
