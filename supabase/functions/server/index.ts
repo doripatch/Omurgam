@@ -42,6 +42,20 @@ async function requireAdmin(c: any) {
   }
 }
 
+// 🔐 GÜVENLİK: İsteği yapanın giriş yapmış (herhangi bir) kullanıcı olduğunu doğrular.
+async function requireUser(c: any) {
+  try {
+    const userToken = c.req.header("X-User-Token");
+    if (!userToken) return null;
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    const { data: { user }, error } = await supabase.auth.getUser(userToken);
+    if (error || !user) return null;
+    return user;
+  } catch {
+    return null;
+  }
+}
+
 // 🧹 HAYALET AVCISI: Geçmişte kalan bozuk videoları temizleme rotası (SADECE ADMIN)
 app.get("/cleanup", async (c) => {
   try {
@@ -1214,6 +1228,60 @@ app.delete("/contact-messages/:id", async (c) => {
     return c.json({ success: true });
   } catch (error) {
     return c.json({ error: "Failed to delete message" }, 500);
+  }
+});
+
+// ========================================
+// FAVORİLER ENDPOINTS (kullanıcıya özel)
+// KV key: favorites_<userId>
+// ========================================
+
+app.get("/favorites", async (c) => {
+  try {
+    const user = await requireUser(c);
+    if (!user) return c.json({ error: "Unauthorized" }, 401);
+    const rec = await kv.get(`favorites_${user.id}`);
+    return c.json({ favorites: rec?.items || [] });
+  } catch (error) {
+    return c.json({ error: "Failed to fetch favorites" }, 500);
+  }
+});
+
+app.post("/favorites", async (c) => {
+  try {
+    const user = await requireUser(c);
+    if (!user) return c.json({ error: "Unauthorized" }, 401);
+    const body = await c.req.json();
+    const type = (body.type || '').toString();
+    const itemId = (body.itemId || '').toString();
+    const title = (body.title || '').toString().slice(0, 300);
+    if (!type || !itemId) return c.json({ error: "type ve itemId gerekli" }, 400);
+
+    const rec = (await kv.get(`favorites_${user.id}`)) || { userId: user.id, items: [] };
+    const exists = rec.items.some((i: any) => i.type === type && i.itemId === itemId);
+    if (!exists) {
+      rec.items.push({ type, itemId, title, createdAt: new Date().toISOString() });
+      await kv.set(`favorites_${user.id}`, rec);
+    }
+    return c.json({ success: true, favorites: rec.items });
+  } catch (error) {
+    return c.json({ error: "Failed to add favorite" }, 500);
+  }
+});
+
+app.delete("/favorites", async (c) => {
+  try {
+    const user = await requireUser(c);
+    if (!user) return c.json({ error: "Unauthorized" }, 401);
+    const body = await c.req.json().catch(() => ({}));
+    const type = (body.type || '').toString();
+    const itemId = (body.itemId || '').toString();
+    const rec = (await kv.get(`favorites_${user.id}`)) || { userId: user.id, items: [] };
+    rec.items = rec.items.filter((i: any) => !(i.type === type && i.itemId === itemId));
+    await kv.set(`favorites_${user.id}`, rec);
+    return c.json({ success: true, favorites: rec.items });
+  } catch (error) {
+    return c.json({ error: "Failed to remove favorite" }, 500);
   }
 });
 

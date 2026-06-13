@@ -3,6 +3,7 @@ import { Search, BookOpen, Info, Tag, ChevronDown, Sparkles } from 'lucide-react
 import { medicalTermsAPI } from '../lib/api';
 import { toast } from 'sonner';
 import Seo from '../components/Seo';
+import FavoriteButton from '../components/FavoriteButton';
 
 interface MedicalTerm {
   id: string;
@@ -242,6 +243,9 @@ export default function MedicalGlossary() {
                               <p className="text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">
                                 {term.definition}
                               </p>
+                            </div>
+                            <div className="mt-3">
+                              <FavoriteButton type="medterm" itemId={term.id} title={term.term} />
                             </div>
                           </div>
                         )}

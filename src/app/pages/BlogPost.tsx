@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { blogAPI } from '../lib/api';
 import { toast } from 'sonner';
 import Seo from '../components/Seo';
+import FavoriteButton from '../components/FavoriteButton';
 
 interface BlogPostData {
   id: string;
@@ -94,7 +95,10 @@ export default function BlogPost() {
               </div>
 
               {/* Title */}
-              <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">{post.title}</h1>
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <h1 className="text-4xl md:text-5xl font-bold text-slate-900 flex-1">{post.title}</h1>
+                <FavoriteButton type="blog" itemId={post.id} title={post.title} label={false} className="p-3 rounded-xl border border-slate-200 hover:border-amber-300 text-slate-600 flex-shrink-0" />
+              </div>
 
               {/* Meta Info */}
               <div className="flex items-center gap-6 text-slate-600 mb-8 pb-8 border-b border-slate-200">

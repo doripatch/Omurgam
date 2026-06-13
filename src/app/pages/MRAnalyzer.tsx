@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Brain, AlertTriangle, CheckCircle, Info, TrendingUp, Shield, AlertCircle } from 'lucide-react';
 import { termsAPI } from '../lib/api';
 import { toast } from 'sonner';
+import FavoriteButton from '../components/FavoriteButton';
 
 interface MRTerm {
   id: string;
@@ -213,6 +214,9 @@ export default function MRAnalyzer() {
                     <p className="text-base md:text-lg text-slate-700 leading-relaxed">
                       {selectedTerm.explanation}
                     </p>
+                    <div className="mt-4">
+                      <FavoriteButton type="term" itemId={selectedTerm.id} title={selectedTerm.term} />
+                    </div>
                   </div>
                 </div>
               </div>

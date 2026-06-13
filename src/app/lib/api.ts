@@ -256,6 +256,19 @@ export const medicalTermsAPI = {
   search: (query: string) => makeRequest(`/medical-terms/search?q=${encodeURIComponent(query)}`),
 };
 
+// Favoriler API (kullanıcıya özel)
+export const favoritesAPI = {
+  getAll: () => makeRequest('/favorites'),
+  add: (type: string, itemId: string, title: string) => makeRequest('/favorites', {
+    method: 'POST',
+    body: JSON.stringify({ type, itemId, title }),
+  }),
+  remove: (type: string, itemId: string) => makeRequest('/favorites', {
+    method: 'DELETE',
+    body: JSON.stringify({ type, itemId }),
+  }),
+};
+
 // Randevu / Danışma Talepleri API
 export const appointmentsAPI = {
   send: (data: { name: string; phone: string; email?: string; subject?: string; preferredDate?: string; message?: string }) =>

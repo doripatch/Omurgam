@@ -4,6 +4,7 @@ import { ThumbsUp, MessageSquare, Eye, ArrowLeft, Send, Trash2, Clock, Tag, Load
 import { toast } from 'sonner';
 import { videosAPI } from '../lib/api';
 import { useAuthStore } from '../store/authStore';
+import FavoriteButton from '../components/FavoriteButton';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
@@ -282,6 +283,8 @@ export default function VideoDetail() {
                   <ThumbsUp className={`w-5 h-5 ${likeStatus.liked ? 'fill-current' : ''}`} />
                   <span>{likeStatus.count} Beğeni</span>
                 </button>
+
+                <FavoriteButton type="video" itemId={video.id} title={video.title} className="flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all" />
 
                 <div className="flex items-center gap-2 text-slate-600">
                   <MessageSquare className="w-5 h-5" />

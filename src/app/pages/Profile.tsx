@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { User, Mail, Calendar, MessageSquare, FileText, AtSign, Loader2, Shield, Clock, Check, Edit, Key, LogOut, X, Save } from 'lucide-react';
 import { supabase, TABLES } from '../lib/supabase';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router';
+import { useNavigate, Link } from 'react-router';
 import { useAuthStore } from '../store/authStore';
+import { useFavoritesStore } from '../store/favoritesStore';
+import { Bookmark, Video as VideoIcon, BookOpen, Brain, FileText as FileIcon } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -56,6 +58,29 @@ export default function Profile() {
 
   const navigate = useNavigate();
   const signout = useAuthStore((state) => state.signout);
+  const { items: favorites, load: loadFavorites, loaded: favLoaded, toggle: toggleFav } = useFavoritesStore();
+
+  useEffect(() => {
+    if (!favLoaded) loadFavorites();
+  }, [favLoaded, loadFavorites]);
+
+  const favMeta = (type: string): { to: string; icon: any } => {
+    switch (type) {
+      case 'video': return { to: '/video/', icon: VideoIcon };
+      case 'blog': return { to: '/blog/', icon: FileIcon };
+      case 'medterm': return { to: '/saglik-sozlugu', icon: BookOpen };
+      case 'term': return { to: '/mr-analiz', icon: Brain };
+      default: return { to: '/', icon: Bookmark };
+    }
+  };
+
+  const removeFav = async (type: string, id: string, title: string) => {
+    try {
+      await toggleFav(type, id, title);
+    } catch {
+      toast.error('İşlem başarısız');
+    }
+  };
 
   useEffect(() => {
     fetchProfile();
@@ -424,6 +449,44 @@ export default function Profile() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* Favorilerim */}
+        <div className="backdrop-blur-xl bg-white/80 border border-teal-200/30 rounded-3xl p-8 mt-6">
+          <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <Bookmark className="w-5 h-5 text-amber-600" />
+            Favorilerim
+          </h3>
+          {favorites.length === 0 ? (
+            <div className="text-center py-8 text-slate-500">
+              Henüz favoriniz yok. Video, terim ve blog yazılarını favorilere ekleyebilirsiniz.
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {favorites.map((f) => {
+                const meta = favMeta(f.type);
+                const Icon = meta.icon;
+                const href = (f.type === 'video' || f.type === 'blog') ? `${meta.to}${f.itemId}` : meta.to;
+                return (
+                  <div key={`${f.type}-${f.itemId}`} className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl">
+                    <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-4 h-4 text-amber-600" />
+                    </div>
+                    <Link to={href} className="flex-1 font-medium text-slate-800 hover:text-amber-700 truncate">
+                      {f.title || 'Kayıtlı içerik'}
+                    </Link>
+                    <button
+                      onClick={() => removeFav(f.type, f.itemId, f.title)}
+                      className="text-slate-400 hover:text-red-500 text-sm flex-shrink-0"
+                      title="Favorilerden çıkar"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
