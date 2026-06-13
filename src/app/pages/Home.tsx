@@ -1,10 +1,10 @@
 import { Link } from 'react-router';
-import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, User, ThumbsUp, Clock } from 'lucide-react';
+import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, ThumbsUp, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useState, useEffect } from 'react';
 import { supabase, TABLES } from '../lib/supabase';
-import { toast } from 'sonner';
+import { useSiteSettingsStore } from '../store/siteSettingsStore';
 
 interface Question {
   id: string;
@@ -26,6 +26,10 @@ export default function Home() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
 
+  // Tüm metinler buradan gelir (panelden düzenlenebilir, varsayılanlar her zaman dolu)
+  const settings = useSiteSettingsStore((s) => s.settings);
+  const c = settings.home;
+
   useEffect(() => {
     loadAnsweredQuestions();
   }, []);
@@ -45,13 +49,12 @@ export default function Home() {
         .limit(4);
 
       if (error) throw error;
-      
+
       const formattedQuestions = (data || []).map((q: any) => ({
         ...q,
         answers: q.answers || []
       }));
-      
-      console.log('🏠 Anasayfa - Yanıtlanan sorular:', formattedQuestions);
+
       setQuestions(formattedQuestions);
     } catch (error: any) {
       console.error('❌ Sorular yüklenirken hata:', error);
@@ -74,11 +77,18 @@ export default function Home() {
     return date.toLocaleDateString('tr-TR');
   };
 
+  // Disclaimer'da ilk ":" öncesini kalın göster (örn. "ÖNEMLİ:")
+  const disclaimerParts = (() => {
+    const text = c.disclaimer || '';
+    const idx = text.indexOf(':');
+    if (idx === -1) return { head: '', rest: text };
+    return { head: text.slice(0, idx + 1), rest: text.slice(idx + 1) };
+  })();
+
   return (
     <div className="w-full bg-stone-50 dark:bg-slate-900">
-      {/* HERO - Ultra Minimal with Huge Typography */}
+      {/* HERO */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 py-20">
-        {/* Subtle Background Pattern */}
         <div className="absolute inset-0 opacity-[0.02]">
           <div className="absolute inset-0" style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, rgb(120, 53, 15) 1px, transparent 0)`,
@@ -93,7 +103,6 @@ export default function Home() {
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
             className="text-center"
           >
-            {/* Small Badge */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -101,29 +110,26 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100/80 backdrop-blur-sm rounded-full mb-8"
             >
               <Sparkles className="w-4 h-4 text-amber-700" />
-              <span className="text-sm font-bold text-amber-900 tracking-wide">Prof. Dr. Defne Kaya Utlu</span>
+              <span className="text-sm font-bold text-amber-900 tracking-wide">{c.badge}</span>
             </motion.div>
 
-            {/* Giant Hero Title */}
             <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-black tracking-tighter mb-6 leading-[0.9]">
-              <span className="block text-slate-900">Omurgam</span>
+              <span className="block text-slate-900">{c.title}</span>
             </h1>
 
-            {/* Subtitle with Gradient */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.8 }}
               className="text-2xl md:text-4xl font-light text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
-              Omurga sağlığınız için{' '}
+              {c.subtitlePrefix}{' '}
               <span className="font-bold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
-                bilimsel bilgilendirme
+                {c.subtitleHighlight}
               </span>
-              {' '}platformu
+              {' '}{c.subtitleSuffix}
             </motion.p>
 
-            {/* CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -137,7 +143,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-600 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative flex items-center gap-3">
                   <Play className="w-5 h-5" />
-                  <span>Video Arşivi</span>
+                  <span>{c.ctaVideos}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
@@ -148,14 +154,13 @@ export default function Home() {
               >
                 <div className="flex items-center gap-3">
                   <Search className="w-5 h-5" />
-                  <span>Terim Sözlüğü</span>
+                  <span>{c.ctaGlossary}</span>
                 </div>
               </Link>
             </motion.div>
           </motion.div>
         </div>
 
-        {/* Scroll Indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -163,7 +168,7 @@ export default function Home() {
           className="absolute bottom-12 left-1/2 -translate-x-1/2"
         >
           <div className="flex flex-col items-center gap-2 text-slate-400">
-            <span className="text-xs uppercase tracking-wider font-semibold">Aşağı Kaydır</span>
+            <span className="text-xs uppercase tracking-wider font-semibold">{c.scrollText}</span>
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
@@ -175,16 +180,11 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* STATS BAR - Minimal */}
+      {/* STATS BAR */}
       <section className="py-12 px-4 bg-white border-y border-slate-200">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { number: '150+', label: 'Bilgilendirme Videosu' },
-              { number: '50+', label: 'Tıbbi Terim' },
-              { number: '24/7', label: 'Erişim' },
-              { number: '100%', label: 'Bilimsel İçerik' }
-            ].map((stat, i) => (
+            {(c.stats || []).map((stat, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -201,10 +201,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FORUM / COMMUNITY QUESTIONS - Main Feature */}
+      {/* FORUM / COMMUNITY QUESTIONS */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="max-w-7xl mx-auto">
-          {/* Section Header */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -213,28 +212,27 @@ export default function Home() {
             className="text-center mb-12"
           >
             <span className="inline-block px-4 py-2 bg-amber-500/20 text-amber-300 font-bold rounded-full mb-6 text-sm uppercase tracking-wide">
-              Topluluk Forumu
+              {c.forumBadge}
             </span>
             <h2 className="text-5xl md:text-7xl font-black text-white mb-4">
-              Soru & Cevap
+              {c.forumTitle}
             </h2>
             <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-8">
-              Omurga sağlığı hakkında merak ettiklerinizi sorun, deneyimlerinizi paylaşın
+              {c.forumDesc}
             </p>
             <Link
               to="/soru-sor"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-full font-bold hover:shadow-lg hover:shadow-amber-500/50 transition-all hover:scale-105"
             >
               <MessageCircle className="w-5 h-5" />
-              <span>Yeni Soru Sor</span>
+              <span>{c.forumCta}</span>
             </Link>
           </motion.div>
 
-          {/* Questions Grid */}
           <div className="grid md:grid-cols-2 gap-6">
             {isLoadingQuestions ? (
               <div className="col-span-2 text-center">
-                <p className="text-xl text-slate-300">Sorular yükleniyor...</p>
+                <p className="text-xl text-slate-300">{c.forumLoading}</p>
               </div>
             ) : (
               questions.map((question, index) => (
@@ -247,7 +245,6 @@ export default function Home() {
                   className="group bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
                   onClick={() => window.location.href = `/soru/${question.id}`}
                 >
-                  {/* User Info */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <img
@@ -268,7 +265,6 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Question */}
                   <h3 className="text-xl font-black text-white mb-3 group-hover:text-amber-300 transition-colors">
                     {question.question}
                   </h3>
@@ -276,7 +272,6 @@ export default function Home() {
                     {question.excerpt}
                   </p>
 
-                  {/* Stats & Actions */}
                   <div className="flex items-center justify-between pt-4 border-t border-white/10">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1 text-slate-400">
@@ -300,7 +295,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* View All Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -312,17 +306,16 @@ export default function Home() {
               to="/forum"
               className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white rounded-2xl font-bold hover:bg-white/20 transition-all group"
             >
-              <span>Tüm Soruları Görüntüle</span>
+              <span>{c.forumViewAll}</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
         </div>
       </section>
 
-      {/* ASYMMETRIC BENTO GRID - Main Features */}
+      {/* BENTO GRID - Features */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
         <div className="max-w-7xl mx-auto">
-          {/* Section Header */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -331,16 +324,14 @@ export default function Home() {
             className="mb-16"
           >
             <h2 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white mb-4">
-              Neler Sunuyoruz?
+              {c.featuresTitle}
             </h2>
             <p className="text-xl text-slate-600 dark:text-slate-400 font-light max-w-2xl">
-              Omurga sağlığınız için ihtiyacınız olan her şey, bir arada
+              {c.featuresDesc}
             </p>
           </motion.div>
 
-          {/* Bento Grid */}
           <div className="grid grid-cols-1 md:grid-cols-6 gap-6 auto-rows-[280px]">
-            {/* Large Card - Video Archive */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -352,7 +343,6 @@ export default function Home() {
                 to="/videolar"
                 className="relative h-full bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl overflow-hidden p-8 flex flex-col justify-end hover:scale-[1.02] transition-transform duration-500"
               >
-                {/* Background Image */}
                 <div className="absolute inset-0">
                   <ImageWithFallback
                     src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200"
@@ -362,25 +352,23 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
                 </div>
 
-                {/* Content */}
                 <div className="relative z-10">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full mb-4">
                     <Play className="w-4 h-4 text-amber-300" />
-                    <span className="text-sm font-bold text-amber-300">150+ VİDEO</span>
+                    <span className="text-sm font-bold text-amber-300">{c.cardVideoBadge}</span>
                   </div>
-                  <h3 className="text-4xl md:text-5xl font-black text-white mb-3">Video Arşivi</h3>
+                  <h3 className="text-4xl md:text-5xl font-black text-white mb-3">{c.cardVideoTitle}</h3>
                   <p className="text-lg text-slate-300 mb-6 max-w-lg">
-                    Profesyonel fizyoterapist rehberliğinde hazırlanmış egzersiz ve bilgilendirme videoları
+                    {c.cardVideoDesc}
                   </p>
                   <div className="inline-flex items-center gap-2 text-white font-bold group-hover:gap-4 transition-all">
-                    <span>Keşfet</span>
+                    <span>{c.cardVideoCta}</span>
                     <ArrowRight className="w-5 h-5" />
                   </div>
                 </div>
               </Link>
             </motion.div>
 
-            {/* Medium Card - MR Dictionary */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -401,13 +389,12 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Terim Sözlüğü</h3>
-                  <p className="text-slate-700 dark:text-slate-300 font-medium">MR raporu terimlerini anlayın</p>
+                  <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2">{c.cardGlossaryTitle}</h3>
+                  <p className="text-slate-700 dark:text-slate-300 font-medium">{c.cardGlossaryDesc}</p>
                 </div>
               </Link>
             </motion.div>
 
-            {/* Medium Card - Ask Question */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -428,13 +415,12 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Soru Sor</h3>
-                  <p className="text-slate-700 dark:text-slate-400 font-medium">Sorularınızı paylaşın</p>
+                  <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2">{c.cardAskTitle}</h3>
+                  <p className="text-slate-700 dark:text-slate-400 font-medium">{c.cardAskDesc}</p>
                 </div>
               </Link>
             </motion.div>
 
-            {/* Wide Card - Blog */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -453,8 +439,8 @@ export default function Home() {
                 </div>
                 <div className="relative w-full flex items-end justify-between">
                   <div>
-                    <h3 className="text-3xl font-black text-white mb-2">Blog & Makaleler</h3>
-                    <p className="text-slate-300 font-medium">Güncel sağlık bilgileri</p>
+                    <h3 className="text-3xl font-black text-white mb-2">{c.cardBlogTitle}</h3>
+                    <p className="text-slate-300 font-medium">{c.cardBlogDesc}</p>
                   </div>
                   <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-amber-600 transition-colors duration-300">
                     <ArrowRight className="w-6 h-6 text-white" />
@@ -463,7 +449,6 @@ export default function Home() {
               </Link>
             </motion.div>
 
-            {/* Medium Card - Profile */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -481,10 +466,10 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="relative w-full">
-                  <h3 className="text-3xl font-black text-white mb-2">Hesap Oluştur</h3>
-                  <p className="text-amber-100 font-medium mb-4">Tüm özelliklere erişim</p>
+                  <h3 className="text-3xl font-black text-white mb-2">{c.cardAccountTitle}</h3>
+                  <p className="text-amber-100 font-medium mb-4">{c.cardAccountDesc}</p>
                   <div className="inline-flex items-center gap-2 text-white font-bold">
-                    <span>Başla</span>
+                    <span>{c.cardAccountCta}</span>
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
@@ -494,7 +479,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* WHY US - Large Typography Section */}
+      {/* WHY US */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -505,25 +490,19 @@ export default function Home() {
               transition={{ duration: 0.8 }}
             >
               <span className="inline-block px-4 py-2 bg-amber-100 text-amber-900 font-bold rounded-full mb-6 text-sm uppercase tracking-wide">
-                Neden Omurgam?
+                {c.whyBadge}
               </span>
               <h2 className="text-5xl md:text-6xl font-black text-slate-900 mb-6 leading-tight">
-                Bilimsel ve<br />
+                {c.whyTitleLine1}<br />
                 <span className="bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
-                  Güvenilir İçerik
+                  {c.whyTitleHighlight}
                 </span>
               </h2>
               <p className="text-xl text-slate-600 leading-relaxed mb-8">
-                Prof. Dr. Defne Kaya Utlu'nun akademik bilgi birikimi ve klinik deneyimiyle hazırlanmış, 
-                Sağlık Bakanlığı prosedürlerine uygun bilgilendirme içerikleri.
+                {c.whyDesc}
               </p>
               <div className="space-y-4">
-                {[
-                  'Fizyoterapi profesörü tarafından hazırlanmış içerikler',
-                  'Bilimsel araştırmalara dayalı bilgiler',
-                  'Sağlık Bakanlığı prosedürlerine uygun',
-                  'Sürekli güncellenen video arşivi'
-                ].map((item, i) => (
+                {(c.whyItems || []).map((item, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, x: -20 }}
@@ -551,7 +530,7 @@ export default function Home() {
               <div className="relative rounded-3xl overflow-hidden">
                 <ImageWithFallback
                   src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800"
-                  alt="Prof. Dr. Defne Kaya Utlu"
+                  alt={c.whyCardName}
                   className="w-full h-[600px] object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
@@ -562,8 +541,8 @@ export default function Home() {
                         <Heart className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h4 className="text-lg font-black text-slate-900 mb-1">Prof. Dr. Defne Kaya Utlu</h4>
-                        <p className="text-sm text-slate-600">Fizyoterapi Profesörü</p>
+                        <h4 className="text-lg font-black text-slate-900 mb-1">{c.whyCardName}</h4>
+                        <p className="text-sm text-slate-600">{c.whyCardRole}</p>
                       </div>
                     </div>
                   </div>
@@ -574,9 +553,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA - Final Push */}
+      {/* CTA */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 to-slate-800 relative overflow-hidden">
-        {/* Background Elements */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500 rounded-full blur-3xl"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500 rounded-full blur-3xl"></div>
@@ -590,11 +568,10 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             <h2 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
-              Omurga Sağlığınız<br />
-              İçin İlk Adım
+              {c.ctaTitle}
             </h2>
             <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto">
-              Hemen üye olun, video arşivine erişin ve omurga sağlığınız hakkında bilgi edinin
+              {c.ctaDesc}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -602,7 +579,7 @@ export default function Home() {
                 className="group px-10 py-5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-amber-500/50 transition-all hover:scale-105"
               >
                 <div className="flex items-center gap-3">
-                  <span>Ücretsiz Kayıt Ol</span>
+                  <span>{c.ctaPrimary}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
@@ -610,21 +587,19 @@ export default function Home() {
                 to="/videolar"
                 className="px-10 py-5 bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white rounded-2xl font-bold text-lg hover:bg-white/20 transition-all"
               >
-                Videoları İncele
+                {c.ctaSecondary}
               </Link>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* DISCLAIMER - Important Legal */}
+      {/* DISCLAIMER */}
       <section className="py-12 px-4 bg-amber-50 border-t border-amber-200">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-sm text-slate-700 leading-relaxed">
-            <strong className="font-bold text-slate-900">ÖNEMLİ:</strong> Bu platform yalnızca bilgilendirme amaçlıdır. 
-            Burada yer alan bilgiler tıbbi teşhis, tedavi veya reçete yerine geçmez. 
-            Sağlık sorunlarınız için mutlaka hekiminize danışın. 
-            Prof. Dr. Defne Kaya Utlu fizyoterapi profesörü olup, tıbbi tedavi uygulamaz.
+            <strong className="font-bold text-slate-900">{disclaimerParts.head}</strong>
+            {disclaimerParts.rest}
           </p>
         </div>
       </section>

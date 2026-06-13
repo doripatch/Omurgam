@@ -1,57 +1,44 @@
 import { create } from 'zustand';
 import { siteSettingsAPI } from '../lib/api';
+import { DEFAULT_CONTENT, type SiteContent } from '../lib/defaultContent';
 
-export interface SiteSettings {
-  // Genel Ayarlar
-  siteName: string;
-  siteTagline: string;
-  logoText: string;
-  
-  // İletişim Bilgileri
-  email: string;
-  phone: string;
-  address: string;
-  
-  // Sosyal Medya
-  instagram: string;
-  youtube: string;
-  linkedin: string;
-  facebook: string;
-  twitter: string;
-  
-  // Ana Sayfa
-  heroTitle: string;
-  heroSubtitle: string;
-  heroDescription: string;
-  
-  // Hakkımda
-  aboutTitle: string;
-  aboutContent: string;
-  
-  // Footer
-  footerAbout: string;
-  footerDisclaimer: string;
-  footerCopyright: string;
-  
-  // Yasal Sayfalar
-  privacyPolicy: string;
-  termsOfService: string;
-  
-  // SEO
-  metaDescription: string;
-  metaKeywords: string;
+// Geriye dönük uyumluluk: eski SiteSettings tipi yerine artık tam içerik tipi kullanılıyor
+export type SiteSettings = SiteContent;
+
+// İç içe nesneleri güvenli şekilde birleştiren yardımcı (varsayılan + kaydedilen)
+function isPlainObject(v: any): v is Record<string, any> {
+  return v && typeof v === 'object' && !Array.isArray(v);
+}
+
+function deepMerge<T>(base: T, override: any): T {
+  if (!isPlainObject(base)) {
+    return (override === undefined ? base : override) as T;
+  }
+  const result: any = Array.isArray(base) ? [...(base as any)] : { ...base };
+  if (!isPlainObject(override)) return result;
+  for (const key of Object.keys(override)) {
+    const o = override[key];
+    if (o === undefined || o === null) continue;
+    if (isPlainObject((base as any)[key]) && isPlainObject(o)) {
+      result[key] = deepMerge((base as any)[key], o);
+    } else {
+      result[key] = o;
+    }
+  }
+  return result;
 }
 
 interface SiteSettingsStore {
-  settings: SiteSettings | null;
+  settings: SiteContent;
   isLoading: boolean;
   error: string | null;
   fetchSettings: () => Promise<void>;
-  updateSettings: (settings: Partial<SiteSettings>) => Promise<void>;
+  updateSettings: (settings: Partial<SiteContent> | Record<string, any>) => Promise<void>;
 }
 
 export const useSiteSettingsStore = create<SiteSettingsStore>((set, get) => ({
-  settings: null,
+  // Başlangıçta tam varsayılan içerik -> site hiçbir zaman boş görünmez
+  settings: DEFAULT_CONTENT,
   isLoading: false,
   error: null,
 
@@ -59,29 +46,32 @@ export const useSiteSettingsStore = create<SiteSettingsStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const data = await siteSettingsAPI.get();
-      set({ settings: data, isLoading: false });
+      // Kaydedilen değerleri varsayılanların üzerine yaz (eksik alanlar varsayılanla dolar)
+      set({ settings: deepMerge(DEFAULT_CONTENT, data), isLoading: false });
     } catch (error) {
       console.error('Error fetching site settings:', error);
-      set({ 
-        error: error instanceof Error ? error.message : 'Unknown error', 
-        isLoading: false 
+      // Hata olsa bile varsayılanlarla devam et
+      set({
+        error: error instanceof Error ? error.message : 'Unknown error',
+        isLoading: false,
       });
     }
   },
 
-  updateSettings: async (newSettings: Partial<SiteSettings>) => {
+  updateSettings: async (newSettings) => {
     set({ isLoading: true, error: null });
     try {
-      const currentSettings = get().settings || {};
-      const updatedSettings = { ...currentSettings, ...newSettings };
-      const data = await siteSettingsAPI.update(updatedSettings);
-      set({ settings: data, isLoading: false });
+      const current = get().settings;
+      const merged = deepMerge(current, newSettings);
+      const data = await siteSettingsAPI.update(merged);
+      set({ settings: deepMerge(DEFAULT_CONTENT, data), isLoading: false });
     } catch (error) {
       console.error('Error updating site settings:', error);
-      set({ 
-        error: error instanceof Error ? error.message : 'Unknown error', 
-        isLoading: false 
+      set({
+        error: error instanceof Error ? error.message : 'Unknown error',
+        isLoading: false,
       });
+      throw error;
     }
   },
 }));

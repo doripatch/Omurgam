@@ -330,7 +330,7 @@ export default function Root() {
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Hızlı Erişim</h4>
+              <h4 className="font-semibold mb-4">{settings?.footer?.quickLinksTitle || 'Hızlı Erişim'}</h4>
               <ul className="space-y-2 text-sm text-slate-300">
                 <li><Link to="/hakkimizda" className="hover:text-amber-300 transition-colors">Hakkımızda</Link></li>
                 <li><Link to="/videolar" className="hover:text-amber-300 transition-colors">Video Arşivi</Link></li>
@@ -343,7 +343,7 @@ export default function Root() {
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Bilgi</h4>
+              <h4 className="font-semibold mb-4">{settings?.footer?.infoTitle || 'Bilgi'}</h4>
               <ul className="space-y-2 text-sm text-slate-300">
                 <li><Link to="/iletisim" className="hover:text-amber-300 transition-colors">İletişim</Link></li>
                 <li><Link to="/gizlilik" className="hover:text-amber-300 transition-colors">Gizlilik Politikası</Link></li>
@@ -352,7 +352,7 @@ export default function Root() {
               
               {/* Sosyal Medya */}
               <div className="mt-6">
-                <h4 className="font-semibold mb-3">Takip Edin</h4>
+                <h4 className="font-semibold mb-3">{settings?.footer?.followTitle || 'Takip Edin'}</h4>
                 <div className="flex gap-3">
                   {settings?.instagram && (
                     <a 

@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
-import { Video, MessageSquare, FileText, Users, TrendingUp, Eye, Clock, CheckCircle, Brain, Settings, BookOpen } from 'lucide-react';
+import { Video, MessageSquare, FileText, Users, TrendingUp, Eye, Clock, CheckCircle, Brain, Settings, BookOpen, HelpCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { videosAPI, questionsAPI, blogAPI, adminAPI, termsAPI, medicalTermsAPI } from '../../lib/api';
+import { videosAPI, questionsAPI, blogAPI, adminAPI, termsAPI, medicalTermsAPI, faqAPI } from '../../lib/api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -11,6 +11,7 @@ export default function AdminDashboard() {
     users: 0,
     mrTerms: 0,
     medicalTerms: 0,
+    faqCount: 0,
     totalViews: 0,
     answeredQuestions: 0,
   });
@@ -26,13 +27,14 @@ export default function AdminDashboard() {
       setIsLoading(true);
       
       // Load all data in parallel
-      const [videosData, questionsData, blogData, usersData, termsData, medicalTermsData] = await Promise.all([
+      const [videosData, questionsData, blogData, usersData, termsData, medicalTermsData, faqData] = await Promise.all([
         videosAPI.getAll(),
         questionsAPI.getAll(),
         blogAPI.getAll(),
         adminAPI.getUsers().catch(() => ({ users: [] })),
         termsAPI.getAll().catch(() => ({ terms: [] })),
-        medicalTermsAPI.getAll().catch(() => ({ terms: [] }))
+        medicalTermsAPI.getAll().catch(() => ({ terms: [] })),
+        faqAPI.getAll().catch(() => ({ items: [] }))
       ]);
 
       setStats({
@@ -42,6 +44,7 @@ export default function AdminDashboard() {
         users: usersData.users?.length || 0,
         mrTerms: termsData.terms?.length || 0,
         medicalTerms: medicalTermsData.terms?.length || 0,
+        faqCount: faqData.items?.length || 0,
         totalViews: videosData.videos?.reduce((acc: number, video: any) => acc + video.views, 0) || 0,
         answeredQuestions: questionsData.questions?.filter((q: any) => q.isAnswered).length || 0,
       });
@@ -99,6 +102,14 @@ export default function AdminDashboard() {
       icon: BookOpen,
       color: 'from-amber-500 to-orange-600',
       link: '/admin/saglik-sozlugu'
+    },
+    {
+      title: 'SSS Soruları',
+      value: stats.faqCount.toString(),
+      change: `${stats.faqCount} soru`,
+      icon: HelpCircle,
+      color: 'from-sky-500 to-blue-600',
+      link: '/admin/sss'
     },
     {
       title: 'Kayıtlı Kullanıcı',
@@ -270,6 +281,19 @@ export default function AdminDashboard() {
                 <div className="flex-1">
                   <div className="font-semibold text-slate-900">Sağlık Sözlüğü</div>
                   <div className="text-xs text-slate-600">{stats.medicalTerms} terim</div>
+                </div>
+              </Link>
+
+              <Link
+                to="/admin/sss"
+                className="flex items-center gap-3 p-4 bg-gradient-to-br from-sky-50 to-blue-50 rounded-2xl hover:shadow-md transition-all"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-blue-600 rounded-xl flex items-center justify-center">
+                  <HelpCircle className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-slate-900">SSS Yönet</div>
+                  <div className="text-xs text-slate-600">{stats.faqCount} soru</div>
                 </div>
               </Link>
 

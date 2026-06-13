@@ -26,6 +26,7 @@ import AdminQuestions from "./pages/admin/Questions";
 import AdminBlog from "./pages/admin/Blog";
 import AdminTerms from "./pages/admin/Terms";
 import AdminMedicalTerms from "./pages/admin/MedicalTerms";
+import AdminFAQ from "./pages/admin/FAQ";
 import AdminUsers from "./pages/admin/Users";
 import AdminSiteSettings from "./pages/admin/SiteSettings";
 import NotFound from "./pages/NotFound";
@@ -61,6 +62,7 @@ export const router = createBrowserRouter([
       { path: "admin/blog", Component: AdminBlog },
       { path: "admin/kosullar", Component: AdminTerms },
       { path: "admin/saglik-sozlugu", Component: AdminMedicalTerms },
+      { path: "admin/sss", Component: AdminFAQ },
       { path: "admin/kullanicilar", Component: AdminUsers },
       { path: "admin/site-ayarlari", Component: AdminSiteSettings },
       { path: "*", Component: NotFound },

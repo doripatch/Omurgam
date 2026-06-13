@@ -1009,6 +1009,67 @@ app.delete("/medical-terms/:id", async (c) => {
 });
 
 // ========================================
+// SSS (SIKÇA SORULAN SORULAR) ENDPOINTS
+// KV prefix: faq_
+// ========================================
+
+app.get("/faq", async (c) => {
+  try {
+    const items = await kv.getByPrefix("faq_");
+    return c.json({ items: items || [] });
+  } catch (error) {
+    return c.json({ error: "Failed to fetch faq" }, 500);
+  }
+});
+
+app.get("/faq/:id", async (c) => {
+  try {
+    const id = cleanId(c.req.param("id"));
+    const item = await kv.get(`faq_${id}`);
+    if (!item) return c.json({ error: "FAQ not found" }, 404);
+    return c.json(item);
+  } catch (error) {
+    return c.json({ error: "Failed to fetch faq item" }, 500);
+  }
+});
+
+app.post("/faq", async (c) => {
+  try {
+    const body = await c.req.json();
+    const id = body.id ? cleanId(body.id) : crypto.randomUUID();
+    const item = { ...body, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    await kv.set(`faq_${id}`, item);
+    return c.json(item);
+  } catch (error) {
+    return c.json({ error: "Failed to create faq item" }, 500);
+  }
+});
+
+app.put("/faq/:id", async (c) => {
+  try {
+    const id = cleanId(c.req.param("id"));
+    const body = await c.req.json();
+    const existing = await kv.get(`faq_${id}`);
+    if (!existing) return c.json({ error: "FAQ not found" }, 404);
+    const updated = { ...existing, ...body, id, updatedAt: new Date().toISOString() };
+    await kv.set(`faq_${id}`, updated);
+    return c.json(updated);
+  } catch (error) {
+    return c.json({ error: "Failed to update faq item" }, 500);
+  }
+});
+
+app.delete("/faq/:id", async (c) => {
+  try {
+    const id = cleanId(c.req.param("id"));
+    await kv.del(`faq_${id}`);
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to delete faq item" }, 500);
+  }
+});
+
+// ========================================
 // ADMIN ENDPOINTS
 // ========================================
 

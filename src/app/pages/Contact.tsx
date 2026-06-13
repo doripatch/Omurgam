@@ -1,8 +1,12 @@
 import { Mail, Phone, MapPin, Send, Clock, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useSiteSettingsStore } from '../store/siteSettingsStore';
 
 export default function Contact() {
+  const settings = useSiteSettingsStore((s) => s.settings);
+  const t = settings.contact;
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -15,9 +19,8 @@ export default function Contact() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simüle edilmiş form gönderimi
     setTimeout(() => {
-      toast.success('Mesajınız alındı! En kısa sürede dönüş yapacağız.');
+      toast.success(t.successToast);
       setFormData({ name: '', email: '', subject: '', message: '' });
       setIsSubmitting(false);
     }, 1500);
@@ -30,6 +33,8 @@ export default function Contact() {
     });
   };
 
+  const telHref = `tel:${(settings.phone || '').replace(/[^+\d]/g, '')}`;
+
   return (
     <div className="w-full bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-16 px-4">
       <div className="max-w-7xl mx-auto">
@@ -37,13 +42,13 @@ export default function Contact() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-sm font-medium mb-6">
             <MessageCircle className="w-4 h-4" />
-            <span>Bize Ulaşın</span>
+            <span>{t.badge}</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-amber-800 to-orange-700 dark:from-amber-400 dark:to-orange-400 bg-clip-text text-transparent mb-4">
-            İletişim
+            {t.title}
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Sorularınız, önerileriniz veya görüşleriniz için bizimle iletişime geçebilirsiniz.
+            {t.subtitle}
           </p>
         </div>
 
@@ -55,15 +60,15 @@ export default function Contact() {
               <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center mb-4">
                 <Mail className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">E-posta</h3>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{t.emailCardTitle}</h3>
               <p className="text-slate-600 dark:text-slate-400 text-sm mb-3">
-                Bize e-posta gönderin
+                {t.emailCardDesc}
               </p>
-              <a 
-                href="mailto:info@omurgam.com" 
+              <a
+                href={`mailto:${settings.email}`}
                 className="text-amber-700 dark:text-amber-400 font-medium hover:underline"
               >
-                info@omurgam.com
+                {settings.email}
               </a>
             </div>
 
@@ -72,15 +77,15 @@ export default function Contact() {
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4">
                 <Phone className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Telefon</h3>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{t.phoneCardTitle}</h3>
               <p className="text-slate-600 dark:text-slate-400 text-sm mb-3">
-                Hafta içi 09:00 - 18:00
+                {t.phoneCardDesc}
               </p>
-              <a 
-                href="tel:+902121234567" 
+              <a
+                href={telHref}
                 className="text-amber-700 dark:text-amber-400 font-medium hover:underline"
               >
-                +90 (212) 123 45 67
+                {settings.phone}
               </a>
             </div>
 
@@ -89,11 +94,9 @@ export default function Contact() {
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-4">
                 <MapPin className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Adres</h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                İstanbul Üniversitesi Tıp Fakültesi<br />
-                Fiziksel Tıp ve Rehabilitasyon Ana Bilim Dalı<br />
-                Fatih / İstanbul
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{t.addressCardTitle}</h3>
+              <p className="text-slate-600 dark:text-slate-400 text-sm whitespace-pre-line">
+                {t.addressText}
               </p>
             </div>
 
@@ -101,20 +104,20 @@ export default function Contact() {
             <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-6 text-white shadow-lg">
               <div className="flex items-center gap-3 mb-4">
                 <Clock className="w-6 h-6" />
-                <h3 className="text-lg font-semibold">Çalışma Saatleri</h3>
+                <h3 className="text-lg font-semibold">{t.hoursTitle}</h3>
               </div>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-amber-100">Pazartesi - Cuma</span>
-                  <span className="font-medium">09:00 - 18:00</span>
+                  <span className="text-amber-100">{t.hoursWeekdayLabel}</span>
+                  <span className="font-medium">{t.hoursWeekdayValue}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-amber-100">Cumartesi</span>
-                  <span className="font-medium">09:00 - 13:00</span>
+                  <span className="text-amber-100">{t.hoursSatLabel}</span>
+                  <span className="font-medium">{t.hoursSatValue}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-amber-100">Pazar</span>
-                  <span className="font-medium">Kapalı</span>
+                  <span className="text-amber-100">{t.hoursSunLabel}</span>
+                  <span className="font-medium">{t.hoursSunValue}</span>
                 </div>
               </div>
             </div>
@@ -124,13 +127,13 @@ export default function Contact() {
           <div className="lg:col-span-2">
             <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl p-8 border border-amber-500/10 dark:border-slate-700 shadow-sm">
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
-                Mesaj Gönderin
+                {t.formTitle}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Adınız Soyadınız
+                      {t.formNameLabel}
                     </label>
                     <input
                       type="text"
@@ -144,7 +147,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      E-posta Adresiniz
+                      {t.formEmailLabel}
                     </label>
                     <input
                       type="email"
@@ -160,7 +163,7 @@ export default function Contact() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Konu
+                    {t.formSubjectLabel}
                   </label>
                   <input
                     type="text"
@@ -175,7 +178,7 @@ export default function Contact() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Mesajınız
+                    {t.formMessageLabel}
                   </label>
                   <textarea
                     name="message"
@@ -201,7 +204,7 @@ export default function Contact() {
                   ) : (
                     <>
                       <Send className="w-5 h-5" />
-                      <span>Mesajı Gönder</span>
+                      <span>{t.formButton}</span>
                     </>
                   )}
                 </button>
@@ -209,9 +212,8 @@ export default function Contact() {
 
               {/* Bilgilendirme */}
               <div className="mt-8 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
-                <p className="text-sm text-amber-800 dark:text-amber-300">
-                  <strong>Not:</strong> Mesajınız en geç 2 iş günü içerisinde yanıtlanacaktır. 
-                  Acil durumlar için lütfen telefon ile iletişime geçiniz.
+                <p className="text-sm text-amber-800 dark:text-amber-300 whitespace-pre-line">
+                  <strong>Not:</strong> {t.note}
                 </p>
               </div>
             </div>
@@ -224,11 +226,8 @@ export default function Contact() {
             <div className="aspect-video bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 rounded-xl flex items-center justify-center">
               <div className="text-center">
                 <MapPin className="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto mb-3" />
-                <p className="text-slate-600 dark:text-slate-400 font-medium">
-                  İstanbul Üniversitesi Tıp Fakültesi
-                </p>
-                <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">
-                  Harita entegrasyonu
+                <p className="text-slate-600 dark:text-slate-400 font-medium whitespace-pre-line">
+                  {t.addressText}
                 </p>
               </div>
             </div>

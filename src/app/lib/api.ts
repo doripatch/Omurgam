@@ -262,6 +262,23 @@ export const medicalTermsAPI = {
   search: (query: string) => makeRequest(`/medical-terms/search?q=${encodeURIComponent(query)}`),
 };
 
+// SSS (Sıkça Sorulan Sorular) API
+export const faqAPI = {
+  getAll: () => makeRequest('/faq'),
+  getById: (id: string) => makeRequest(`/faq/${cleanId(id)}`),
+  create: (item: any) => makeRequest('/faq', {
+    method: 'POST',
+    body: JSON.stringify(item),
+  }),
+  update: (id: string, item: any) => makeRequest(`/faq/${cleanId(id)}`, {
+    method: 'PUT',
+    body: JSON.stringify(item),
+  }),
+  delete: (id: string) => makeRequest(`/faq/${cleanId(id)}`, {
+    method: 'DELETE',
+  }),
+};
+
 // Admin API
 export const adminAPI = {
   getUsers: () => makeRequest('/admin/users'),
