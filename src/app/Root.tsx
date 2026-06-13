@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import DarkModeToggle from './components/DarkModeToggle';
 import FloatingActionButton from './components/FloatingActionButton';
 import GlobalSearch from './components/GlobalSearch';
+import CookieConsent from './components/CookieConsent';
+import { trackPageview } from './lib/analytics';
 import { useAuthStore } from './store/authStore';
 import { useSiteSettingsStore } from './store/siteSettingsStore';
 import { toast } from 'sonner';
@@ -24,6 +26,11 @@ export default function Root() {
   useEffect(() => {
     fetchSettings();
   }, [fetchSettings]);
+
+  // Sayfa geçişlerini GA'ya bildir (yalnızca çerez onayı verildiyse çalışır)
+  useEffect(() => {
+    trackPageview(location.pathname + location.search);
+  }, [location.pathname, location.search]);
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -317,6 +324,9 @@ export default function Root() {
 
       {/* Floating Action Button */}
       <FloatingActionButton />
+
+      {/* KVKK Çerez Onayı */}
+      <CookieConsent />
 
       {/* Global Search Modal */}
       <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
