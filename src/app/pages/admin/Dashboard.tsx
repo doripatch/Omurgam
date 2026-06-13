@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import { Video, MessageSquare, FileText, Users, TrendingUp, Eye, Clock, CheckCircle, Brain, Settings, BookOpen, HelpCircle, Inbox } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { videosAPI, questionsAPI, blogAPI, adminAPI, termsAPI, medicalTermsAPI, faqAPI, contactAPI } from '../../lib/api';
+import { videosAPI, questionsAPI, blogAPI, adminAPI, termsAPI, medicalTermsAPI, faqAPI, contactAPI, newsletterAPI } from '../../lib/api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -13,6 +13,7 @@ export default function AdminDashboard() {
     medicalTerms: 0,
     faqCount: 0,
     unreadMessages: 0,
+    subscribers: 0,
     totalViews: 0,
     answeredQuestions: 0,
   });
@@ -28,7 +29,7 @@ export default function AdminDashboard() {
       setIsLoading(true);
       
       // Load all data in parallel
-      const [videosData, questionsData, blogData, usersData, termsData, medicalTermsData, faqData, messagesData] = await Promise.all([
+      const [videosData, questionsData, blogData, usersData, termsData, medicalTermsData, faqData, messagesData, subscribersData] = await Promise.all([
         videosAPI.getAll(),
         questionsAPI.getAll(),
         blogAPI.getAll(),
@@ -36,7 +37,8 @@ export default function AdminDashboard() {
         termsAPI.getAll().catch(() => ({ terms: [] })),
         medicalTermsAPI.getAll().catch(() => ({ terms: [] })),
         faqAPI.getAll().catch(() => ({ items: [] })),
-        contactAPI.getAll().catch(() => ({ messages: [] }))
+        contactAPI.getAll().catch(() => ({ messages: [] })),
+        newsletterAPI.getAll().catch(() => ({ subscribers: [] }))
       ]);
 
       setStats({
@@ -48,6 +50,7 @@ export default function AdminDashboard() {
         medicalTerms: medicalTermsData.terms?.length || 0,
         faqCount: faqData.items?.length || 0,
         unreadMessages: (messagesData.messages || []).filter((m: any) => !m.read).length,
+        subscribers: subscribersData.subscribers?.length || 0,
         totalViews: videosData.videos?.reduce((acc: number, video: any) => acc + video.views, 0) || 0,
         answeredQuestions: questionsData.questions?.filter((q: any) => q.isAnswered).length || 0,
       });
@@ -121,6 +124,14 @@ export default function AdminDashboard() {
       icon: Inbox,
       color: 'from-rose-500 to-pink-600',
       link: '/admin/mesajlar'
+    },
+    {
+      title: 'Bülten Aboneleri',
+      value: stats.subscribers.toString(),
+      change: `${stats.subscribers} abone`,
+      icon: Users,
+      color: 'from-emerald-500 to-teal-600',
+      link: '/admin/aboneler'
     },
     {
       title: 'Kayıtlı Kullanıcı',

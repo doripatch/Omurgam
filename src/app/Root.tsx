@@ -6,6 +6,7 @@ import FloatingActionButton from './components/FloatingActionButton';
 import GlobalSearch from './components/GlobalSearch';
 import CookieConsent from './components/CookieConsent';
 import { trackPageview } from './lib/analytics';
+import { newsletterAPI } from './lib/api';
 import { useAuthStore } from './store/authStore';
 import { useSiteSettingsStore } from './store/siteSettingsStore';
 import { toast } from 'sonner';
@@ -13,6 +14,26 @@ import { toast } from 'sonner';
 export default function Root() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) {
+      toast.error('Lütfen e-posta adresinizi girin');
+      return;
+    }
+    setNewsletterLoading(true);
+    try {
+      const res: any = await newsletterAPI.subscribe(newsletterEmail.trim());
+      toast.success(res?.alreadySubscribed ? 'Zaten abonesiniz, teşekkürler!' : 'Bültene abone oldunuz! 🎉');
+      setNewsletterEmail('');
+    } catch (error: any) {
+      toast.error(error.message || 'Abone olunamadı, lütfen tekrar deneyin.');
+    } finally {
+      setNewsletterLoading(false);
+    }
+  };
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -354,6 +375,30 @@ export default function Root() {
               <p className="text-slate-300 mb-4 leading-relaxed">
                 {settings?.footerAbout || 'Omurga sağlığınız hakkında bilimsel bilgiler ve eğitici içerikler.'}
               </p>
+
+              {/* E-bülten aboneliği */}
+              <div className="mt-6 max-w-md">
+                <h4 className="font-semibold mb-2 text-white">Bültene Abone Olun</h4>
+                <p className="text-sm text-slate-400 mb-3">
+                  Yeni video, blog ve sağlık ipuçlarından ilk siz haberdar olun.
+                </p>
+                <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    placeholder="E-posta adresiniz"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={newsletterLoading}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold hover:shadow-lg transition-all disabled:opacity-50 whitespace-nowrap"
+                  >
+                    {newsletterLoading ? 'Gönderiliyor...' : 'Abone Ol'}
+                  </button>
+                </form>
+              </div>
             </div>
 
             <div>

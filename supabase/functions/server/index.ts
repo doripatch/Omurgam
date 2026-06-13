@@ -1106,6 +1106,54 @@ app.delete("/faq/:id", async (c) => {
 });
 
 // ========================================
+// E-BÜLTEN ABONELERİ ENDPOINTS
+// KV prefix: newsletter_
+// ========================================
+
+// Abone ol (HERKESE AÇIK)
+app.post("/newsletter", async (c) => {
+  try {
+    const body = await c.req.json();
+    const email = (body.email || '').toString().trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return c.json({ error: "Geçerli bir e-posta adresi girin" }, 400);
+    }
+    const existing = await kv.getByPrefix("newsletter_");
+    if ((existing || []).some((s: any) => s.email === email)) {
+      return c.json({ success: true, alreadySubscribed: true });
+    }
+    const id = crypto.randomUUID();
+    await kv.set(`newsletter_${id}`, { id, email, createdAt: new Date().toISOString() });
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to subscribe" }, 500);
+  }
+});
+
+// Aboneleri listele (ADMIN)
+app.get("/newsletter", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const subs = await kv.getByPrefix("newsletter_");
+    return c.json({ subscribers: subs || [] });
+  } catch (error) {
+    return c.json({ error: "Failed to fetch subscribers" }, 500);
+  }
+});
+
+// Abone sil (ADMIN)
+app.delete("/newsletter/:id", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const id = cleanId(c.req.param("id"));
+    await kv.del(`newsletter_${id}`);
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to delete subscriber" }, 500);
+  }
+});
+
+// ========================================
 // İLETİŞİM MESAJLARI ENDPOINTS
 // KV prefix: contactmsg_
 // ========================================

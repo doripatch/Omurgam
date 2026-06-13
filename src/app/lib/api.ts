@@ -256,6 +256,16 @@ export const medicalTermsAPI = {
   search: (query: string) => makeRequest(`/medical-terms/search?q=${encodeURIComponent(query)}`),
 };
 
+// E-bülten API
+export const newsletterAPI = {
+  subscribe: (email: string) => makeRequest('/newsletter', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  }),
+  getAll: () => makeRequest('/newsletter'),
+  delete: (id: string) => makeRequest(`/newsletter/${cleanId(id)}`, { method: 'DELETE' }),
+};
+
 // İletişim Mesajları API
 export const contactAPI = {
   send: (msg: { name: string; email: string; subject: string; message: string }) =>

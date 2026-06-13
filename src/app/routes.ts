@@ -27,6 +27,7 @@ import AdminTerms from "./pages/admin/Terms";
 import AdminMedicalTerms from "./pages/admin/MedicalTerms";
 import AdminFAQ from "./pages/admin/FAQ";
 import AdminMessages from "./pages/admin/Messages";
+import AdminSubscribers from "./pages/admin/Subscribers";
 import AdminUsers from "./pages/admin/Users";
 import AdminSiteSettings from "./pages/admin/SiteSettings";
 import NotFound from "./pages/NotFound";
@@ -63,6 +64,7 @@ export const router = createBrowserRouter([
       { path: "admin/saglik-sozlugu", Component: AdminMedicalTerms },
       { path: "admin/sss", Component: AdminFAQ },
       { path: "admin/mesajlar", Component: AdminMessages },
+      { path: "admin/aboneler", Component: AdminSubscribers },
       { path: "admin/kullanicilar", Component: AdminUsers },
       { path: "admin/site-ayarlari", Component: AdminSiteSettings },
       { path: "*", Component: NotFound },
