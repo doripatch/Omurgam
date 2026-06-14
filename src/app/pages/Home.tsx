@@ -110,7 +110,7 @@ export default function Home() {
         }}
       />
       {/* HERO */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 py-20">
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 pt-20 pb-36">
         <div className="absolute inset-0 opacity-[0.02]">
           <div className="absolute inset-0" style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, rgb(120, 53, 15) 1px, transparent 0)`,
@@ -129,10 +129,12 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100/80 backdrop-blur-sm rounded-full mb-8"
+              className="inline-flex items-center gap-2.5 pl-1.5 pr-5 py-1.5 bg-white/80 dark:bg-slate-800/60 backdrop-blur-md border border-amber-200/70 dark:border-slate-700 rounded-full shadow-sm mb-8"
             >
-              <Sparkles className="w-4 h-4 text-amber-700" />
-              <span className="text-sm font-bold text-amber-900 tracking-wide">{c.badge}</span>
+              <span className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-sm">
+                <Sparkles className="w-4 h-4 text-white" />
+              </span>
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 tracking-[0.08em] uppercase">{c.badge}</span>
             </motion.div>
 
             <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-black tracking-tighter mb-6 leading-[0.9]">
@@ -187,7 +189,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 1 }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2"
+          className="absolute bottom-5 left-1/2 -translate-x-1/2 hidden sm:flex"
         >
           <div className="flex flex-col items-center gap-2 text-slate-400">
             <span className="text-xs uppercase tracking-wider font-semibold">{c.scrollText}</span>
