@@ -116,8 +116,8 @@ export default function Root() {
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-4 lg:gap-5">
+            {/* Desktop Navigation - ortadaki linkler (tam genişliğe yayılır) */}
+            <nav className="hidden md:flex items-center gap-5 lg:gap-7 flex-1 justify-center">
               <Link
                 to="/videolar"
                 className={`text-sm font-medium whitespace-nowrap transition-colors ${
@@ -166,16 +166,8 @@ export default function Root() {
               >
                 Hakkımızda
               </Link>
-              <Link 
-                to="/sorular" 
-                className={`text-sm font-medium transition-colors ${
-                  isActive('/sorular') ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-400'
-                }`}
-              >
-                SSS
-              </Link>
-              <Link 
-                to="/iletisim" 
+              <Link
+                to="/iletisim"
                 className={`text-sm font-medium transition-colors ${
                   isActive('/iletisim') ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-400'
                 }`}
@@ -188,7 +180,10 @@ export default function Root() {
               >
                 Randevu
               </Link>
+            </nav>
 
+            {/* Sağ taraf araçları */}
+            <div className="hidden md:flex items-center gap-2 lg:gap-3">
               {/* Dark Mode Toggle */}
               <DarkModeToggle />
               
@@ -286,7 +281,7 @@ export default function Root() {
                   <span>Giriş / Kayıt</span>
                 </Link>
               )}
-            </nav>
+            </div>
 
             {/* Mobile Menu Button */}
             <button 
@@ -353,15 +348,6 @@ export default function Root() {
                 }`}
               >
                 Hakkımızda
-              </Link>
-              <Link 
-                to="/sorular" 
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2 text-sm font-medium ${
-                  isActive('/sorular') ? 'text-amber-700' : 'text-slate-700'
-                }`}
-              >
-                SSS
               </Link>
               <Link 
                 to="/iletisim" 

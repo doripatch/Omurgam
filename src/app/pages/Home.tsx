@@ -1,10 +1,11 @@
 import { Link } from 'react-router';
-import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, ThumbsUp, Clock } from 'lucide-react';
+import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, ThumbsUp, Clock, HelpCircle, Plus, Minus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useState, useEffect } from 'react';
 import { supabase, TABLES } from '../lib/supabase';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
+import { faqAPI } from '../lib/api';
 import Seo from '../components/Seo';
 
 interface Question {
@@ -26,6 +27,8 @@ interface Question {
 export default function Home() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
+  const [faqs, setFaqs] = useState<any[]>([]);
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
 
   // Tüm metinler buradan gelir (panelden düzenlenebilir, varsayılanlar her zaman dolu)
   const settings = useSiteSettingsStore((s) => s.settings);
@@ -33,6 +36,7 @@ export default function Home() {
 
   useEffect(() => {
     loadAnsweredQuestions();
+    faqAPI.getAll().then((d) => setFaqs(d.items || [])).catch(() => {});
   }, []);
 
   const loadAnsweredQuestions = async () => {
@@ -611,6 +615,75 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* SSS - Sıkça Sorulan Sorular */}
+      {faqs.length > 0 && (
+        <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-800">
+          <div className="max-w-3xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-bold rounded-full mb-4 text-sm uppercase tracking-wide">
+                <HelpCircle className="w-4 h-4" />
+                {settings.faq?.badge || 'Sıkça Sorulan Sorular'}
+              </span>
+              <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-4">
+                Merak Edilenler
+              </h2>
+              <p className="text-lg text-slate-600 dark:text-slate-400">
+                {settings.faq?.subtitle || 'Platform ve omurga sağlığı hakkında sık sorulan sorular'}
+              </p>
+            </motion.div>
+
+            <div className="space-y-3">
+              {faqs.slice(0, 8).map((f) => {
+                const open = openFaq === f.id;
+                return (
+                  <div
+                    key={f.id}
+                    className="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden bg-stone-50 dark:bg-slate-900/40"
+                  >
+                    <button
+                      onClick={() => setOpenFaq(open ? null : f.id)}
+                      className="w-full flex items-center justify-between gap-3 p-5 text-left"
+                    >
+                      <span className="font-semibold text-slate-900 dark:text-white">
+                        {f.icon ? `${f.icon} ` : ''}{f.question}
+                      </span>
+                      {open ? (
+                        <Minus className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                      ) : (
+                        <Plus className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                      )}
+                    </button>
+                    {open && (
+                      <div className="px-5 pb-5 -mt-1 text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+                        {f.answer}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {faqs.length > 8 && (
+              <div className="text-center mt-8">
+                <Link
+                  to="/sorular"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold hover:scale-105 transition-transform"
+                >
+                  <span>Tüm Soruları Gör</span>
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* DISCLAIMER */}
       <section className="py-12 px-4 bg-amber-50 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800">
