@@ -8,10 +8,12 @@ interface MRTerm {
   id: string;
   term: string;
   explanation: string;
-  risk_level: 'low' | 'medium' | 'high';
+  risk_level: string; // 'low' | 'medium' | 'high' veya '' (risksiz/nötr terim)
   category: string;
   recommendations: string[];
 }
+
+const hasRisk = (level?: string) => level === 'low' || level === 'medium' || level === 'high';
 
 export default function MRAnalyzer() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,7 +75,7 @@ export default function MRAnalyzer() {
     }
   };
 
-  const getRiskColor = (level: 'low' | 'medium' | 'high') => {
+  const getRiskColor = (level: string) => {
     switch (level) {
       case 'low':
         return 'from-emerald-500 to-green-500';
@@ -81,10 +83,12 @@ export default function MRAnalyzer() {
         return 'from-amber-500 to-orange-500';
       case 'high':
         return 'from-red-500 to-rose-500';
+      default:
+        return 'from-amber-600 to-orange-600'; // nötr terim (marka rengi)
     }
   };
 
-  const getRiskIcon = (level: 'low' | 'medium' | 'high') => {
+  const getRiskIcon = (level: string) => {
     switch (level) {
       case 'low':
         return <CheckCircle className="w-8 h-8 text-white" />;
@@ -92,10 +96,12 @@ export default function MRAnalyzer() {
         return <AlertCircle className="w-8 h-8 text-white" />;
       case 'high':
         return <AlertTriangle className="w-8 h-8 text-white" />;
+      default:
+        return <Info className="w-8 h-8 text-white" />; // nötr terim
     }
   };
 
-  const getRiskText = (level: 'low' | 'medium' | 'high') => {
+  const getRiskText = (level: string) => {
     switch (level) {
       case 'low':
         return 'Düşük Risk';
@@ -103,6 +109,8 @@ export default function MRAnalyzer() {
         return 'Orta Risk';
       case 'high':
         return 'Yüksek Risk';
+      default:
+        return '';
     }
   };
 
@@ -204,14 +212,16 @@ export default function MRAnalyzer() {
                           {selectedTerm.category}
                         </span>
                       </div>
-                      <div className="text-left sm:text-right">
-                        <div className="text-xs md:text-sm text-slate-500 mb-1">Risk Seviyesi</div>
-                        <div className={`text-xl md:text-2xl font-bold bg-gradient-to-r ${getRiskColor(selectedTerm.risk_level)} bg-clip-text text-transparent`}>
-                          {getRiskText(selectedTerm.risk_level)}
+                      {hasRisk(selectedTerm.risk_level) && (
+                        <div className="text-left sm:text-right">
+                          <div className="text-xs md:text-sm text-slate-500 mb-1">Risk Seviyesi</div>
+                          <div className={`text-xl md:text-2xl font-bold bg-gradient-to-r ${getRiskColor(selectedTerm.risk_level)} bg-clip-text text-transparent`}>
+                            {getRiskText(selectedTerm.risk_level)}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
-                    <p className="text-base md:text-lg text-slate-700 leading-relaxed">
+                    <p className="text-base md:text-lg text-slate-700 leading-relaxed whitespace-pre-line">
                       {selectedTerm.explanation}
                     </p>
                     <div className="mt-4">
@@ -222,26 +232,28 @@ export default function MRAnalyzer() {
               </div>
             </div>
 
-            {/* Recommendations Card */}
-            <div className="backdrop-blur-xl bg-white/80 border border-teal-200/30 rounded-2xl md:rounded-3xl p-4 md:p-8">
-              <div className="flex items-center gap-3 mb-4 md:mb-6">
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-100 to-emerald-100 rounded-2xl flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-teal-600" />
-                </div>
-                <h3 className="text-lg md:text-2xl font-bold text-slate-900">Öneriler ve Tedavi Yaklaşımı</h3>
-              </div>
-              <div className="grid sm:grid-cols-2 gap-3 md:gap-4">
-                {(selectedTerm.recommendations || []).map((rec, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-3 p-3 md:p-4 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-xl md:rounded-2xl"
-                  >
-                    <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-teal-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm md:text-base text-slate-700">{rec}</span>
+            {/* Recommendations Card — sadece öneri varsa göster */}
+            {selectedTerm.recommendations && selectedTerm.recommendations.length > 0 && (
+              <div className="backdrop-blur-xl bg-white/80 border border-teal-200/30 rounded-2xl md:rounded-3xl p-4 md:p-8">
+                <div className="flex items-center gap-3 mb-4 md:mb-6">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-100 to-emerald-100 rounded-2xl flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-teal-600" />
                   </div>
-                ))}
+                  <h3 className="text-lg md:text-2xl font-bold text-slate-900">Öneriler ve Tedavi Yaklaşımı</h3>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3 md:gap-4">
+                  {selectedTerm.recommendations.map((rec, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 p-3 md:p-4 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-xl md:rounded-2xl"
+                    >
+                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-teal-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm md:text-base text-slate-700">{rec}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Warning Card */}
             <div className="backdrop-blur-xl bg-amber-50/80 border border-amber-200 rounded-2xl md:rounded-3xl p-4 md:p-6">
@@ -279,9 +291,11 @@ export default function MRAnalyzer() {
                   <p className="text-slate-600 mb-3 line-clamp-2 text-sm md:text-base">{term.explanation}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-xs md:text-sm text-slate-500">{term.category}</span>
-                    <span className={`text-xs md:text-sm font-semibold bg-gradient-to-r ${getRiskColor(term.risk_level)} bg-clip-text text-transparent`}>
-                      {getRiskText(term.risk_level)}
-                    </span>
+                    {hasRisk(term.risk_level) && (
+                      <span className={`text-xs md:text-sm font-semibold bg-gradient-to-r ${getRiskColor(term.risk_level)} bg-clip-text text-transparent`}>
+                        {getRiskText(term.risk_level)}
+                      </span>
+                    )}
                   </div>
                 </button>
               ))}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, Loader2, Search, Brain } from 'lucide-react';
+import { useRef } from 'react';
+import { Plus, Edit, Trash2, Save, X, Loader2, Search, Brain, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { termsAPI } from '../../lib/api';
 import { Link } from 'react-router';
@@ -49,6 +50,49 @@ export default function AdminTerms() {
     category: CATEGORIES[0],
     recommendations: [''],
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setImporting(true);
+      const text = await file.text();
+      const arr = JSON.parse(text);
+      if (!Array.isArray(arr)) throw new Error('Dosya bir liste (JSON array) değil');
+      if (!confirm(`${arr.length} terim içe aktarılacak. Devam edilsin mi?`)) {
+        setImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
+      let ok = 0;
+      let fail = 0;
+      for (const item of arr) {
+        if (!item || !item.term) { fail++; continue; }
+        try {
+          await termsAPI.create({
+            term: item.term,
+            explanation: item.explanation || '',
+            category: item.category || 'Diğer',
+            risk_level: item.risk_level || '',
+            recommendations: Array.isArray(item.recommendations) ? item.recommendations : [],
+          });
+          ok++;
+        } catch {
+          fail++;
+        }
+      }
+      toast.success(`${ok} terim eklendi${fail ? `, ${fail} başarısız` : ''}`);
+      await loadTerms();
+    } catch (err: any) {
+      toast.error('İçe aktarma hatası: ' + (err.message || 'geçersiz dosya'));
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   useEffect(() => {
     loadTerms();
@@ -229,13 +273,30 @@ export default function AdminTerms() {
             </h1>
             <p className="text-slate-600 mt-2">Tıbbi terimleri yönetin</p>
           </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-purple-500/50 transition-all hover:scale-105 flex items-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Yeni Terim Ekle</span>
-          </button>
+          <div className="flex gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={handleImportFile}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={importing}
+              className="px-5 py-3 bg-white border-2 border-purple-200 text-purple-700 rounded-2xl font-bold hover:bg-purple-50 transition-all flex items-center gap-2 disabled:opacity-50"
+            >
+              {importing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+              <span>{importing ? 'İçe Aktarılıyor...' : 'Toplu İçe Aktar'}</span>
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-purple-500/50 transition-all hover:scale-105 flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Yeni Terim Ekle</span>
+            </button>
+          </div>
         </div>
 
         {/* Search */}
@@ -275,13 +336,15 @@ export default function AdminTerms() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-2xl font-bold text-slate-900">{term.term}</h3>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold border ${
-                          RISK_LEVEL_COLORS[term.risk_level]
-                        }`}
-                      >
-                        {RISK_LEVEL_LABELS[term.risk_level]}
-                      </span>
+                      {RISK_LEVEL_LABELS[term.risk_level] && (
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                            RISK_LEVEL_COLORS[term.risk_level]
+                          }`}
+                        >
+                          {RISK_LEVEL_LABELS[term.risk_level]}
+                        </span>
+                      )}
                       <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-bold">
                         {term.category}
                       </span>
