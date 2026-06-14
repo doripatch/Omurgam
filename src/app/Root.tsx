@@ -117,10 +117,10 @@ export default function Root() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-8">
-              <Link 
-                to="/videolar" 
-                className={`text-sm font-medium transition-colors ${
+            <nav className="hidden md:flex items-center gap-4 lg:gap-5">
+              <Link
+                to="/videolar"
+                className={`text-sm font-medium whitespace-nowrap transition-colors ${
                   isActive('/videolar') ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-400'
                 }`}
               >
@@ -256,25 +256,25 @@ export default function Root() {
                   {isAdmin && (
                     <Link
                       to="/admin"
-                      className="text-sm font-medium text-purple-600 hover:text-purple-700 flex items-center gap-1"
+                      title="Admin Paneli"
+                      className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/60 transition-colors flex items-center justify-center flex-shrink-0"
                     >
-                      <LayoutDashboard className="w-4 h-4" />
-                      Admin
+                      <LayoutDashboard className="w-5 h-5" />
                     </Link>
                   )}
                   <Link
                     to="/profil"
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors whitespace-nowrap"
+                    title={user?.name || 'Profilim'}
+                    className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-colors flex items-center justify-center flex-shrink-0"
                   >
-                    <User className="w-4 h-4 flex-shrink-0" />
-                    <span className="font-medium truncate max-w-[140px]">{user?.name || 'Profilim'}</span>
+                    <User className="w-5 h-5" />
                   </Link>
                   <button
                     onClick={handleSignout}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors whitespace-nowrap flex-shrink-0"
+                    title="Çıkış Yap"
+                    className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-red-100 hover:text-red-600 transition-colors flex items-center justify-center flex-shrink-0"
                   >
-                    <LogOut className="w-4 h-4 flex-shrink-0" />
-                    <span>Çıkış Yap</span>
+                    <LogOut className="w-5 h-5" />
                   </button>
                 </div>
               ) : (
