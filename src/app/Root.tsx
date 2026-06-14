@@ -112,7 +112,7 @@ export default function Root() {
                 <h1 className="text-xl font-bold bg-gradient-to-r from-amber-800 to-orange-700 bg-clip-text text-transparent">
                   {settings?.logoText || 'Omurgam'}
                 </h1>
-                <p className="text-xs text-slate-500 font-medium">{settings?.siteTagline || 'Prof. Dr. Defne Kaya Utlu'}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap hidden sm:block">{settings?.siteTagline || 'Prof. Dr. Defne Kaya Utlu'}</p>
               </div>
             </Link>
 
@@ -176,9 +176,9 @@ export default function Root() {
               </Link>
               <Link
                 to="/randevu"
-                className="text-sm font-semibold px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-colors whitespace-nowrap"
+                className="text-sm font-semibold px-5 py-2 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-sm hover:shadow-lg hover:shadow-amber-500/30 hover:scale-105 transition-all whitespace-nowrap"
               >
-                Randevu
+                Randevu Al
               </Link>
             </nav>
 
@@ -199,9 +199,12 @@ export default function Root() {
                   ⌘K
                 </kbd>
               </button>
-              
+
+              {/* Ayraç */}
+              <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-0.5"></div>
+
               {isAuthenticated ? (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   {/* Bildirim Zili */}
                   <div className="relative">
                     <button
