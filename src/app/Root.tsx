@@ -306,6 +306,15 @@ export default function Root() {
               >
                 Günün Terimi (Oyun)
               </Link>
+              <Link
+                to="/mit-avi"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block py-2 text-sm font-medium ${
+                  isActive('/mit-avi') ? 'text-amber-700' : 'text-slate-700'
+                }`}
+              >
+                Mit Avı (Oyun)
+              </Link>
               <Link 
                 to="/hakkimizda" 
                 onClick={() => setMobileMenuOpen(false)}
@@ -432,6 +441,7 @@ export default function Root() {
                 <li><Link to="/mr-analiz" className="hover:text-amber-300 transition-colors">MR Terim Sözlüğü</Link></li>
                 <li><Link to="/saglik-sozlugu" className="hover:text-amber-300 transition-colors">Sağlık Sözlüğü</Link></li>
                 <li><Link to="/gunun-terimi" className="hover:text-amber-300 transition-colors">Günün Terimi (Oyun)</Link></li>
+                <li><Link to="/mit-avi" className="hover:text-amber-300 transition-colors">Mit Avı (Oyun)</Link></li>
                 <li><Link to="/randevu" className="hover:text-amber-300 transition-colors">Randevu / Danışma</Link></li>
                 <li><Link to="/soru-sor" className="hover:text-amber-300 transition-colors">Soru Sor</Link></li>
                 <li><Link to="/sorular" className="hover:text-amber-300 transition-colors">Sıkça Sorulan Sorular</Link></li>

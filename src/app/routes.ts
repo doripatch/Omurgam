@@ -11,6 +11,7 @@ import Forum from "./pages/Forum";
 import MRAnalyzer from "./pages/MRAnalyzer";
 import MedicalGlossary from "./pages/MedicalGlossary";
 import WordGame from "./pages/WordGame";
+import MythGame from "./pages/MythGame";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
       { path: "mr-analiz", Component: MRAnalyzer },
       { path: "saglik-sozlugu", Component: MedicalGlossary },
       { path: "gunun-terimi", Component: WordGame },
+      { path: "mit-avi", Component: MythGame },
       { path: "hakkimizda", Component: About },
       { path: "iletisim", Component: Contact },
       { path: "randevu", Component: Appointment },

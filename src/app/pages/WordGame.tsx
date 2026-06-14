@@ -340,9 +340,14 @@ export default function WordGame() {
             <span className="inline-flex items-center gap-1 text-amber-700 font-semibold">
               <Flame className="w-4 h-4" /> Seri: {stats.currentStreak}
             </span>
-            <button onClick={() => setShowStats(true)} className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900">
+            <button onClick={() => setShowStats(true)} className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
               <BarChart3 className="w-4 h-4" /> İstatistik
             </button>
+          </div>
+          <div className="mt-3">
+            <Link to="/mit-avi" className="text-sm text-amber-700 dark:text-amber-400 font-semibold hover:underline">
+              Mit Avı oyununu da dene →
+            </Link>
           </div>
         </div>
 
