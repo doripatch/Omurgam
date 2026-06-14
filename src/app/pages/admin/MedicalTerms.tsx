@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, X, Loader2, Search, BookOpen } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Edit, Trash2, X, Loader2, Search, BookOpen, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { medicalTermsAPI } from '../../lib/api';
 import { Link } from 'react-router';
@@ -9,6 +9,10 @@ interface MedicalTerm {
   term: string;
   definition: string;
   category: string;
+  opening?: string;
+  clinicalNote?: string;
+  mistakeWrong?: string;
+  mistakeRight?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -26,6 +30,10 @@ const emptyForm = {
   term: '',
   definition: '',
   category: CATEGORIES[0],
+  opening: '',
+  clinicalNote: '',
+  mistakeWrong: '',
+  mistakeRight: '',
 };
 
 export default function AdminMedicalTerms() {
@@ -37,6 +45,59 @@ export default function AdminMedicalTerms() {
   const [editingTerm, setEditingTerm] = useState<MedicalTerm | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({ ...emptyForm });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+
+  const buildPayload = () => ({
+    term: formData.term.trim(),
+    definition: formData.definition.trim(),
+    category: formData.category,
+    opening: formData.opening.trim(),
+    clinicalNote: formData.clinicalNote.trim(),
+    mistakeWrong: formData.mistakeWrong.trim(),
+    mistakeRight: formData.mistakeRight.trim(),
+  });
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setImporting(true);
+      const arr = JSON.parse(await file.text());
+      if (!Array.isArray(arr)) throw new Error('Dosya bir liste (JSON array) değil');
+      if (!confirm(`${arr.length} terim içe aktarılacak. Devam edilsin mi?`)) {
+        setImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
+      let ok = 0;
+      let fail = 0;
+      for (const item of arr) {
+        if (!item || !item.term) { fail++; continue; }
+        try {
+          await medicalTermsAPI.create({
+            term: item.term,
+            definition: item.definition || '',
+            category: item.category || 'Diğer',
+            opening: item.opening || '',
+            clinicalNote: item.clinicalNote || '',
+            mistakeWrong: item.mistakeWrong || '',
+            mistakeRight: item.mistakeRight || '',
+          });
+          ok++;
+        } catch {
+          fail++;
+        }
+      }
+      toast.success(`${ok} terim eklendi${fail ? `, ${fail} başarısız` : ''}`);
+      await loadTerms();
+    } catch (err: any) {
+      toast.error('İçe aktarma hatası: ' + (err.message || 'geçersiz dosya'));
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   useEffect(() => {
     loadTerms();
@@ -84,11 +145,7 @@ export default function AdminMedicalTerms() {
       return;
     }
     try {
-      await medicalTermsAPI.create({
-        term: formData.term.trim(),
-        definition: formData.definition.trim(),
-        category: formData.category,
-      });
+      await medicalTermsAPI.create(buildPayload());
       toast.success('Terim başarıyla eklendi!');
       setShowAddModal(false);
       resetForm();
@@ -105,6 +162,10 @@ export default function AdminMedicalTerms() {
       term: term.term,
       definition: term.definition,
       category: term.category || CATEGORIES[0],
+      opening: term.opening || '',
+      clinicalNote: term.clinicalNote || '',
+      mistakeWrong: term.mistakeWrong || '',
+      mistakeRight: term.mistakeRight || '',
     });
     setShowEditModal(true);
   };
@@ -117,11 +178,7 @@ export default function AdminMedicalTerms() {
       return;
     }
     try {
-      await medicalTermsAPI.update(editingTerm.id, {
-        term: formData.term.trim(),
-        definition: formData.definition.trim(),
-        category: formData.category,
-      });
+      await medicalTermsAPI.update(editingTerm.id, buildPayload());
       toast.success('Terim başarıyla güncellendi!');
       setShowEditModal(false);
       setEditingTerm(null);
@@ -163,16 +220,33 @@ export default function AdminMedicalTerms() {
             </h1>
             <p className="text-slate-600 mt-2">Genel tıbbi ve tedavi terimlerini yönetin</p>
           </div>
-          <button
-            onClick={() => {
-              resetForm();
-              setShowAddModal(true);
-            }}
-            className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-amber-500/50 transition-all hover:scale-105 flex items-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Yeni Terim Ekle</span>
-          </button>
+          <div className="flex gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={handleImportFile}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={importing}
+              className="px-5 py-3 bg-white border-2 border-amber-200 text-amber-700 rounded-2xl font-bold hover:bg-amber-50 transition-all flex items-center gap-2 disabled:opacity-50"
+            >
+              {importing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+              <span>{importing ? 'İçe Aktarılıyor...' : 'Toplu İçe Aktar'}</span>
+            </button>
+            <button
+              onClick={() => {
+                resetForm();
+                setShowAddModal(true);
+              }}
+              className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-amber-500/50 transition-all hover:scale-105 flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Yeni Terim Ekle</span>
+            </button>
+          </div>
         </div>
 
         {/* Search */}
@@ -301,6 +375,54 @@ export default function AdminMedicalTerms() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100">
+                  <p className="text-xs text-slate-400 mt-3 mb-1">Aşağıdaki alanlar opsiyoneldir — doldurursanız sözlükte zengin görünüm oluşturur.</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Açılış</label>
+                  <textarea
+                    value={formData.opening}
+                    onChange={(e) => setFormData({ ...formData, opening: e.target.value })}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    rows={3}
+                    placeholder="Dikkat çeken giriş cümlesi..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Klinik Pratikten Bir Not</label>
+                  <textarea
+                    value={formData.clinicalNote}
+                    onChange={(e) => setFormData({ ...formData, clinicalNote: e.target.value })}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    rows={3}
+                    placeholder="Klinik gözleminizi yansıtan kısa not..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Sık Yapılan Yanlış (❌)</label>
+                  <input
+                    type="text"
+                    value={formData.mistakeWrong}
+                    onChange={(e) => setFormData({ ...formData, mistakeWrong: e.target.value })}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    placeholder="Yaygın yanlış inanış..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Doğrusu (✅)</label>
+                  <input
+                    type="text"
+                    value={formData.mistakeRight}
+                    onChange={(e) => setFormData({ ...formData, mistakeRight: e.target.value })}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    placeholder="Doğru bilgi..."
+                  />
                 </div>
 
                 <div className="flex gap-3 pt-4">

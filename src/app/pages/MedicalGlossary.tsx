@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Search, BookOpen, Info, Tag, ChevronDown, Sparkles } from 'lucide-react';
+import { Search, BookOpen, Info, Tag, ChevronDown, Sparkles, Stethoscope, XCircle, CheckCircle2 } from 'lucide-react';
 import { medicalTermsAPI } from '../lib/api';
 import { toast } from 'sonner';
 import Seo from '../components/Seo';
@@ -10,6 +10,10 @@ interface MedicalTerm {
   term: string;
   definition: string;
   category: string;
+  opening?: string;        // Açılış
+  clinicalNote?: string;   // Klinik Pratikten Bir Not
+  mistakeWrong?: string;   // Sık Yapılan Yanlış (❌)
+  mistakeRight?: string;   // Doğrusu (✅)
   createdAt?: string;
   updatedAt?: string;
 }
@@ -237,14 +241,53 @@ export default function MedicalGlossary() {
                         </button>
 
                         {isOpen && (
-                          <div className="px-4 md:px-5 pb-5 -mt-1">
+                          <div className="px-4 md:px-5 pb-5 -mt-1 space-y-3">
+                            {/* Kısa tanım */}
                             <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-700/50 dark:to-slate-700/30 rounded-xl">
                               <Info className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                               <p className="text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">
                                 {term.definition}
                               </p>
                             </div>
-                            <div className="mt-3">
+
+                            {/* Açılış */}
+                            {term.opening && (
+                              <p className="text-slate-600 dark:text-slate-300 leading-relaxed italic border-l-4 border-amber-300 dark:border-amber-700 pl-4 whitespace-pre-line">
+                                {term.opening}
+                              </p>
+                            )}
+
+                            {/* Klinik Pratikten Bir Not */}
+                            {term.clinicalNote && (
+                              <div className="p-4 bg-teal-50 dark:bg-teal-900/20 border border-teal-200/60 dark:border-teal-800/50 rounded-xl">
+                                <div className="flex items-center gap-2 mb-2 text-teal-700 dark:text-teal-300 font-semibold text-sm">
+                                  <Stethoscope className="w-4 h-4" /> Klinik Pratikten Bir Not
+                                </div>
+                                <p className="text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">
+                                  {term.clinicalNote}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Sık Yapılan Yanlış */}
+                            {(term.mistakeWrong || term.mistakeRight) && (
+                              <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                                {term.mistakeWrong && (
+                                  <div className="flex items-start gap-2 p-3 bg-rose-50 dark:bg-rose-900/20">
+                                    <XCircle className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
+                                    <p className="text-slate-700 dark:text-slate-200">{term.mistakeWrong}</p>
+                                  </div>
+                                )}
+                                {term.mistakeRight && (
+                                  <div className="flex items-start gap-2 p-3 bg-emerald-50 dark:bg-emerald-900/20">
+                                    <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                    <p className="text-slate-700 dark:text-slate-200">{term.mistakeRight}</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            <div className="pt-1">
                               <FavoriteButton type="medterm" itemId={term.id} title={term.term} />
                             </div>
                           </div>
