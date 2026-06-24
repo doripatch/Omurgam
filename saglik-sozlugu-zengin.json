@@ -1,0 +1,191 @@
+[
+  {
+    "term": "Disk Ekstrüzyonu",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Disk içeriğinin (nükleus) dış halkayı aşarak dışarı taşması ve normal disk sınırının ötesine geçmesidir.",
+    "opening": "MR raporlarında en çok korku yaratan kelimelerden biri ekstrüzyondur. Çünkü birçok kişi bunun doğrudan ameliyat anlamına geldiğini düşünür.",
+    "clinicalNote": "Ekstrüzyon gördüğüm bazı hastalarda ağrı birkaç ay içinde belirgin şekilde azalırken, bazılarında daha yakın takip gerekebiliyor. Kararı MR değil, hastanın kliniği verir.",
+    "mistakeWrong": "Ekstrüzyon varsa mutlaka ameliyat gerekir.",
+    "mistakeRight": "Birçok ekstrüzyon zaman içinde küçülebilir ve şikayetler gerileyebilir."
+  },
+  {
+    "term": "Disk Protrüzyonu",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Diskin dış halkası sağlam kalmakla birlikte tabanın geniş olduğu, dengeli bir disk taşmasıdır.",
+    "opening": "Protrüzyon, halk arasında 'fıtık' denince akla gelenin daha hafif bir biçimidir; çoğu zaman ekstrüzyondan daha sınırlıdır.",
+    "clinicalNote": "Protrüzyon saptanan hastaların önemli bir kısmında, doğru egzersiz ve duruş düzenlemesiyle şikayetler kontrol altına alınabiliyor.",
+    "mistakeWrong": "Protrüzyon = ciddi fıtık, hareket etmemek gerekir.",
+    "mistakeRight": "Protrüzyon çoğunlukla konservatif yöntemlerle yönetilebilen bir durumdur."
+  },
+  {
+    "term": "Disk Bulging (Disk Taşması)",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Diskin tüm çevresi boyunca hafifçe dışa doğru genişlemesidir; genellikle yaşa bağlı doğal bir değişikliktir.",
+    "opening": "Bulging neredeyse herkeste bir miktar görülebilen, çoğu zaman 'normalin sınırında' kabul edilen bir bulgudur.",
+    "clinicalNote": "Bulging'i tek başına bir hastalık gibi yorumlamamaya özen gösteririm; çoğu zaman yaşla gelen olağan bir değişikliktir.",
+    "mistakeWrong": "Bulging gördüm, demek ki diskim eridi/bitti.",
+    "mistakeRight": "Bulging çoğunlukla yaşa bağlı normal bir değişikliktir, tek başına hastalık değildir."
+  },
+  {
+    "term": "Sekestrasyon (Serbest Parça)",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Fıtıklaşan disk parçasının ana diskten tamamen kopup spinal kanal içinde serbest hale gelmesidir.",
+    "opening": "Sekestrasyon kulağa en 'ağır' bulgulardan biri gibi gelir; oysa vücudun bu serbest parçayı zamanla emebildiği durumlar vardır.",
+    "clinicalNote": "İlginç biçimde, kopmuş serbest parçalar bazen bağışıklık sistemi tarafından daha hızlı küçültülebiliyor; bu yüzden her sekestrasyon hemen ameliyat demek değil.",
+    "mistakeWrong": "Kopmuş parça asla küçülmez, tek çare ameliyat.",
+    "mistakeRight": "Serbest parçalar bir bölümünde zamanla küçülebilir; karar kliniğe göre verilir."
+  },
+  {
+    "term": "Spinal Stenoz (Kanal Darlığı)",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Omurilik ve sinirlerin geçtiği spinal kanalın daralmasıdır; çoğunlukla yaşa bağlı değişikliklerle gelişir.",
+    "opening": "Stenoz, özellikle yürürken bacaklara vuran ağrı/uyuşma ile kendini gösterebilir ve hastayı en çok yürüme mesafesi kaygılandırır.",
+    "clinicalNote": "Stenozda hastanın ne kadar yürüyebildiği, MR'daki daralmanın derecesinden daha çok yol gösterici olabiliyor.",
+    "mistakeWrong": "Kanal darlığı varsa yürümeyi tamamen bırakmalıyım.",
+    "mistakeRight": "Uygun program ve duruşla yürüme mesafesi çoğu zaman korunabilir, hatta artırılabilir."
+  },
+  {
+    "term": "Foraminal Daralma",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Sinir kökünün omurgadan çıktığı kemik penceresinin (foramen) daralmasıdır.",
+    "opening": "Foraminal daralma, kola veya bacağa yayılan ağrının sık nedenlerinden biridir.",
+    "clinicalNote": "Tek bir foramende daralma görüldüğünde, şikayetin o sinirin yayıldığı bölgeyle uyumlu olup olmadığına bakarım.",
+    "mistakeWrong": "Foraminal daralma her zaman ameliyat gerektirir.",
+    "mistakeRight": "Birçok foraminal daralma egzersiz ve aktivite düzenlemesiyle yönetilebilir."
+  },
+  {
+    "term": "Spondiloz (Omurga Kireçlenmesi)",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Omurga eklemleri ve disklerinde yaşa bağlı yıpranma ve kireçlenme değişiklikleridir.",
+    "opening": "Spondiloz kelimesi raporda görününce çoğu kişi 'omurgam eridi' diye endişelenir; oysa bu büyük ölçüde yaşlanmanın doğal izidir.",
+    "clinicalNote": "Spondiloz, kırışıklık gibi düşünülebilir; herkeste bir miktar olur ve tek başına ne kadar ağrı olacağını söylemez.",
+    "mistakeWrong": "Kireçlenme = geri dönüşü olmayan, ilerleyici felç riski.",
+    "mistakeRight": "Spondiloz yaygın ve çoğunlukla iyi huylu bir yaşlanma bulgusudur."
+  },
+  {
+    "term": "Spondilolistezis (Omur Kayması)",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Bir omurun alttaki omura göre öne veya arkaya kaymasıdır; dereceye göre sınıflandırılır.",
+    "opening": "Kayma kelimesi korkutucudur ama çoğu düşük dereceli kayma stabildir ve yıllarca sorun çıkarmadan kalabilir.",
+    "clinicalNote": "Kaymanın derecesi kadar, zaman içinde ilerleyip ilerlemediği ve kliniğe yansıması benim için önemli.",
+    "mistakeWrong": "Omurum kaydı, her an daha çok kayıp felç olabilirim.",
+    "mistakeRight": "Düşük dereceli kaymaların çoğu stabildir ve egzersizle desteklenebilir."
+  },
+  {
+    "term": "Modic Değişiklikleri",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Omur gövdesi kemik iliğinde MR'da görülen, disk dejenerasyonuyla ilişkili sinyal değişiklikleridir.",
+    "opening": "Modic değişiklikleri raporda teknik bir terim olarak geçer ve hastayı 'kemiğimde bir şey mi var' diye endişelendirebilir.",
+    "clinicalNote": "Modic bulgularını her zaman tek başına ağrının kaynağı saymam; kliniğiyle birlikte değerlendiririm.",
+    "mistakeWrong": "Modic değişikliği kanser/enfeksiyon işaretidir.",
+    "mistakeRight": "Modic değişiklikleri genellikle disk yıpranmasıyla ilişkili iyi huylu bulgulardır."
+  },
+  {
+    "term": "Annüler Fissür (Halka Yırtığı)",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Diskin dış halkasındaki (annulus) küçük yırtık veya çatlaktır.",
+    "opening": "Annüler fissür, MR'da sık görülen ve çoğu zaman yaşa bağlı bir bulgudur.",
+    "clinicalNote": "Fissür saptanan birçok kişide belirgin bir şikayet olmayabiliyor; bu yüzden bulguyu tek başına abartmamaya çalışırım.",
+    "mistakeWrong": "Halkada yırtık var, diskim patlamak üzere.",
+    "mistakeRight": "Annüler fissür yaygındır ve çoğu zaman ciddi bir tehlike işareti değildir."
+  },
+  {
+    "term": "Radikülopati",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Bir sinir kökünün baskı veya tahriş nedeniyle etkilenmesi sonucu o sinirin yayıldığı bölgede ağrı, uyuşma veya güçsüzlük olmasıdır.",
+    "opening": "Radikülopati, 'bacağıma/koluma vuruyor' diye tarif edilen şikayetin tıbbi karşılığıdır.",
+    "clinicalNote": "Radikülopatide ağrının yayıldığı hat, hangi sinirin etkilendiğini anlamamda MR kadar yol gösterici olabiliyor.",
+    "mistakeWrong": "Bacağıma vuran ağrı kesin ameliyatlık demektir.",
+    "mistakeRight": "Radikülopatilerin önemli kısmı zamanla ve uygun tedaviyle geriler."
+  },
+  {
+    "term": "Miyelopati",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Omuriliğin kendisinin baskı altında kalmasıyla ortaya çıkan, denge, el becerisi ve yürüyüşü etkileyebilen durumdur.",
+    "opening": "Miyelopati, radikülopatiden farklı olarak sinir kökünü değil doğrudan omuriliği ilgilendirdiği için daha yakın takip gerektirebilir.",
+    "clinicalNote": "Miyelopati düşündüren belirtilerde (el beceriksizliği, denge kaybı) zaman daha değerli olabiliyor; bu yüzden bu bulguları ciddiye alırım.",
+    "mistakeWrong": "Miyelopati de diğer fıtıklar gibi beklenebilir.",
+    "mistakeRight": "Miyelopati belirtileri uzman değerlendirmesi ve yakın takip gerektirebilir."
+  },
+  {
+    "term": "Skolyoz",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Omurganın yana doğru ve kendi ekseninde dönerek eğrilmesidir.",
+    "opening": "Skolyoz denince akla hep ergenlik gelir; oysa erişkinlikte de gelişen ya da ilerleyen türleri vardır.",
+    "clinicalNote": "Skolyozda eğriliğin derece olarak büyüklüğü kadar, ilerleyip ilerlemediği ve kişiyi nasıl etkilediği önemli.",
+    "mistakeWrong": "Her skolyoz korse veya ameliyat gerektirir.",
+    "mistakeRight": "Birçok hafif skolyoz takip ve egzersizle yönetilir."
+  },
+  {
+    "term": "Kifoz",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Sırt bölgesinin normalden fazla öne doğru (kambur) eğrilmesidir.",
+    "opening": "Kifoz, özellikle masa başı yaşam ve duruş alışkanlıklarıyla gündeme gelen bir başlıktır.",
+    "clinicalNote": "Duruşa bağlı kifozlarda, farkındalık ve hedefli egzersizlerle belirgin iyileşme görebiliyorum.",
+    "mistakeWrong": "Kamburluk yaşlılıkta kaçınılmazdır, yapılacak bir şey yoktur.",
+    "mistakeRight": "Duruşa bağlı kifozun çoğu egzersiz ve farkındalıkla düzeltilebilir."
+  },
+  {
+    "term": "Lordoz Düzleşmesi",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Bel veya boyundaki doğal içe çukurluğun (lordoz) azalması/düzleşmesidir.",
+    "opening": "Lordoz düzleşmesi raporlarda sık geçer ve genellikle kas spazmı ya da duruşla ilişkilidir.",
+    "clinicalNote": "Düzleşmeyi çoğu zaman kalıcı bir hasar değil, o anki kas durumunun bir yansıması olarak değerlendiririm.",
+    "mistakeWrong": "Boynum/belim düzleşmiş, omurgam bozulmuş.",
+    "mistakeRight": "Lordoz düzleşmesi sıklıkla geçici ve duruş/spazmla ilişkili bir bulgudur."
+  },
+  {
+    "term": "Schmorl Nodülü",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Disk dokusunun komşu omur gövdesinin içine doğru çökmesiyle oluşan küçük girintilerdir.",
+    "opening": "Schmorl nodülü kulağa ürkütücü gelse de çoğunlukla rastlantısal ve iyi huylu bir bulgudur.",
+    "clinicalNote": "Schmorl nodüllerini çoğu zaman tek başına tedavi gerektiren bir sorun olarak görmem.",
+    "mistakeWrong": "Kemiğimin içine bir şey çökmüş, bu çok tehlikeli.",
+    "mistakeRight": "Schmorl nodülleri genellikle zararsız, rastlantısal bulgulardır."
+  },
+  {
+    "term": "Faset Eklem Artropatisi",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Omurların arkasındaki küçük eklemlerin (faset) yıpranma/kireçlenme değişiklikleridir.",
+    "opening": "Faset kaynaklı ağrı, özellikle geriye eğilince artan bel ağrısı olarak kendini gösterebilir.",
+    "clinicalNote": "Faset eklem şikayetlerinde duruş, kor güçlendirme ve aktivite düzenlemesinin çok işe yaradığını görüyorum.",
+    "mistakeWrong": "Faset kireçlenmesi ancak ameliyatla geçer.",
+    "mistakeRight": "Faset kaynaklı şikayetlerin çoğu konservatif yöntemlerle yönetilebilir."
+  },
+  {
+    "term": "Dejeneratif Disk Hastalığı",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Disklerin zamanla su içeriğini ve yüksekliğini kaybederek yıpranmasıdır.",
+    "opening": "Adında 'hastalık' geçse de bu büyük ölçüde diskin yaşlanma sürecidir.",
+    "clinicalNote": "Bu terimi gören hastalara, çoğu zaman bunun bir 'hastalık'tan çok yaşa bağlı bir süreç olduğunu anlatmaya özen gösteririm.",
+    "mistakeWrong": "Disk hastalığım var, giderek kötüleşip yatağa düşeceğim.",
+    "mistakeRight": "Dejeneratif değişiklikler yaygındır ve uygun yaşam tarzıyla iyi yönetilebilir."
+  },
+  {
+    "term": "Vertebra (Kemik İliği) Ödemi",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Omur gövdesinde MR'da görülen, iltihabi süreç, zorlanma veya kırıkla ilişkili olabilen sıvı/sinyal artışıdır.",
+    "opening": "Kemik iliği ödemi, aktif bir sürecin işareti olabileceği için kliniğiyle birlikte değerlendirilmesi gereken bir bulgudur.",
+    "clinicalNote": "Ödemin nedenini anlamak benim için önemlidir; çünkü zorlanmaya bağlı geçici bir ödemle, daha yakın takip isteyen bir tablo aynı şey değildir.",
+    "mistakeWrong": "Kemikte ödem = kesin kırık veya ciddi hastalık.",
+    "mistakeRight": "Kemik iliği ödeminin birçok iyi huylu nedeni vardır; kliniğe göre değerlendirilir."
+  },
+  {
+    "term": "Ligamentum Flavum Hipertrofisi",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Omurga kanalının arkasındaki bağın (ligamentum flavum) kalınlaşmasıdır; kanal darlığına katkıda bulunabilir.",
+    "opening": "Bu kalınlaşma, yaşa bağlı değişikliklerin bir parçası olarak stenoz tablosuna eşlik edebilir.",
+    "clinicalNote": "Ligament kalınlaşmasını tek başına değil, kanal darlığı ve hastanın yürüme şikayetiyle birlikte ele alırım.",
+    "mistakeWrong": "Bağ kalınlaşması ancak ameliyatla düzelir.",
+    "mistakeRight": "Birçok hastada egzersiz ve duruş düzenlemesiyle şikayetler kontrol altına alınabilir."
+  },
+  {
+    "term": "Siyatik (Siyatalji)",
+    "category": "MR & Omurga Terimleri",
+    "definition": "Siyatik sinir hattı boyunca, belden kalçaya ve bacağa yayılan ağrıdır; bir tanı değil bir belirtidir.",
+    "opening": "Siyatik aslında bir 'hastalık adı' değil, bele bağlı bir sinir şikayetinin yayılma biçimidir.",
+    "clinicalNote": "Siyatik şikayetiyle gelen hastaların önemli kısmında, ağrı haftalar-aylar içinde uygun programla belirgin azalabiliyor.",
+    "mistakeWrong": "Siyatik kalıcıdır, ömür boyu bu ağrıyla yaşarım.",
+    "mistakeRight": "Siyatik şikayetlerinin çoğu zamanla ve uygun tedaviyle geriler."
+  }
+]

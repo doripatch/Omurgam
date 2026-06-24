@@ -111,10 +111,8 @@ export default function Root() {
           <div className="flex justify-between items-center h-[4.5rem] gap-4">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 p-[2px] shadow-md group-hover:shadow-lg group-hover:shadow-amber-500/30 group-hover:scale-105 transition-all">
-                <div className="w-full h-full rounded-[14px] bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden">
-                  <img src="/assets/logo.svg" alt="Omurgam Logo" className="w-7 h-7 object-contain" />
-                </div>
+              <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden p-1 group-hover:shadow-md group-hover:scale-105 transition-all">
+                <img src="/assets/logo.png" alt="Omurgam Logo" className="w-full h-full object-contain" />
               </div>
               <div className="leading-tight">
                 <h1 className="text-xl font-extrabold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
@@ -395,8 +393,8 @@ export default function Root() {
           <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Heart className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg overflow-hidden p-1">
+                  <img src="/assets/logo.png" alt="Omurgam" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">{settings?.siteName || 'Omurgam'}</h3>

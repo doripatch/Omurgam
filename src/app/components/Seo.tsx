@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 
 const SITE = 'Omurgam';
 const ORIGIN = 'https://omurgam.com';
-const DEFAULT_IMAGE = `${ORIGIN}/assets/logo.svg`;
+const DEFAULT_IMAGE = `${ORIGIN}/assets/logo-og.png`;
 
 interface SeoProps {
   title?: string;

@@ -122,6 +122,24 @@ export const DEFAULT_CONTENT = {
     whyCardName: 'Prof. Dr. Defne Kaya Utlu',
     whyCardRole: 'Fizyoterapi Profesörü',
 
+    // Ana sayfa "Hakkımızda" bölümü
+    aboutTitle: 'Omurgam Hakkında',
+    aboutText: "Omurgam, Prof. Dr. Defne Kaya Utlu öncülüğünde hazırlanan, omurga sağlığı konusunda bilimsel ve anlaşılır bilgi sunan bir platformdur. Amacımız; MR raporundaki terimlerden egzersiz önerilerine, sık yapılan yanlışlardan uzman yanıtlarına kadar güvenilir bilgiyi herkes için erişilebilir kılmaktır.",
+    aboutCta: 'Daha Fazla Bilgi',
+
+    // Ana sayfa "Sözlük" tanıtım bölümü
+    glossaryTitle: 'Tıbbi Terimleri Anlayın',
+    glossaryDesc: 'MR raporunuzdaki ya da doktorunuzun kullandığı terimleri sade Türkçe açıklamalarıyla öğrenin.',
+    glossaryCta: 'Sözlüğe Göz At',
+
+    // Ana sayfa "Doğru Bilinen Yanlışlar" bölümü
+    mythsTitle: 'Doğru Bilinen Yanlışlar',
+    mythsDesc: 'Omurga sağlığı hakkında en sık karşılaşılan yanlış inanışlar ve doğruları.',
+
+    // Ana sayfa sosyal medya bölümü
+    socialTitle: 'Bizi Takip Edin',
+    socialDesc: 'Yeni içerikler ve sağlık ipuçları için sosyal medyada bize katılın.',
+
     // Final CTA bölümü
     ctaTitle: 'Omurga Sağlığınız İçin İlk Adım',
     ctaDesc: 'Hemen üye olun, video arşivine erişin ve omurga sağlığınız hakkında bilgi edinin',

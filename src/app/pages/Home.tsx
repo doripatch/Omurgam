@@ -1,11 +1,11 @@
 import { Link } from 'react-router';
-import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, ThumbsUp, Clock, HelpCircle, Plus, Minus } from 'lucide-react';
+import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, ThumbsUp, Clock, HelpCircle, Plus, Minus, BookOpen, XCircle, CheckCircle2, Instagram, Youtube, Linkedin, Facebook, Twitter } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useState, useEffect } from 'react';
 import { supabase, TABLES } from '../lib/supabase';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
-import { faqAPI } from '../lib/api';
+import { faqAPI, medicalTermsAPI } from '../lib/api';
 import Seo from '../components/Seo';
 
 interface Question {
@@ -29,6 +29,7 @@ export default function Home() {
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
   const [faqs, setFaqs] = useState<any[]>([]);
   const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const [myths, setMyths] = useState<any[]>([]);
 
   // Tüm metinler buradan gelir (panelden düzenlenebilir, varsayılanlar her zaman dolu)
   const settings = useSiteSettingsStore((s) => s.settings);
@@ -37,7 +38,14 @@ export default function Home() {
   useEffect(() => {
     loadAnsweredQuestions();
     faqAPI.getAll().then((d) => setFaqs(d.items || [])).catch(() => {});
+    medicalTermsAPI.getAll()
+      .then((d) => setMyths((d.terms || []).filter((t: any) => t.mistakeWrong && t.mistakeRight).slice(0, 3)))
+      .catch(() => {});
   }, []);
+
+  const scrollDown = () => {
+    window.scrollTo({ top: window.innerHeight * 0.9, behavior: 'smooth' });
+  };
 
   const loadAnsweredQuestions = async () => {
     try {
@@ -125,17 +133,16 @@ export default function Home() {
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
             className="text-center"
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="inline-flex items-center gap-2.5 pl-1.5 pr-5 py-1.5 bg-white/80 dark:bg-slate-800/60 backdrop-blur-md border border-amber-200/70 dark:border-slate-700 rounded-full shadow-sm mb-8"
+            <Link
+              to="/hakkimizda"
+              title="Prof. Dr. Defne Kaya Utlu — Özgeçmiş"
+              className="inline-flex items-center gap-2.5 pl-1.5 pr-5 py-1.5 bg-white/80 dark:bg-slate-800/60 backdrop-blur-md border border-amber-200/70 dark:border-slate-700 rounded-full shadow-sm mb-8 hover:border-amber-400 hover:shadow-md transition-all"
             >
               <span className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-sm">
                 <Sparkles className="w-4 h-4 text-white" />
               </span>
               <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 tracking-[0.08em] uppercase">{c.badge}</span>
-            </motion.div>
+            </Link>
 
             <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-black tracking-tighter mb-6 leading-[0.9]">
               <span className="block text-slate-900 dark:text-white">{c.title}</span>
@@ -189,9 +196,10 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 1 }}
-          className="absolute bottom-5 left-1/2 -translate-x-1/2 hidden sm:flex"
+          onClick={scrollDown}
+          className="absolute bottom-5 left-1/2 -translate-x-1/2 hidden sm:flex cursor-pointer"
         >
-          <div className="flex flex-col items-center gap-2 text-slate-400">
+          <div className="flex flex-col items-center gap-2 text-slate-400 hover:text-amber-600 transition-colors">
             <span className="text-xs uppercase tracking-wider font-semibold">{c.scrollText}</span>
             <motion.div
               animate={{ y: [0, 8, 0] }}
@@ -617,6 +625,136 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* HAKKIMIZDA (özet) */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="max-w-4xl mx-auto text-center"
+        >
+          <span className="inline-block px-4 py-2 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-bold rounded-full mb-6 text-sm uppercase tracking-wide">
+            Hakkımızda
+          </span>
+          <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-6">{c.aboutTitle}</h2>
+          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 leading-relaxed mb-8">{c.aboutText}</p>
+          <Link
+            to="/hakkimizda"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl border-2 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 font-bold hover:bg-amber-50 dark:hover:bg-slate-800 transition-all"
+          >
+            {c.aboutCta} <ArrowRight className="w-5 h-5" />
+          </Link>
+        </motion.div>
+      </section>
+
+      {/* SÖZLÜK tanıtımı */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-800">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="max-w-5xl mx-auto"
+        >
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-600 to-orange-600 text-white p-8 md:p-12">
+            <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
+            <div className="relative grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-5">
+                  <BookOpen className="w-7 h-7 text-white" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black mb-3">{c.glossaryTitle}</h2>
+                <p className="text-amber-50 text-lg leading-relaxed">{c.glossaryDesc}</p>
+              </div>
+              <div className="flex flex-col sm:flex-row md:flex-col gap-3 md:items-end">
+                <Link to="/saglik-sozlugu" className="px-6 py-3 bg-white text-amber-700 rounded-2xl font-bold text-center hover:scale-105 transition-transform">
+                  {c.glossaryCta}
+                </Link>
+                <Link to="/mr-analiz" className="px-6 py-3 bg-white/15 border border-white/30 text-white rounded-2xl font-bold text-center hover:bg-white/25 transition-colors">
+                  MR Terim Sözlüğü
+                </Link>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* DOĞRU BİLİNEN YANLIŞLAR */}
+      {myths.length > 0 && (
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
+          <div className="max-w-5xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-10"
+            >
+              <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-3">{c.mythsTitle}</h2>
+              <p className="text-lg text-slate-600 dark:text-slate-400">{c.mythsDesc}</p>
+            </motion.div>
+            <div className="grid md:grid-cols-3 gap-5">
+              {myths.map((m) => (
+                <div key={m.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6">
+                  <h3 className="font-bold text-slate-900 dark:text-white mb-4">{m.term}</h3>
+                  <div className="flex items-start gap-2 mb-3 text-sm">
+                    <XCircle className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-slate-600 dark:text-slate-300">{m.mistakeWrong}</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-slate-700 dark:text-slate-200 font-medium">{m.mistakeRight}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="text-center mt-8">
+              <Link to="/mit-avi" className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold hover:scale-105 transition-transform">
+                Mit Avı oyununu oyna <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* SOSYAL MEDYA */}
+      {(settings.instagram || settings.youtube || settings.linkedin || settings.facebook || settings.twitter) && (
+        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-2">{c.socialTitle}</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">{c.socialDesc}</p>
+            <div className="flex justify-center gap-3">
+              {settings.youtube && (
+                <a href={settings.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-red-600 hover:text-white flex items-center justify-center transition-colors">
+                  <Youtube className="w-6 h-6" />
+                </a>
+              )}
+              {settings.instagram && (
+                <a href={settings.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-gradient-to-br hover:from-purple-600 hover:to-pink-600 hover:text-white flex items-center justify-center transition-colors">
+                  <Instagram className="w-6 h-6" />
+                </a>
+              )}
+              {settings.linkedin && (
+                <a href={settings.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-colors">
+                  <Linkedin className="w-6 h-6" />
+                </a>
+              )}
+              {settings.facebook && (
+                <a href={settings.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-blue-700 hover:text-white flex items-center justify-center transition-colors">
+                  <Facebook className="w-6 h-6" />
+                </a>
+              )}
+              {settings.twitter && (
+                <a href={settings.twitter} target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-sky-500 hover:text-white flex items-center justify-center transition-colors">
+                  <Twitter className="w-6 h-6" />
+                </a>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* SSS - Sıkça Sorulan Sorular */}
       {faqs.length > 0 && (
