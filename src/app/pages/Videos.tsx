@@ -58,6 +58,10 @@ export default function Videos() {
     return matchesCategory && matchesSearch;
   });
 
+  // Öne çıkan (ilk) video + geri kalan arşiv
+  const featured = filteredVideos[0];
+  const restVideos = filteredVideos.slice(1);
+
   const handleCompleteExercise = (video: Video) => {
     // Add session to store
     addCompletedExercise({
@@ -148,9 +152,45 @@ export default function Videos() {
           </div>
         </motion.div>
 
+        {/* Öne Çıkan Video */}
+        {featured && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-10"
+          >
+            <h2 className="text-sm font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-3">Öne Çıkan Video</h2>
+            <Link to={`/video/${featured.id}`} className="group block relative rounded-3xl overflow-hidden">
+              <div className="aspect-video md:aspect-[21/9] overflow-hidden">
+                <img
+                  src={featured.thumbnailUrl || featured.thumbnail || 'https://via.placeholder.com/1200'}
+                  alt={featured.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 bg-amber-600 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                  <Play className="w-10 h-10 text-white ml-1" />
+                </div>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                <span className="inline-block px-3 py-1 bg-amber-600/90 rounded-full text-white text-xs font-bold uppercase mb-3">{featured.category}</span>
+                <h3 className="text-2xl md:text-4xl font-black text-white mb-2">{featured.title}</h3>
+                {featured.description && <p className="text-slate-200 max-w-2xl line-clamp-2">{featured.description}</p>}
+              </div>
+            </Link>
+          </motion.div>
+        )}
+
+        {/* Video Arşivi */}
+        {restVideos.length > 0 && (
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-5">Arşivdeki Diğer Videolar</h2>
+        )}
+
         {/* Video Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredVideos.map((video, index) => (
+          {restVideos.map((video, index) => (
             <motion.div
               key={video.id}
               initial={{ opacity: 0, y: 20 }}

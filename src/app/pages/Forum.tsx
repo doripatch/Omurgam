@@ -113,7 +113,7 @@ export default function Forum() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-amber-50">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background Decoration */}
@@ -128,15 +128,18 @@ export default function Forum() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="inline-block px-4 py-2 bg-teal-500/20 text-teal-700 font-bold rounded-full mb-6 text-sm uppercase tracking-wide">
+            <span className="inline-block px-4 py-2 bg-teal-500/20 text-teal-700 dark:text-teal-300 font-bold rounded-full mb-6 text-sm uppercase tracking-wide">
               Topluluk Forumu
             </span>
-            <h1 className="text-5xl md:text-7xl font-black text-slate-900 mb-6">
+            <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white mb-6">
               Soru & Cevap
             </h1>
-            <p className="text-xl md:text-2xl text-slate-600 mb-8 max-w-3xl mx-auto">
-              Yanıtlanmış soruları inceleyin ve omurga sağlığı hakkında bilgi edinin
+            <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-6 max-w-3xl mx-auto">
+              Yanıtlanmış soruları inceleyin; aradığınız cevap büyük ihtimalle burada. Bulamazsanız kendi sorunuzu sorun.
             </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-full text-sm font-medium mb-8">
+              💡 İpucu: Sormadan önce aşağıdan arayın — cevap zaten yanıtlanmış olabilir.
+            </div>
 
             {/* Quick Action Button */}
             <Link
