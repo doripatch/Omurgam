@@ -10,6 +10,7 @@ interface MedicalTerm {
   term: string;
   definition: string;
   category: string;
+  aliases?: string;        // Halk dilinde / eş anlamlılar
   opening?: string;        // Açılış
   clinicalNote?: string;   // Klinik Pratikten Bir Not
   mistakeWrong?: string;   // Sık Yapılan Yanlış (❌)
@@ -64,7 +65,8 @@ export default function MedicalGlossary() {
           ? true
           : t.term?.toLowerCase().includes(q) ||
             t.definition?.toLowerCase().includes(q) ||
-            t.category?.toLowerCase().includes(q)
+            t.category?.toLowerCase().includes(q) ||
+            t.aliases?.toLowerCase().includes(q)
       )
       .sort((a, b) => a.term.localeCompare(b.term, 'tr'));
   }, [allTerms, searchQuery, activeCategory]);

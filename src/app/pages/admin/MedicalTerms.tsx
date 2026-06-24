@@ -30,6 +30,7 @@ const emptyForm = {
   term: '',
   definition: '',
   category: CATEGORIES[0],
+  aliases: '',
   opening: '',
   clinicalNote: '',
   mistakeWrong: '',
@@ -52,6 +53,7 @@ export default function AdminMedicalTerms() {
     term: formData.term.trim(),
     definition: formData.definition.trim(),
     category: formData.category,
+    aliases: formData.aliases.trim(),
     opening: formData.opening.trim(),
     clinicalNote: formData.clinicalNote.trim(),
     mistakeWrong: formData.mistakeWrong.trim(),
@@ -79,6 +81,7 @@ export default function AdminMedicalTerms() {
             term: item.term,
             definition: item.definition || '',
             category: item.category || 'Diğer',
+            aliases: item.aliases || '',
             opening: item.opening || '',
             clinicalNote: item.clinicalNote || '',
             mistakeWrong: item.mistakeWrong || '',
@@ -162,6 +165,7 @@ export default function AdminMedicalTerms() {
       term: term.term,
       definition: term.definition,
       category: term.category || CATEGORIES[0],
+      aliases: (term as any).aliases || '',
       opening: term.opening || '',
       clinicalNote: term.clinicalNote || '',
       mistakeWrong: term.mistakeWrong || '',
@@ -375,6 +379,18 @@ export default function AdminMedicalTerms() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Halk Dilinde / Eş Anlamlılar</label>
+                  <input
+                    type="text"
+                    value={formData.aliases}
+                    onChange={(e) => setFormData({ ...formData, aliases: e.target.value })}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    placeholder="Virgülle ayırın: bel fıtığı, fıtık..."
+                  />
+                  <p className="text-xs text-slate-400 mt-1">Kullanıcılar bu kelimelerle de arayabilir.</p>
                 </div>
 
                 <div className="pt-2 border-t border-slate-100">

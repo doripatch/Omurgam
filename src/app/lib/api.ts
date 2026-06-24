@@ -278,6 +278,15 @@ export const favoritesAPI = {
   }),
 };
 
+// Banner API
+export const bannersAPI = {
+  getAll: () => makeRequest('/banners'),
+  getAllAdmin: () => makeRequest('/banners/all'),
+  create: (banner: any) => makeRequest('/banners', { method: 'POST', body: JSON.stringify(banner) }),
+  update: (id: string, banner: any) => makeRequest(`/banners/${cleanId(id)}`, { method: 'PUT', body: JSON.stringify(banner) }),
+  delete: (id: string) => makeRequest(`/banners/${cleanId(id)}`, { method: 'DELETE' }),
+};
+
 // Randevu / Danışma Talepleri API
 export const appointmentsAPI = {
   send: (data: { name: string; phone: string; email?: string; subject?: string; preferredDate?: string; message?: string }) =>

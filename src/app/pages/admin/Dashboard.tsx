@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { Video, MessageSquare, FileText, Users, TrendingUp, Eye, Clock, CheckCircle, Brain, Settings, BookOpen, HelpCircle, Inbox, CalendarCheck } from 'lucide-react';
+import { Video, MessageSquare, FileText, Users, TrendingUp, Eye, Clock, CheckCircle, Brain, Settings, BookOpen, HelpCircle, Inbox, CalendarCheck, Image as ImageIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { videosAPI, questionsAPI, blogAPI, adminAPI, termsAPI, medicalTermsAPI, faqAPI, contactAPI, newsletterAPI, appointmentsAPI } from '../../lib/api';
 
@@ -321,6 +321,19 @@ export default function AdminDashboard() {
                 <div className="flex-1">
                   <div className="font-semibold text-slate-900">SSS Yönet</div>
                   <div className="text-xs text-slate-600">{stats.faqCount} soru</div>
+                </div>
+              </Link>
+
+              <Link
+                to="/admin/bannerlar"
+                className="flex items-center gap-3 p-4 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl hover:shadow-md transition-all"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl flex items-center justify-center">
+                  <ImageIcon className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-slate-900">Bannerlar</div>
+                  <div className="text-xs text-slate-600">Ana sayfa kuşakları</div>
                 </div>
               </Link>
 

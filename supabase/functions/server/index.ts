@@ -991,7 +991,12 @@ app.get("/terms/search", async (c) => {
   try {
     const query = c.req.query("q")?.toLowerCase() || "";
     const allTerms = await kv.getByPrefix("term_");
-    const filtered = allTerms.filter((term: any) => term.term?.toLowerCase().includes(query) || term.description?.toLowerCase().includes(query));
+    const filtered = allTerms.filter((term: any) =>
+      term.term?.toLowerCase().includes(query) ||
+      term.description?.toLowerCase().includes(query) ||
+      term.explanation?.toLowerCase().includes(query) ||
+      term.aliases?.toLowerCase().includes(query)
+    );
     return c.json({ terms: filtered });
   } catch (error) {
     return c.json({ error: "Failed to search terms" }, 500);
@@ -1404,6 +1409,74 @@ app.delete("/appointments/:id", async (c) => {
     return c.json({ success: true });
   } catch (error) {
     return c.json({ error: "Failed to delete appointment" }, 500);
+  }
+});
+
+// ========================================
+// BANNER (ANA SAYFA KUŞAKLARI) ENDPOINTS
+// KV prefix: banner_
+// ========================================
+
+app.get("/banners", async (c) => {
+  try {
+    const items = await kv.getByPrefix("banner_");
+    const sorted = (items || [])
+      .filter((b: any) => b.active !== false)
+      .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+    return c.json({ banners: sorted });
+  } catch (error) {
+    return c.json({ error: "Failed to fetch banners" }, 500);
+  }
+});
+
+// Admin: tümünü (pasif dahil) getir
+app.get("/banners/all", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const items = await kv.getByPrefix("banner_");
+    const sorted = (items || []).sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+    return c.json({ banners: sorted });
+  } catch (error) {
+    return c.json({ error: "Failed to fetch banners" }, 500);
+  }
+});
+
+app.post("/banners", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const body = await c.req.json();
+    const id = body.id ? cleanId(body.id) : crypto.randomUUID();
+    const banner = { active: true, order: 0, ...body, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    await kv.set(`banner_${id}`, banner);
+    return c.json(banner);
+  } catch (error) {
+    return c.json({ error: "Failed to create banner" }, 500);
+  }
+});
+
+app.put("/banners/:id", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const id = cleanId(c.req.param("id"));
+    const existing = await kv.get(`banner_${id}`);
+    if (!existing) return c.json({ error: "Not found" }, 404);
+    const body = await c.req.json();
+    const updated = { ...existing, ...body, id, updatedAt: new Date().toISOString() };
+    await kv.set(`banner_${id}`, updated);
+    return c.json(updated);
+  } catch (error) {
+    return c.json({ error: "Failed to update banner" }, 500);
+  }
+});
+
+app.delete("/banners/:id", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const id = cleanId(c.req.param("id"));
+    await kv.del(`banner_${id}`);
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to delete banner" }, 500);
   }
 });
 

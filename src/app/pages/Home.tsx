@@ -5,7 +5,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useState, useEffect } from 'react';
 import { supabase, TABLES } from '../lib/supabase';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
-import { faqAPI, medicalTermsAPI } from '../lib/api';
+import { faqAPI, medicalTermsAPI, bannersAPI } from '../lib/api';
 import Seo from '../components/Seo';
 
 interface Question {
@@ -30,6 +30,7 @@ export default function Home() {
   const [faqs, setFaqs] = useState<any[]>([]);
   const [openFaq, setOpenFaq] = useState<string | null>(null);
   const [myths, setMyths] = useState<any[]>([]);
+  const [banners, setBanners] = useState<any[]>([]);
 
   // Tüm metinler buradan gelir (panelden düzenlenebilir, varsayılanlar her zaman dolu)
   const settings = useSiteSettingsStore((s) => s.settings);
@@ -41,7 +42,25 @@ export default function Home() {
     medicalTermsAPI.getAll()
       .then((d) => setMyths((d.terms || []).filter((t: any) => t.mistakeWrong && t.mistakeRight).slice(0, 3)))
       .catch(() => {});
+    bannersAPI.getAll().then((d) => setBanners(d.banners || [])).catch(() => {});
   }, []);
+
+  const renderBanner = (b: any) => {
+    const inner = (
+      <div className="group relative h-48 md:h-56 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all">
+        <ImageWithFallback src={b.imageUrl} alt={b.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-slate-900/30 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 p-5">
+          <h3 className="text-xl font-black text-white mb-1">{b.title}</h3>
+          {b.subtitle && <p className="text-sm text-slate-200 line-clamp-2">{b.subtitle}</p>}
+        </div>
+      </div>
+    );
+    const key = b.id;
+    if (!b.link) return <div key={key}>{inner}</div>;
+    if (b.link.startsWith('/')) return <Link key={key} to={b.link}>{inner}</Link>;
+    return <a key={key} href={b.link} target="_blank" rel="noopener noreferrer">{inner}</a>;
+  };
 
   const scrollDown = () => {
     window.scrollTo({ top: window.innerHeight * 0.9, behavior: 'smooth' });
@@ -232,6 +251,17 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* BANNERLAR */}
+      {banners.length > 0 && (
+        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
+          <div className="max-w-7xl mx-auto">
+            <div className={`grid gap-5 ${banners.length === 1 ? 'grid-cols-1' : banners.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
+              {banners.slice(0, 6).map(renderBanner)}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* FORUM / COMMUNITY QUESTIONS */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 to-slate-800">

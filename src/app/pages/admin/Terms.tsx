@@ -49,6 +49,7 @@ export default function AdminTerms() {
     risk_level: 'low' as 'low' | 'medium' | 'high',
     category: CATEGORIES[0],
     recommendations: [''],
+    aliases: '',
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -78,6 +79,7 @@ export default function AdminTerms() {
             category: item.category || 'Diğer',
             risk_level: item.risk_level || '',
             recommendations: Array.isArray(item.recommendations) ? item.recommendations : [],
+            aliases: item.aliases || '',
           });
           ok++;
         } catch {
@@ -150,6 +152,7 @@ export default function AdminTerms() {
         risk_level: formData.risk_level,
         category: formData.category,
         recommendations: validRecommendations,
+        aliases: formData.aliases,
       });
       console.log('✅ Terim eklendi!');
       toast.success('Terim başarıyla eklendi!');
@@ -170,6 +173,7 @@ export default function AdminTerms() {
       risk_level: term.risk_level,
       category: term.category,
       recommendations: (term.recommendations && term.recommendations.length > 0) ? term.recommendations : [''],
+      aliases: (term as any).aliases || '',
     });
     setShowEditModal(true);
   };
@@ -193,6 +197,7 @@ export default function AdminTerms() {
         risk_level: formData.risk_level,
         category: formData.category,
         recommendations: validRecommendations,
+        aliases: formData.aliases,
       });
       console.log('✅ Terim güncellendi!');
       toast.success('Terim başarıyla güncellendi!');
@@ -228,6 +233,7 @@ export default function AdminTerms() {
       risk_level: 'low',
       category: CATEGORIES[0],
       recommendations: [''],
+      aliases: '',
     });
   };
 
@@ -501,6 +507,18 @@ export default function AdminTerms() {
                   </div>
                 </div>
 
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Halk Dilinde / Eş Anlamlılar</label>
+                  <input
+                    type="text"
+                    value={formData.aliases}
+                    onChange={(e) => setFormData({ ...formData, aliases: e.target.value })}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Virgülle ayırın: bel fıtığı, fıtık, disk kayması"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">Kullanıcılar bu kelimelerle de arayabilir.</p>
+                </div>
+
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
@@ -641,6 +659,18 @@ export default function AdminTerms() {
                       + Öneri Ekle
                     </button>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Halk Dilinde / Eş Anlamlılar</label>
+                  <input
+                    type="text"
+                    value={formData.aliases}
+                    onChange={(e) => setFormData({ ...formData, aliases: e.target.value })}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Virgülle ayırın: bel fıtığı, fıtık, disk kayması"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">Kullanıcılar bu kelimelerle de arayabilir.</p>
                 </div>
 
                 <div className="flex gap-3 pt-4">
