@@ -33,8 +33,19 @@ export default function MedicalGlossary() {
   const [allTerms, setAllTerms] = useState<MedicalTerm[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('Tümü');
+  const [activeLetter, setActiveLetter] = useState<string>('');
   const [openId, setOpenId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Terimlerde bulunan baş harfler (A-Z indeks için)
+  const availableLetters = useMemo(() => {
+    const set = new Set<string>();
+    allTerms.forEach((t) => {
+      const ch = (t.term?.[0] || '').toLocaleUpperCase('tr');
+      if (ch) set.add(ch);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'tr'));
+  }, [allTerms]);
 
   useEffect(() => {
     loadTerms();
@@ -68,8 +79,11 @@ export default function MedicalGlossary() {
             t.category?.toLowerCase().includes(q) ||
             t.aliases?.toLowerCase().includes(q)
       )
+      .filter((t) =>
+        !activeLetter ? true : (t.term?.[0] || '').toLocaleUpperCase('tr') === activeLetter
+      )
       .sort((a, b) => a.term.localeCompare(b.term, 'tr'));
-  }, [allTerms, searchQuery, activeCategory]);
+  }, [allTerms, searchQuery, activeCategory, activeLetter]);
 
   // A-Z grupla
   const groupedTerms = useMemo(() => {
@@ -158,6 +172,35 @@ export default function MedicalGlossary() {
             </button>
           ))}
         </div>
+
+        {/* A-Z indeks */}
+        {availableLetters.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-8 justify-center">
+            <button
+              onClick={() => setActiveLetter('')}
+              className={`w-9 h-9 rounded-lg text-sm font-bold transition-all ${
+                activeLetter === ''
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-300'
+              }`}
+            >
+              Tümü
+            </button>
+            {availableLetters.map((letter) => (
+              <button
+                key={letter}
+                onClick={() => setActiveLetter(activeLetter === letter ? '' : letter)}
+                className={`w-9 h-9 rounded-lg text-sm font-bold transition-all ${
+                  activeLetter === letter
+                    ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-300 hover:text-amber-700'
+                }`}
+              >
+                {letter}
+              </button>
+            ))}
+          </div>
+        )}
 
         {isLoading ? (
           <div className="text-center py-20">

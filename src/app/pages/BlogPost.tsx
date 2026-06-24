@@ -12,6 +12,7 @@ interface BlogPostData {
   content: string;
   excerpt: string;
   category: string;
+  imageUrl?: string;
   views: number;
   published: boolean;
   created_at: string;
@@ -61,6 +62,7 @@ export default function BlogPost() {
       <Seo
         title={post?.title || 'Blog'}
         description={post?.excerpt || (post?.content ? post.content.slice(0, 155) : 'Omurga sağlığı hakkında blog yazıları.')}
+        image={post?.imageUrl}
         type="article"
         jsonLd={post ? {
           '@context': 'https://schema.org',
@@ -86,6 +88,13 @@ export default function BlogPost() {
             </div>
           ) : post ? (
             <>
+              {/* Kapak Görseli */}
+              {post.imageUrl && (
+                <div className="rounded-2xl overflow-hidden mb-8 -mt-2">
+                  <img src={post.imageUrl} alt={post.title} className="w-full max-h-96 object-cover" />
+                </div>
+              )}
+
               {/* Category Badge */}
               <div className="flex items-center gap-2 mb-4">
                 <Tag className="w-4 h-4 text-amber-600" />

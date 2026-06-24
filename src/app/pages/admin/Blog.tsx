@@ -9,6 +9,7 @@ interface BlogPost {
   content: string;
   excerpt: string;
   category: string;
+  imageUrl?: string;
   views: number;
   published: boolean;
   created_at: string;
@@ -28,6 +29,7 @@ export default function AdminBlog() {
     content: '',
     excerpt: '',
     category: 'Bel Fıtığı',
+    imageUrl: '',
     published: false,
   });
 
@@ -141,6 +143,7 @@ export default function AdminBlog() {
         content: formData.content,
         excerpt: formData.excerpt || formData.content.substring(0, 150) + '...',
         category: formData.category,
+        imageUrl: formData.imageUrl,
         published: formData.published,
       });
       console.log('✅ Blog eklendi:', result);
@@ -151,6 +154,7 @@ export default function AdminBlog() {
         content: '',
         excerpt: '',
         category: 'Bel Fıtığı',
+        imageUrl: '',
         published: false,
       });
       await loadPosts();
@@ -177,6 +181,7 @@ export default function AdminBlog() {
         content: formData.content,
         excerpt: formData.excerpt || formData.content.substring(0, 150) + '...',
         category: formData.category,
+        imageUrl: formData.imageUrl,
         published: formData.published,
       });
       console.log('✅ Blog güncellendi:', result);
@@ -187,6 +192,7 @@ export default function AdminBlog() {
         content: '',
         excerpt: '',
         category: 'Bel Fıtığı',
+        imageUrl: '',
         published: false,
       });
       await loadPosts();
@@ -366,6 +372,7 @@ export default function AdminBlog() {
                                   content: post.content,
                                   excerpt: post.excerpt,
                                   category: post.category,
+                                  imageUrl: post.imageUrl || '',
                                   published: post.published,
                                 });
                                 setShowEditModal(true);
@@ -407,6 +414,20 @@ export default function AdminBlog() {
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
                     placeholder="Örn: Bel Ağrısı İçin Egzersizler"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Kapak Görseli (URL)</label>
+                  <input
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="https://... (yazı kartında ve üstünde görünür)"
+                  />
+                  {formData.imageUrl && (
+                    <img src={formData.imageUrl} alt="önizleme" className="mt-2 h-32 w-full object-cover rounded-2xl" />
+                  )}
                 </div>
 
                 <div>
@@ -495,6 +516,20 @@ export default function AdminBlog() {
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
                     placeholder="Örn: Bel Ağrısı İçin Egzersizler"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Kapak Görseli (URL)</label>
+                  <input
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="https://... (yazı kartında ve üstünde görünür)"
+                  />
+                  {formData.imageUrl && (
+                    <img src={formData.imageUrl} alt="önizleme" className="mt-2 h-32 w-full object-cover rounded-2xl" />
+                  )}
                 </div>
 
                 <div>
