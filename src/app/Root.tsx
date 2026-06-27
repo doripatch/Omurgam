@@ -7,6 +7,7 @@ import GlobalSearch from './components/GlobalSearch';
 import CookieConsent from './components/CookieConsent';
 import { trackPageview } from './lib/analytics';
 import { newsletterAPI } from './lib/api';
+import { openCookiePreferences } from './lib/consent';
 import { useNotificationsStore } from './store/notificationsStore';
 import { useAuthStore } from './store/authStore';
 import { useSiteSettingsStore } from './store/siteSettingsStore';
@@ -500,6 +501,7 @@ export default function Root() {
                 <li><Link to="/iletisim" className="hover:text-amber-300 transition-colors">İletişim</Link></li>
                 <li><Link to="/gizlilik" className="hover:text-amber-300 transition-colors">Gizlilik Politikası</Link></li>
                 <li><Link to="/kullanim-kosullari" className="hover:text-amber-300 transition-colors">Kullanım Koşulları</Link></li>
+                <li><button onClick={openCookiePreferences} className="hover:text-amber-300 transition-colors text-left">Çerez Tercihleri</button></li>
               </ul>
               
               {/* Sosyal Medya */}

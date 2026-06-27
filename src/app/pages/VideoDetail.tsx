@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
-import { ThumbsUp, MessageSquare, Eye, ArrowLeft, Send, Trash2, Clock, Tag, Loader2 } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Eye, ArrowLeft, Send, Trash2, Clock, Tag, Loader2, Play } from 'lucide-react';
 import { toast } from 'sonner';
 import { videosAPI } from '../lib/api';
+import { getConsent, subscribeConsent, setConsent, openCookiePreferences } from '../lib/consent';
 import { useAuthStore } from '../store/authStore';
 import FavoriteButton from '../components/FavoriteButton';
 import { formatDistanceToNow } from 'date-fns';
@@ -60,6 +61,13 @@ export default function VideoDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [commentText, setCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [mediaAllowed, setMediaAllowed] = useState<boolean>(() => !!getConsent()?.media);
+
+  // Çerez (gömülü medya) onayını izle
+  useEffect(() => {
+    setMediaAllowed(!!getConsent()?.media);
+    return subscribeConsent((c) => setMediaAllowed(!!c?.media));
+  }, []);
 
   // Load video data
   useEffect(() => {
@@ -227,15 +235,44 @@ export default function VideoDetail() {
             {/* Video Player */}
             <div className="bg-white/70 backdrop-blur-xl rounded-3xl overflow-hidden shadow-xl border border-amber-500/10">
               {youtubeVideoId ? (
-                <div className="relative pt-[56.25%]">
-                  <iframe
-                    className="absolute inset-0 w-full h-full"
-                    src={`https://www.youtube.com/embed/${youtubeVideoId}?rel=0&modestbranding=1`}
-                    title={video.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
+                mediaAllowed ? (
+                  <div className="relative pt-[56.25%]">
+                    <iframe
+                      className="absolute inset-0 w-full h-full"
+                      src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}?rel=0&modestbranding=1`}
+                      title={video.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : (
+                  <div className="relative pt-[56.25%]">
+                    <div
+                      className="absolute inset-0 flex flex-col items-center justify-center text-center gap-4 p-6 bg-cover bg-center"
+                      style={video.thumbnailUrl ? { backgroundImage: `linear-gradient(rgba(15,23,42,0.82), rgba(15,23,42,0.82)), url(${video.thumbnailUrl})` } : { background: '#0f172a' }}
+                    >
+                      <Play className="w-12 h-12 text-white/90" />
+                      <p className="text-white text-sm max-w-md leading-relaxed">
+                        Bu videoyu YouTube üzerinden gösterebilmek için <strong>gömülü medya çerezlerine</strong> izin vermeniz gerekiyor.
+                        YouTube, izleme verilerinizi işleyebilir.
+                      </p>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        <button
+                          onClick={() => setConsent({ analytics: !!getConsent()?.analytics, media: true })}
+                          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 text-white text-sm font-bold hover:shadow-lg transition-all"
+                        >
+                          Videoyu Yükle
+                        </button>
+                        <button
+                          onClick={openCookiePreferences}
+                          className="px-5 py-2.5 rounded-xl border border-white/40 text-white text-sm font-semibold hover:bg-white/10 transition-colors"
+                        >
+                          Çerez Tercihleri
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )
               ) : (
                 <div className="aspect-video bg-slate-200 flex items-center justify-center">
                   <p className="text-slate-600">Geçersiz video URL</p>
