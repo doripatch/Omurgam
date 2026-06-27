@@ -132,22 +132,22 @@ export default function Root() {
       {/* Modern Header with Glassmorphism */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border-b border-amber-500/10 dark:border-slate-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-[4.5rem] gap-4">
+          <div className="flex justify-between items-center h-[4.5rem] gap-2">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-              <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden p-1 group-hover:shadow-md group-hover:scale-105 transition-all">
+            <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden p-1 group-hover:shadow-md group-hover:scale-105 transition-all">
                 <img src="/assets/logo.png" alt="Omurgam Logo" className="w-full h-full object-contain" />
               </div>
               <div className="leading-tight">
-                <h1 className="text-xl font-extrabold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
+                <h1 className="text-lg font-extrabold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
                   {settings?.logoText || 'Omurgam'}
                 </h1>
               </div>
             </Link>
 
             {/* Yüzen hap menü (ortada) */}
-            <div className="hidden xl:flex flex-1 justify-center min-w-0 px-2">
-            <nav className="flex items-center gap-0.5 bg-slate-100/70 dark:bg-slate-800/60 backdrop-blur-md rounded-full p-1 border border-white/60 dark:border-slate-700/50 shadow-sm flex-shrink-0">
+            <div className="hidden xl:flex flex-1 justify-center min-w-0 px-1">
+            <nav className="flex items-center gap-0 bg-slate-100/70 dark:bg-slate-800/60 backdrop-blur-md rounded-full p-0.5 border border-white/60 dark:border-slate-700/50 shadow-sm flex-shrink-0">
               {navItems.map((item) =>
                 item.children ? (
                   <div
@@ -157,14 +157,14 @@ export default function Root() {
                     onMouseLeave={() => setOpenMenu(null)}
                   >
                     <button
-                      className={`flex items-center gap-1 px-3 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-all duration-200 ${
+                      className={`flex items-center gap-0.5 px-2 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-all duration-200 ${
                         isChildActive(item.children) || openMenu === item.label
                           ? 'bg-white dark:bg-slate-700 text-amber-700 dark:text-amber-300 shadow-sm'
                           : 'text-slate-600 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-white/70 dark:hover:bg-slate-700/50'
                       }`}
                     >
                       {item.label}
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${openMenu === item.label ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`w-3 h-3 transition-transform ${openMenu === item.label ? 'rotate-180' : ''}`} />
                     </button>
                     {openMenu === item.label && (
                       <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 z-50">
@@ -191,7 +191,7 @@ export default function Root() {
                   <Link
                     key={item.to}
                     to={item.to!}
-                    className={`px-3 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-all duration-200 ${
+                    className={`px-2 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-all duration-200 ${
                       isActive(item.to!)
                         ? 'bg-white dark:bg-slate-700 text-amber-700 dark:text-amber-300 shadow-sm'
                         : 'text-slate-600 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-white/70 dark:hover:bg-slate-700/50'
@@ -205,11 +205,11 @@ export default function Root() {
             </div>
 
             {/* Sağ taraf araçları */}
-            <div className="hidden xl:flex items-center justify-end gap-1.5 flex-shrink-0">
+            <div className="hidden xl:flex items-center justify-end gap-1 flex-shrink-0">
               {/* Arama */}
               <button
                 onClick={() => setSearchOpen(true)}
-                className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors"
                 title="Ara (⌘K)"
               >
                 <Search className="w-[18px] h-[18px]" />
@@ -221,13 +221,13 @@ export default function Root() {
               {/* Randevu CTA */}
               <Link
                 to="/randevu"
-                className="ml-1 text-sm font-semibold px-5 py-2 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-sm hover:shadow-lg hover:shadow-amber-500/30 hover:scale-105 transition-all whitespace-nowrap"
+                className="ml-0.5 text-[13px] font-semibold px-3.5 py-2 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-sm hover:shadow-lg hover:shadow-amber-500/30 hover:scale-105 transition-all whitespace-nowrap"
               >
                 Randevu Al
               </Link>
 
               {/* Ayraç */}
-              <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1.5"></div>
+              <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
 
               {isAuthenticated ? (
                 <div className="flex items-center gap-1.5">
@@ -235,7 +235,7 @@ export default function Root() {
                   <div className="relative">
                     <button
                       onClick={() => { setNotifOpen((o) => !o); if (!notifOpen) loadNotifs(); }}
-                      className="relative w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors"
+                      className="relative w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors"
                       title="Bildirimler"
                     >
                       <Bell className="w-[18px] h-[18px]" />
@@ -281,7 +281,7 @@ export default function Root() {
                     <Link
                       to="/admin"
                       title="Admin Paneli"
-                      className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/60 transition-colors flex items-center justify-center flex-shrink-0"
+                      className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/60 transition-colors flex items-center justify-center flex-shrink-0"
                     >
                       <LayoutDashboard className="w-5 h-5" />
                     </Link>
@@ -289,14 +289,14 @@ export default function Root() {
                   <Link
                     to="/profil"
                     title={user?.name || 'Profilim'}
-                    className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white hover:shadow-md hover:shadow-amber-500/40 transition-all flex items-center justify-center flex-shrink-0"
+                    className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white hover:shadow-md hover:shadow-amber-500/40 transition-all flex items-center justify-center flex-shrink-0"
                   >
                     <User className="w-[18px] h-[18px]" />
                   </Link>
                   <button
                     onClick={handleSignout}
                     title="Çıkış Yap"
-                    className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-red-100 hover:text-red-600 transition-colors flex items-center justify-center flex-shrink-0"
+                    className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-red-100 hover:text-red-600 transition-colors flex items-center justify-center flex-shrink-0"
                   >
                     <LogOut className="w-5 h-5" />
                   </button>
