@@ -456,27 +456,31 @@ export default function About() {
             Omurgam'ı hayata geçiren ekip.
           </p>
           <div className="grid sm:grid-cols-2 gap-6">
-            <div className="flex items-center gap-4 p-5 rounded-xl bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-slate-700 dark:to-slate-600">
+            <div className="flex items-start gap-4 p-5 rounded-xl bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-slate-700 dark:to-slate-600">
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 text-white flex items-center justify-center text-lg font-bold flex-shrink-0">
                 DK
               </div>
               <div>
                 <p className="font-bold text-slate-900 dark:text-white">Prof. Dr. Defne Kaya Utlu</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Defne KAYA UTLU, Professor, PhD, PT</p>
                 <p className="text-sm text-teal-700 dark:text-teal-300 font-medium">Kurucu &amp; Bilimsel Direktör</p>
-                <p className="text-sm text-teal-600/80 dark:text-teal-400/80">Founder &amp; Scientific Director</p>
-                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Fizyoterapi Profesörü</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">Founder &amp; Scientific Director</p>
+                <p className="text-sm text-teal-700 dark:text-teal-300 font-medium">Fizyoterapi Profesörü | Kas-iskelet ve Omurga Rehabilitasyonu</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Professor of Physiotherapy | Musculoskeletal &amp; Spine Rehabilitation</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 p-5 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-700 dark:to-slate-600">
+            <div className="flex items-start gap-4 p-5 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-700 dark:to-slate-600">
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center text-lg font-bold flex-shrink-0">
                 DS
               </div>
               <div>
                 <p className="font-bold text-slate-900 dark:text-white">Fzt. Dorukhan Sayım</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Dorukhan SAYIM, PT</p>
                 <p className="text-sm text-amber-700 dark:text-amber-300 font-medium">Kurucu Ortak &amp; Teknoloji Direktörü</p>
-                <p className="text-sm text-amber-600/80 dark:text-amber-400/80">Co-Founder &amp; CTO</p>
-                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Fizyoterapist</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">Co-Founder &amp; CTO</p>
+                <p className="text-sm text-amber-700 dark:text-amber-300 font-medium">Fizyoterapist | Yazılım &amp; Ürün Geliştirme</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Physiotherapist | Software &amp; Product Development</p>
               </div>
             </div>
           </div>
