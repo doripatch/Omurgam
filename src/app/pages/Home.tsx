@@ -193,7 +193,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-600 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative flex items-center gap-3">
                   <Play className="w-5 h-5" />
-                  <span>{c.ctaVideos}</span>
+                  <span>{c.ctaVideos && c.ctaVideos !== 'Video Arşivi' ? c.ctaVideos : 'Omurgam Anlatıyor'}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
@@ -408,7 +408,7 @@ export default function Home() {
                 <div className="absolute inset-0">
                   <ImageWithFallback
                     src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200"
-                    alt="Video Arşivi"
+                    alt="Omurgam Anlatıyor"
                     className="w-full h-full object-cover opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
@@ -419,7 +419,7 @@ export default function Home() {
                     <Play className="w-4 h-4 text-amber-300" />
                     <span className="text-sm font-bold text-amber-300">{c.cardVideoBadge}</span>
                   </div>
-                  <h3 className="text-4xl md:text-5xl font-black text-white mb-3">{c.cardVideoTitle}</h3>
+                  <h3 className="text-4xl md:text-5xl font-black text-white mb-3">{c.cardVideoTitle && c.cardVideoTitle !== 'Video Arşivi' ? c.cardVideoTitle : 'Omurgam Anlatıyor'}</h3>
                   <p className="text-lg text-slate-300 mb-6 max-w-lg">
                     {c.cardVideoDesc}
                   </p>
