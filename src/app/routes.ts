@@ -48,6 +48,7 @@ export const router = createBrowserRouter([
       { path: "video/:id", Component: VideoDetail },
       { path: "blog", Component: Blog },
       { path: "saglikli-yasam", Component: Blog },
+      { path: "omurgam-ne-diyor", Component: Blog },
       { path: "kaleminden", Component: Blog },
       { path: "blog/:id", Component: BlogPost },
       { path: "klinisyenler", Component: Clinicians },

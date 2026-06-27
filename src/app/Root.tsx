@@ -35,11 +35,11 @@ export default function Root() {
         { to: '/mit-avi', label: 'Mit Avı' },
       ],
     },
-    { to: '/kaleminden', label: "Defne Hoca'nın Kaleminden" },
     {
       label: 'Omurgam Köşeleri',
       children: [
         { to: '/forum', label: 'Sizden Gelenler' },
+        { to: '/omurgam-ne-diyor', label: 'Omurgam Ne Diyor?' },
         { to: '/saglikli-yasam', label: 'Sağlıklı Yaşam' },
       ],
     },
@@ -479,8 +479,8 @@ export default function Root() {
               <h4 className="font-semibold mb-4">{settings?.footer?.quickLinksTitle || 'Hızlı Erişim'}</h4>
               <ul className="space-y-2 text-sm text-slate-300">
                 <li><Link to="/videolar" className="hover:text-amber-300 transition-colors">Video Arşivi</Link></li>
-                <li><Link to="/kaleminden" className="hover:text-amber-300 transition-colors">Defne Hoca'nın Kaleminden</Link></li>
                 <li><Link to="/forum" className="hover:text-amber-300 transition-colors">Sizden Gelenler</Link></li>
+                <li><Link to="/omurgam-ne-diyor" className="hover:text-amber-300 transition-colors">Omurgam Ne Diyor?</Link></li>
                 <li><Link to="/saglikli-yasam" className="hover:text-amber-300 transition-colors">Sağlıklı Yaşam</Link></li>
                 <li><Link to="/klinisyenler" className="hover:text-amber-300 transition-colors">Klinisyenler Buraya</Link></li>
                 <li><Link to="/mr-analiz" className="hover:text-amber-300 transition-colors">MR Terim Sözlüğü</Link></li>

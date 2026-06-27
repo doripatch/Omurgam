@@ -18,7 +18,7 @@ interface BlogPost {
 
 const BLOG_SECTIONS = [
   { value: 'saglikli-yasam', label: 'Sağlıklı Yaşam' },
-  { value: 'kaleminden', label: "Defne Hoca'nın Kaleminden" },
+  { value: 'kaleminden', label: 'Omurgam Ne Diyor? (Omurga yazıları)' },
 ];
 
 export default function AdminBlog() {
@@ -473,7 +473,7 @@ export default function AdminBlog() {
                       <option key={s.value} value={s.value}>{s.label}</option>
                     ))}
                   </select>
-                  <p className="text-xs text-slate-500 mt-1">Sağlıklı Yaşam genel yazılar; Defne Hoca'nın Kaleminden yalnızca omurga makaleleri için.</p>
+                  <p className="text-xs text-slate-500 mt-1">Sağlıklı Yaşam genel yazılar; "Omurgam Ne Diyor?" omurga ile ilgili yazılar için.</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -589,7 +589,7 @@ export default function AdminBlog() {
                       <option key={s.value} value={s.value}>{s.label}</option>
                     ))}
                   </select>
-                  <p className="text-xs text-slate-500 mt-1">Sağlıklı Yaşam genel yazılar; Defne Hoca'nın Kaleminden yalnızca omurga makaleleri için.</p>
+                  <p className="text-xs text-slate-500 mt-1">Sağlıklı Yaşam genel yazılar; "Omurgam Ne Diyor?" omurga ile ilgili yazılar için.</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

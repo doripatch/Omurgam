@@ -24,8 +24,8 @@ const SECTIONS: Record<string, { title: string; desc: string; accent: string }> 
     accent: 'emerald',
   },
   'kaleminden': {
-    title: "Defne Hoca'nın Kaleminden",
-    desc: 'Prof. Dr. Defne Kaya Utlu\'nun omurga sağlığına dair makaleleri.',
+    title: 'Omurgam Ne Diyor?',
+    desc: 'Omurga sağlığına dair bilimsel makaleler ve değerlendirmeler.',
     accent: 'amber',
   },
 };
