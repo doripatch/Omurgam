@@ -591,9 +591,9 @@ export default function Home() {
             >
               <div className="relative rounded-3xl overflow-hidden">
                 <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800"
+                  src={c.whyImage}
                   alt={c.whyCardName}
-                  className="w-full h-[600px] object-cover"
+                  className="w-full h-[600px] object-cover bg-white"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
                 <div className="absolute bottom-8 left-8 right-8">

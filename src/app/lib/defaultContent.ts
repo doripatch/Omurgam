@@ -121,6 +121,7 @@ export const DEFAULT_CONTENT = {
     ],
     whyCardName: 'Prof. Dr. Defne Kaya Utlu',
     whyCardRole: 'Fizyoterapi Profesörü',
+    whyImage: '/assets/logo-og.png',
 
     // Ana sayfa "Hakkımızda" bölümü
     aboutTitle: 'Omurgam Hakkında',

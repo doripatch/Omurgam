@@ -101,6 +101,7 @@ const FIELDS: Record<string, Field[]> = {
     { path: 'home.whyDesc', label: 'Neden Biz — Açıklama', type: 'textarea' },
     { path: 'home.whyCardName', label: 'Neden Biz — Kart İsim' },
     { path: 'home.whyCardRole', label: 'Neden Biz — Kart Ünvan' },
+    { path: 'home.whyImage', label: 'Neden Biz — Görsel (URL)' },
     { path: 'home.ctaTitle', label: 'Alt CTA — Başlık', type: 'textarea' },
     { path: 'home.ctaDesc', label: 'Alt CTA — Açıklama', type: 'textarea' },
     { path: 'home.ctaPrimary', label: 'Alt CTA — 1. Buton' },

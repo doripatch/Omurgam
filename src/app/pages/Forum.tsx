@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { MessageSquare, Clock, User, Search, Filter, ChevronRight, Loader2 } from 'lucide-react';
+import { MessageSquare, Clock, User, Search, Filter, ChevronRight, Loader2, Stethoscope, Plus, Minus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { supabase, TABLES } from '../lib/supabase';
+import { clinNotesAPI } from '../lib/api';
+import Seo from '../components/Seo';
 
 interface Question {
   id: string;
@@ -33,9 +35,13 @@ export default function Forum() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tümü');
+  const [tab, setTab] = useState<'masa' | 'notlar'>('masa');
+  const [notes, setNotes] = useState<any[]>([]);
+  const [openNote, setOpenNote] = useState<string | null>(null);
 
   useEffect(() => {
     loadQuestions();
+    clinNotesAPI.getAll().then((d) => setNotes(d.notes || [])).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -114,6 +120,7 @@ export default function Forum() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <Seo title="Defne Hoca'nın Masası" description="Omurga sağlığı hakkında sorularınızı sorun, Prof. Dr. Defne Kaya Utlu ve ekibinden yanıtlar alın. Klinisyenler için genel tavsiyeler." />
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background Decoration */}
@@ -129,31 +136,51 @@ export default function Forum() {
             transition={{ duration: 0.8 }}
           >
             <span className="inline-block px-4 py-2 bg-teal-500/20 text-teal-700 dark:text-teal-300 font-bold rounded-full mb-6 text-sm uppercase tracking-wide">
-              Topluluk Forumu
+              Topluluk
             </span>
-            <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white mb-6">
-              Soru & Cevap
+            <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6">
+              {tab === 'masa' ? "Defne Hoca'nın Masası" : 'Klinisyenlere Notlar'}
             </h1>
-            <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-6 max-w-3xl mx-auto">
-              Yanıtlanmış soruları inceleyin; aradığınız cevap büyük ihtimalle burada. Bulamazsanız kendi sorunuzu sorun.
+            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-3xl mx-auto">
+              {tab === 'masa'
+                ? 'Sorularınızı sorun, Prof. Dr. Defne Kaya Utlu ve ekibi yanıtlasın. Sormadan önce aşağıdaki yanıtlanmış soruları inceleyin — cevabınız zaten burada olabilir.'
+                : 'Hastalardan gelen sorular ışığında, klinisyenler için hazırlanan genel değerlendirme ve tavsiyeler.'}
             </p>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-full text-sm font-medium mb-8">
-              💡 İpucu: Sormadan önce aşağıdan arayın — cevap zaten yanıtlanmış olabilir.
+
+            {/* Sekme değiştirici */}
+            <div className="inline-flex flex-wrap items-center justify-center gap-1 bg-white/70 dark:bg-slate-800/70 backdrop-blur-md rounded-full p-1 border border-teal-200/40 dark:border-slate-700 mb-8">
+              <button
+                onClick={() => setTab('masa')}
+                className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${tab === 'masa' ? 'bg-teal-600 text-white shadow' : 'text-slate-600 dark:text-slate-300 hover:text-teal-700'}`}
+              >
+                <MessageSquare className="w-4 h-4 inline mr-1.5 -mt-0.5" /> Defne Hoca'nın Masası
+              </button>
+              <button
+                onClick={() => setTab('notlar')}
+                className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${tab === 'notlar' ? 'bg-teal-600 text-white shadow' : 'text-slate-600 dark:text-slate-300 hover:text-teal-700'}`}
+              >
+                <Stethoscope className="w-4 h-4 inline mr-1.5 -mt-0.5" /> Klinisyenlere Notlar
+              </button>
             </div>
 
-            {/* Quick Action Button */}
-            <Link
-              to="/soru-sor"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-teal-600 to-teal-700 text-white rounded-2xl font-bold hover:from-teal-700 hover:to-teal-800 transition-all shadow-xl hover:shadow-2xl group"
-            >
-              <MessageSquare className="w-5 h-5" />
-              <span>Soru Sor</span>
-              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            {tab === 'masa' && (
+              <div>
+                <Link
+                  to="/soru-sor"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-teal-600 to-teal-700 text-white rounded-2xl font-bold hover:from-teal-700 hover:to-teal-800 transition-all shadow-xl hover:shadow-2xl group"
+                >
+                  <MessageSquare className="w-5 h-5" />
+                  <span>Soru Sor</span>
+                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
 
+      {tab === 'masa' && (
+      <>
       {/* Search & Filter Section */}
       <section className="px-4 sm:px-6 lg:px-8 pb-12">
         <div className="max-w-7xl mx-auto">
@@ -311,6 +338,52 @@ export default function Forum() {
           </motion.div>
         </div>
       </section>
+      </>
+      )}
+
+      {/* Klinisyenlere Notlar */}
+      {tab === 'notlar' && (
+        <section className="px-4 sm:px-6 lg:px-8 pb-20">
+          <div className="max-w-3xl mx-auto">
+            {notes.length === 0 ? (
+              <div className="text-center py-20 backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 border border-slate-200/30 dark:border-slate-700 rounded-3xl p-12">
+                <Stethoscope className="w-20 h-20 text-slate-300 mx-auto mb-6" />
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Henüz not eklenmemiş</h3>
+                <p className="text-slate-600 dark:text-slate-400">Klinisyenlere yönelik genel değerlendirme ve tavsiyeler yakında burada olacak.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {notes.map((n) => {
+                  const open = openNote === n.id;
+                  return (
+                    <div key={n.id} className="backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 border border-teal-200/30 dark:border-slate-700 rounded-3xl overflow-hidden">
+                      <button onClick={() => setOpenNote(open ? null : n.id)} className="w-full flex items-center justify-between gap-3 p-6 text-left">
+                        <div>
+                          {n.category && (
+                            <div className="flex items-center gap-2 mb-1">
+                              <Stethoscope className="w-4 h-4 text-teal-600" />
+                              <span className="text-xs font-semibold text-teal-600">{n.category}</span>
+                            </div>
+                          )}
+                          <h3 className="text-lg font-bold text-slate-900 dark:text-white">{n.title}</h3>
+                        </div>
+                        {open ? <Minus className="w-6 h-6 text-teal-600 flex-shrink-0" /> : <Plus className="w-6 h-6 text-slate-400 flex-shrink-0" />}
+                      </button>
+                      {open && (
+                        <div className="px-6 pb-6">
+                          <p className="text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line border-t border-slate-200 dark:border-slate-700 pt-4">
+                            {n.content}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

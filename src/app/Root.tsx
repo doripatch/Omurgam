@@ -526,6 +526,32 @@ export default function Root() {
               </p>
             </div>
           </div>
+
+          {/* DKU Akademi */}
+          <div className="border-t border-slate-700/50 pt-8 mt-8 text-center">
+            <a
+              href="https://www.dkuakademi.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mb-4 bg-white rounded-xl p-2.5 hover:shadow-lg hover:shadow-amber-500/20 transition-shadow"
+              title="DKU Akademi"
+            >
+              <img src="/assets/dku-akademi.png" alt="DKU Akademi" className="h-9 w-auto" />
+            </a>
+            <p className="text-xs text-slate-400 max-w-2xl mx-auto leading-relaxed">
+              Omurgam,{' '}
+              <a
+                href="https://www.dkuakademi.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-amber-300 hover:underline font-medium"
+              >
+                DKU Akademi
+              </a>{' '}
+              tarafından geliştirilen bağımsız bir omurga sağlığı bilgi platformudur. Platformda yer alan içerikler
+              güncel bilimsel kanıtlar doğrultusunda hazırlanır ve düzenli olarak güncellenir.
+            </p>
+          </div>
         </div>
       </footer>
     </div>

@@ -278,6 +278,15 @@ export const favoritesAPI = {
   }),
 };
 
+// Klinisyenlere Notlar API
+export const clinNotesAPI = {
+  getAll: () => makeRequest('/clinical-notes'),
+  getAllAdmin: () => makeRequest('/clinical-notes/all'),
+  create: (note: any) => makeRequest('/clinical-notes', { method: 'POST', body: JSON.stringify(note) }),
+  update: (id: string, note: any) => makeRequest(`/clinical-notes/${cleanId(id)}`, { method: 'PUT', body: JSON.stringify(note) }),
+  delete: (id: string) => makeRequest(`/clinical-notes/${cleanId(id)}`, { method: 'DELETE' }),
+};
+
 // Banner API
 export const bannersAPI = {
   getAll: () => makeRequest('/banners'),

@@ -325,6 +325,19 @@ export default function AdminDashboard() {
               </Link>
 
               <Link
+                to="/admin/klinik-notlar"
+                className="flex items-center gap-3 p-4 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-2xl hover:shadow-md transition-all"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                  <MessageSquare className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-slate-900">Klinisyenlere Notlar</div>
+                  <div className="text-xs text-slate-600">Forum 2. bölüm</div>
+                </div>
+              </Link>
+
+              <Link
                 to="/admin/bannerlar"
                 className="flex items-center gap-3 p-4 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl hover:shadow-md transition-all"
               >

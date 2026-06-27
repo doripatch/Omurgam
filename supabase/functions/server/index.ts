@@ -1481,6 +1481,73 @@ app.delete("/banners/:id", async (c) => {
 });
 
 // ========================================
+// KLİNİSYENLERE NOTLAR ENDPOINTS
+// KV prefix: clinnote_
+// ========================================
+
+app.get("/clinical-notes", async (c) => {
+  try {
+    const items = await kv.getByPrefix("clinnote_");
+    const published = (items || [])
+      .filter((n: any) => n.published !== false)
+      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return c.json({ notes: published });
+  } catch (error) {
+    return c.json({ error: "Failed to fetch clinical notes" }, 500);
+  }
+});
+
+app.get("/clinical-notes/all", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const items = await kv.getByPrefix("clinnote_");
+    const sorted = (items || []).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return c.json({ notes: sorted });
+  } catch (error) {
+    return c.json({ error: "Failed to fetch clinical notes" }, 500);
+  }
+});
+
+app.post("/clinical-notes", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const body = await c.req.json();
+    const id = body.id ? cleanId(body.id) : crypto.randomUUID();
+    const note = { published: true, ...body, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    await kv.set(`clinnote_${id}`, note);
+    return c.json(note);
+  } catch (error) {
+    return c.json({ error: "Failed to create clinical note" }, 500);
+  }
+});
+
+app.put("/clinical-notes/:id", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const id = cleanId(c.req.param("id"));
+    const existing = await kv.get(`clinnote_${id}`);
+    if (!existing) return c.json({ error: "Not found" }, 404);
+    const body = await c.req.json();
+    const updated = { ...existing, ...body, id, updatedAt: new Date().toISOString() };
+    await kv.set(`clinnote_${id}`, updated);
+    return c.json(updated);
+  } catch (error) {
+    return c.json({ error: "Failed to update clinical note" }, 500);
+  }
+});
+
+app.delete("/clinical-notes/:id", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const id = cleanId(c.req.param("id"));
+    await kv.del(`clinnote_${id}`);
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to delete clinical note" }, 500);
+  }
+});
+
+// ========================================
 // ADMIN ENDPOINTS
 // ========================================
 

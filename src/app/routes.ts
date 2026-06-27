@@ -32,6 +32,7 @@ import AdminMessages from "./pages/admin/Messages";
 import AdminSubscribers from "./pages/admin/Subscribers";
 import AdminAppointments from "./pages/admin/Appointments";
 import AdminBanners from "./pages/admin/Banners";
+import AdminClinicalNotes from "./pages/admin/ClinicalNotes";
 import AdminUsers from "./pages/admin/Users";
 import AdminSiteSettings from "./pages/admin/SiteSettings";
 import NotFound from "./pages/NotFound";
@@ -73,6 +74,7 @@ export const router = createBrowserRouter([
       { path: "admin/aboneler", Component: AdminSubscribers },
       { path: "admin/randevular", Component: AdminAppointments },
       { path: "admin/bannerlar", Component: AdminBanners },
+      { path: "admin/klinik-notlar", Component: AdminClinicalNotes },
       { path: "admin/kullanicilar", Component: AdminUsers },
       { path: "admin/site-ayarlari", Component: AdminSiteSettings },
       { path: "*", Component: NotFound },
