@@ -462,7 +462,8 @@ export default function About() {
               </div>
               <div>
                 <p className="font-bold text-slate-900 dark:text-white">Prof. Dr. Defne Kaya Utlu</p>
-                <p className="text-sm text-teal-700 dark:text-teal-300 font-medium">Kurucu &amp; İçerik Direktörü</p>
+                <p className="text-sm text-teal-700 dark:text-teal-300 font-medium">Kurucu &amp; Bilimsel Direktör</p>
+                <p className="text-sm text-teal-600/80 dark:text-teal-400/80">Founder &amp; Scientific Director</p>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Fizyoterapi Profesörü</p>
               </div>
             </div>
@@ -473,7 +474,8 @@ export default function About() {
               </div>
               <div>
                 <p className="font-bold text-slate-900 dark:text-white">Fzt. Dorukhan Sayım</p>
-                <p className="text-sm text-amber-700 dark:text-amber-300 font-medium">Co-Founder &amp; CTO</p>
+                <p className="text-sm text-amber-700 dark:text-amber-300 font-medium">Kurucu Ortak &amp; Teknoloji Direktörü</p>
+                <p className="text-sm text-amber-600/80 dark:text-amber-400/80">Co-Founder &amp; CTO</p>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Fizyoterapist</p>
               </div>
             </div>
