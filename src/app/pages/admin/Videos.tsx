@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Upload, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Upload, Edit, Trash2, Eye, Loader2, ListVideo } from 'lucide-react';
 import { toast } from 'sonner';
 import { videosAPI } from '../../lib/api';
 
@@ -59,6 +59,55 @@ export default function AdminVideos() {
     duration: '',
     published: true // Varsayılan olarak yayınlansın
   });
+
+  // Toplu ekleme
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+  const [bulkCategory, setBulkCategory] = useState('Genel');
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  const handleBulkAdd = async () => {
+    const lines = bulkText.split('\n').map((l) => l.trim()).filter(Boolean);
+    if (lines.length === 0) {
+      toast.error('Lütfen en az bir video linki yapıştırın');
+      return;
+    }
+    setBulkBusy(true);
+    let ok = 0;
+    let fail = 0;
+    let n = 0;
+    for (const line of lines) {
+      n++;
+      let title = '';
+      let url = line;
+      if (line.includes('|')) {
+        const parts = line.split('|');
+        title = parts[0].trim();
+        url = parts.slice(1).join('|').trim();
+      }
+      const vid = getYouTubeVideoId(url);
+      if (!vid) { fail++; continue; }
+      try {
+        await videosAPI.create({
+          title: title || `Video ${n}`,
+          description: '',
+          category: bulkCategory,
+          videoUrl: url,
+          thumbnailUrl: `https://img.youtube.com/vi/${vid}/hqdefault.jpg`,
+          duration: '',
+          published: true,
+        });
+        ok++;
+      } catch {
+        fail++;
+      }
+    }
+    setBulkBusy(false);
+    toast.success(`${ok} video eklendi${fail ? `, ${fail} atlandı (geçersiz link)` : ''}`);
+    setBulkText('');
+    setShowBulkModal(false);
+    await loadVideos();
+  };
 
   // Fetch videos from API
   useEffect(() => {
@@ -217,6 +266,13 @@ export default function AdminVideos() {
                 >
                   <Trash2 className="w-5 h-5" />
                   Toplu Sil
+                </button>
+                <button
+                  onClick={() => setShowBulkModal(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all hover:scale-105"
+                >
+                  <ListVideo className="w-5 h-5" />
+                  Toplu Ekle
                 </button>
                 <button
                   onClick={() => setShowAddModal(true)}
@@ -469,6 +525,57 @@ export default function AdminVideos() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Toplu Ekle Modal */}
+        {showBulkModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="backdrop-blur-xl bg-white/95 rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Toplu Video Ekle</h2>
+              <p className="text-sm text-slate-600 mb-5">
+                Her satıra bir YouTube linki yapıştırın. İsterseniz <code className="bg-slate-100 px-1 rounded">Başlık | link</code> biçiminde başlık da verebilirsiniz. Kapak görselleri YouTube'dan otomatik alınır, videolar doğrudan yayınlanır.
+              </p>
+              <textarea
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+                rows={10}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono text-sm"
+                placeholder={"https://youtu.be/abc123\nBel Egzersizleri | https://youtube.com/watch?v=xyz789\nhttps://youtu.be/..."}
+              />
+              <div className="mt-4">
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Tüm videolar için kategori</label>
+                <select
+                  value={bulkCategory}
+                  onChange={(e) => setBulkCategory(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  <option>Genel</option>
+                  <option>Bel Fıtığı</option>
+                  <option>Boyun Ağrısı</option>
+                  <option>Skolyoz</option>
+                  <option>Postür</option>
+                  <option>Egzersiz</option>
+                </select>
+                <p className="text-xs text-slate-400 mt-1">Sonradan her videonun başlığını, kapağını ve kategorisini tek tek değiştirebilirsiniz.</p>
+              </div>
+              <div className="flex gap-3 pt-5">
+                <button
+                  onClick={handleBulkAdd}
+                  disabled={bulkBusy}
+                  className="flex-1 py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {bulkBusy ? <><Loader2 className="w-5 h-5 animate-spin" /> Ekleniyor...</> : 'Hepsini Ekle'}
+                </button>
+                <button
+                  onClick={() => setShowBulkModal(false)}
+                  disabled={bulkBusy}
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 font-semibold rounded-2xl hover:bg-slate-200 transition-colors disabled:opacity-50"
+                >
+                  İptal
+                </button>
+              </div>
             </div>
           </div>
         )}
