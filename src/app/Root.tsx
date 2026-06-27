@@ -8,6 +8,7 @@ import CookieConsent from './components/CookieConsent';
 import { trackPageview } from './lib/analytics';
 import { newsletterAPI } from './lib/api';
 import { openCookiePreferences } from './lib/consent';
+import { POLICIES } from './lib/policies';
 import { useNotificationsStore } from './store/notificationsStore';
 import { useAuthStore } from './store/authStore';
 import { useSiteSettingsStore } from './store/siteSettingsStore';
@@ -499,8 +500,7 @@ export default function Root() {
               <ul className="space-y-2 text-sm text-slate-300">
                 <li><Link to="/hakkimizda" className="hover:text-amber-300 transition-colors">Hakkımızda</Link></li>
                 <li><Link to="/iletisim" className="hover:text-amber-300 transition-colors">İletişim</Link></li>
-                <li><Link to="/gizlilik" className="hover:text-amber-300 transition-colors">Gizlilik Politikası</Link></li>
-                <li><Link to="/kullanim-kosullari" className="hover:text-amber-300 transition-colors">Kullanım Koşulları</Link></li>
+                <li><Link to="/randevu" className="hover:text-amber-300 transition-colors">Randevu / Danışma</Link></li>
                 <li><button onClick={openCookiePreferences} className="hover:text-amber-300 transition-colors text-left">Çerez Tercihleri</button></li>
               </ul>
               
@@ -565,6 +565,20 @@ export default function Root() {
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Kurumsal Politikalar */}
+          <div className="border-t border-slate-700/50 pt-8 mb-8">
+            <h4 className="font-semibold mb-4 text-white">Kurumsal Politikalar</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2 text-sm text-slate-300">
+              <Link to="/kullanim-kosullari" className="hover:text-amber-300 transition-colors">Kullanım Koşulları</Link>
+              <Link to="/gizlilik" className="hover:text-amber-300 transition-colors">Gizlilik Politikası</Link>
+              {POLICIES.map((p) => (
+                <Link key={p.slug} to={`/politika/${p.slug}`} className="hover:text-amber-300 transition-colors">
+                  {p.title}
+                </Link>
+              ))}
             </div>
           </div>
 

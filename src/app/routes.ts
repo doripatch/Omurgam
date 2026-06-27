@@ -21,6 +21,7 @@ import Contact from "./pages/Contact";
 import Appointment from "./pages/Appointment";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import PolicyPage from "./pages/PolicyPage";
 import FAQ from "./pages/FAQ";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminVideos from "./pages/admin/Videos";
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
       { path: "randevu", Component: Appointment },
       { path: "gizlilik", Component: Privacy },
       { path: "kullanim-kosullari", Component: Terms },
+      { path: "politika/:slug", Component: PolicyPage },
       { path: "sorular", Component: FAQ },
       { path: "giris", Component: Login },
       { path: "kayit", Component: Register },
