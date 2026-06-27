@@ -138,10 +138,13 @@ export default function Root() {
               <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden p-1 group-hover:shadow-md group-hover:scale-105 transition-all">
                 <img src="/assets/logo.png" alt="Omurgam Logo" className="w-full h-full object-contain" />
               </div>
-              <div className="leading-tight">
-                <h1 className="text-lg font-extrabold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
+              <div className="leading-none -mt-0.5">
+                <h1 className="text-lg font-extrabold leading-none bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
                   {settings?.logoText || 'Omurgam'}
                 </h1>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium whitespace-nowrap mt-0.5 hidden sm:block">
+                  Bugün omurgan ne sordu?
+                </p>
               </div>
             </Link>
 
