@@ -87,6 +87,13 @@ export default function AdminVideos() {
       }
       const vid = getYouTubeVideoId(url);
       if (!vid) { fail++; continue; }
+      // Başlık verilmemişse YouTube'dan otomatik çek
+      if (!title) {
+        try {
+          const info = await videosAPI.fetchYoutubeInfo(url);
+          if (info?.title) title = info.title;
+        } catch {}
+      }
       try {
         await videosAPI.create({
           title: title || `Video ${n}`,
@@ -535,7 +542,7 @@ export default function AdminVideos() {
             <div className="backdrop-blur-xl bg-white/95 rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <h2 className="text-2xl font-bold text-slate-900 mb-2">Toplu Video Ekle</h2>
               <p className="text-sm text-slate-600 mb-5">
-                Her satıra bir YouTube linki yapıştırın. İsterseniz <code className="bg-slate-100 px-1 rounded">Başlık | link</code> biçiminde başlık da verebilirsiniz. Kapak görselleri YouTube'dan otomatik alınır, videolar doğrudan yayınlanır.
+                Her satıra bir YouTube linki yapıştırın. <strong>Başlıklar YouTube'dan otomatik alınır</strong> (videoyu yüklerken verdiğiniz isim). İsterseniz <code className="bg-slate-100 px-1 rounded">Başlık | link</code> biçiminde elle de yazabilirsiniz. Kapak görselleri otomatik gelir, videolar doğrudan yayınlanır.
               </p>
               <textarea
                 value={bulkText}

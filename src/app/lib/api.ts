@@ -154,6 +154,8 @@ export const videosAPI = {
     method: 'POST',
     body: JSON.stringify({ ids: ids.map(cleanId) }),
   }),
+  // YouTube linkinden başlık/kapak çek
+  fetchYoutubeInfo: (url: string) => makeRequest(`/youtube-info?url=${encodeURIComponent(url)}`),
   incrementViews: (id: string) => makeRequest(`/videos/${cleanId(id)}/view`, {
     method: 'POST',
   }),

@@ -93,11 +93,31 @@ app.notFound((c) => {
 // Health check
 app.get("/health", (c) => {
   console.log("✅ Health check called!");
-  return c.json({ 
-    status: "WORKING", 
+  return c.json({
+    status: "WORKING",
     server: "Omurgam Edge Function v2",
-    timestamp: new Date().toISOString() 
+    timestamp: new Date().toISOString()
   });
+});
+
+// YouTube linkinden başlık/kapak bilgisini çek (oEmbed - CORS engelini aşmak için sunucu tarafı)
+app.get("/youtube-info", async (c) => {
+  try {
+    if (!(await requireAdmin(c))) return c.json({ error: "Forbidden" }, 403);
+    const url = c.req.query("url") || "";
+    if (!url) return c.json({ error: "url gerekli" }, 400);
+    const oembed = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+    const res = await fetch(oembed);
+    if (!res.ok) return c.json({ title: "", thumbnail: "", author: "" });
+    const data = await res.json();
+    return c.json({
+      title: data.title || "",
+      thumbnail: data.thumbnail_url || "",
+      author: data.author_name || "",
+    });
+  } catch (error) {
+    return c.json({ title: "", thumbnail: "", author: "" });
+  }
 });
 
 // Test endpoint
