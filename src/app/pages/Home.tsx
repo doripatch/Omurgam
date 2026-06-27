@@ -111,7 +111,9 @@ export default function Home() {
 
   // Disclaimer'da ilk ":" öncesini kalın göster (örn. "ÖNEMLİ:")
   const disclaimerParts = (() => {
-    const text = c.disclaimer || '';
+    const text = (c.disclaimer || '')
+      .replace(/\s*Prof\. Dr\. Defne Kaya Utlu fizyoterapi profesörü olup,?\s*tıbbi tedavi uygulamaz\.?/i, '')
+      .trim();
     const idx = text.indexOf(':');
     if (idx === -1) return { head: '', rest: text };
     return { head: text.slice(0, idx + 1), rest: text.slice(idx + 1) };

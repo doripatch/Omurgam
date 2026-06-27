@@ -149,7 +149,7 @@ export const DEFAULT_CONTENT = {
 
     // Disclaimer
     disclaimer:
-      'ÖNEMLİ: Bu platform yalnızca bilgilendirme amaçlıdır. Burada yer alan bilgiler tıbbi teşhis, tedavi veya reçete yerine geçmez. Sağlık sorunlarınız için mutlaka hekiminize danışın. Prof. Dr. Defne Kaya Utlu fizyoterapi profesörü olup, tıbbi tedavi uygulamaz.',
+      'ÖNEMLİ: Bu platform yalnızca bilgilendirme amaçlıdır. Burada yer alan bilgiler tıbbi teşhis, tedavi veya reçete yerine geçmez. Sağlık sorunlarınız için mutlaka hekiminize danışın.',
   },
 
   // ---- İLETİŞİM SAYFASI ----
