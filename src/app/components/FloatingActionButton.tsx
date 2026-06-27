@@ -9,7 +9,7 @@ export default function FloatingActionButton() {
   const actions = [
     {
       icon: Play,
-      label: 'Video Arşivi',
+      label: 'Omurgam Anlatıyor',
       href: '/videolar',
       color: 'from-amber-600 to-orange-600'
     },

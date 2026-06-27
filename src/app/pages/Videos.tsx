@@ -89,7 +89,7 @@ export default function Videos() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white mb-4">
-            Video Arşivi
+            Omurgam Anlatıyor
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400">
             Profesyonel rehberliğinde egzersiz videoları

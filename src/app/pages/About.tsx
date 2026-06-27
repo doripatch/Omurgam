@@ -445,6 +445,40 @@ export default function About() {
             </div>
           </div>
         </div>
+
+        {/* Ekip */}
+        <div className="mt-8 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl p-8 border border-amber-500/10 dark:border-slate-700 shadow-sm">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-3">
+            <Users className="w-7 h-7 text-teal-600 dark:text-teal-400" />
+            Ekip
+          </h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+            Omurgam'ı hayata geçiren ekip.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-6">
+            <div className="flex items-center gap-4 p-5 rounded-xl bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-slate-700 dark:to-slate-600">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 text-white flex items-center justify-center text-lg font-bold flex-shrink-0">
+                DK
+              </div>
+              <div>
+                <p className="font-bold text-slate-900 dark:text-white">Prof. Dr. Defne Kaya Utlu</p>
+                <p className="text-sm text-teal-700 dark:text-teal-300 font-medium">Kurucu &amp; İçerik Direktörü</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Fizyoterapi Profesörü</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 p-5 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-700 dark:to-slate-600">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center text-lg font-bold flex-shrink-0">
+                DS
+              </div>
+              <div>
+                <p className="font-bold text-slate-900 dark:text-white">Fzt. Dorukhan Sayım</p>
+                <p className="text-sm text-amber-700 dark:text-amber-300 font-medium">Co-Founder &amp; CTO</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Fizyoterapist</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

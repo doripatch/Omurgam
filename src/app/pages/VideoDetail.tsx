@@ -218,7 +218,7 @@ export default function VideoDetail() {
           className="inline-flex items-center gap-2 text-amber-700 hover:text-amber-800 mb-6 group"
         >
           <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium">Video Arşivine Dön</span>
+          <span className="font-medium">Omurgam Anlatıyor'a Dön</span>
         </Link>
 
         <div className="grid lg:grid-cols-3 gap-8">
