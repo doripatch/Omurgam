@@ -134,7 +134,7 @@ export default function Root() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[4.5rem] gap-4">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group flex-1 min-w-0">
+            <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
               <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden p-1 group-hover:shadow-md group-hover:scale-105 transition-all">
                 <img src="/assets/logo.png" alt="Omurgam Logo" className="w-full h-full object-contain" />
               </div>
@@ -142,12 +142,12 @@ export default function Root() {
                 <h1 className="text-xl font-extrabold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
                   {settings?.logoText || 'Omurgam'}
                 </h1>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium whitespace-nowrap hidden sm:block">{settings?.siteTagline || 'Prof. Dr. Defne Kaya Utlu'}</p>
               </div>
             </Link>
 
             {/* Yüzen hap menü (ortada) */}
-            <nav className="hidden xl:flex items-center gap-0.5 bg-slate-100/70 dark:bg-slate-800/60 backdrop-blur-md rounded-full p-1 border border-white/60 dark:border-slate-700/50 shadow-sm flex-shrink-0">
+            <div className="hidden xl:flex flex-1 justify-center min-w-0 px-2">
+            <nav className="flex items-center gap-0.5 bg-slate-100/70 dark:bg-slate-800/60 backdrop-blur-md rounded-full p-1 border border-white/60 dark:border-slate-700/50 shadow-sm flex-shrink-0">
               {navItems.map((item) =>
                 item.children ? (
                   <div
@@ -202,9 +202,10 @@ export default function Root() {
                 )
               )}
             </nav>
+            </div>
 
             {/* Sağ taraf araçları */}
-            <div className="hidden xl:flex flex-1 items-center justify-end gap-1.5">
+            <div className="hidden xl:flex items-center justify-end gap-1.5 flex-shrink-0">
               {/* Arama */}
               <button
                 onClick={() => setSearchOpen(true)}
