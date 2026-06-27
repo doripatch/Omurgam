@@ -8,6 +8,7 @@ import BlogPost from "./pages/BlogPost";
 import AskQuestion from "./pages/AskQuestion";
 import QuestionDetail from "./pages/QuestionDetail";
 import Forum from "./pages/Forum";
+import Clinicians from "./pages/Clinicians";
 import MRAnalyzer from "./pages/MRAnalyzer";
 import MedicalGlossary from "./pages/MedicalGlossary";
 import WordGame from "./pages/WordGame";
@@ -46,7 +47,10 @@ export const router = createBrowserRouter([
       { path: "videolar", Component: Videos },
       { path: "video/:id", Component: VideoDetail },
       { path: "blog", Component: Blog },
+      { path: "saglikli-yasam", Component: Blog },
+      { path: "kaleminden", Component: Blog },
       { path: "blog/:id", Component: BlogPost },
+      { path: "klinisyenler", Component: Clinicians },
       { path: "soru-sor", Component: AskQuestion },
       { path: "soru/:id", Component: QuestionDetail },
       { path: "forum", Component: Forum },

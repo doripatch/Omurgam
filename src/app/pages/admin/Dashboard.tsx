@@ -332,8 +332,8 @@ export default function AdminDashboard() {
                   <MessageSquare className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <div className="font-semibold text-slate-900">Klinisyenlere Notlar</div>
-                  <div className="text-xs text-slate-600">Forum 2. bölüm</div>
+                  <div className="font-semibold text-slate-900">Klinisyenler Buraya</div>
+                  <div className="text-xs text-slate-600">Klinisyenlere yönelik yazılar</div>
                 </div>
               </Link>
 

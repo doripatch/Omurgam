@@ -26,7 +26,7 @@ export const DEFAULT_CONTENT = {
 
   // ---- Footer ----
   footerAbout: 'Omurga sağlığınız hakkında bilimsel bilgiler ve eğitici içerikler.',
-  footerDisclaimer: 'Bu site bilgilendirme amaçlıdır. Tanı ve tedavi için mutlaka bir uzmana danışın.',
+  footerDisclaimer: 'Bu sitede sunulan bilgiler tıbbi değerlendirme, tanı veya tedavinin yerine geçmez. Genel bilgilendirme amacıyla hazırlanmıştır. Doğru tedavinin ilk adımı doğru tanıdır. Bunun için öncelikle bir hekim değerlendirmesi gereklidir. Tedavi süreci ise tanıya ve bireysel ihtiyaçlara göre planlanmalıdır.',
   footerCopyright: '© 2026 Omurgam. Tüm hakları saklıdır.',
 
   // ---- Yasal ----

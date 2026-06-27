@@ -1,8 +1,9 @@
-import { Search } from 'lucide-react';
+import { Search, PenTool, Leaf } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { blogAPI } from '../lib/api';
 import { toast } from 'sonner';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
+import Seo from '../components/Seo';
 
 interface BlogPost {
   id: string;
@@ -10,42 +11,62 @@ interface BlogPost {
   excerpt: string;
   category: string;
   imageUrl?: string;
+  section?: string;
   published?: boolean;
   views?: number;
   createdAt?: string;
 }
 
+const SECTIONS: Record<string, { title: string; desc: string; accent: string }> = {
+  'saglikli-yasam': {
+    title: 'Sağlıklı Yaşam',
+    desc: 'Genel sağlık, yaşam kalitesi ve iyi yaşam üzerine yazılar.',
+    accent: 'emerald',
+  },
+  'kaleminden': {
+    title: "Defne Hoca'nın Kaleminden",
+    desc: 'Prof. Dr. Defne Kaya Utlu\'nun omurga sağlığına dair makaleleri.',
+    accent: 'amber',
+  },
+};
+
 export default function Blog() {
+  const location = useLocation();
+  const section = location.pathname.includes('saglikli-yasam') ? 'saglikli-yasam' : 'kaleminden';
+  const meta = SECTIONS[section];
+
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadPosts();
-  }, []);
+  }, [section]);
 
   const loadPosts = async () => {
     try {
       setIsLoading(true);
       const data = await blogAPI.getAll();
-      console.log('📚 Blog sayfası - tüm yazılar:', data.posts);
-      const publishedPosts = (data.posts || []).filter((p: BlogPost) => p.published);
-      console.log('✅ Blog sayfası - yayında olanlar:', publishedPosts);
+      const publishedPosts = (data.posts || [])
+        .filter((p: BlogPost) => p.published)
+        .filter((p: BlogPost) => (p.section || 'saglikli-yasam') === section);
       setPosts(publishedPosts);
     } catch (error) {
       console.error('❌ Load posts error:', error);
-      toast.error('Blog yazıları yüklenemedi');
+      toast.error('Yazılar yüklenemedi');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const Icon = section === 'saglikli-yasam' ? Leaf : PenTool;
+
   if (isLoading) {
     return (
-      <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 py-12 px-4">
+      <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-20">
             <div className="w-16 h-16 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-slate-600">Blog yazıları yükleniyor...</p>
+            <p className="text-slate-600 dark:text-slate-400">Yazılar yükleniyor...</p>
           </div>
         </div>
       </div>
@@ -53,15 +74,23 @@ export default function Blog() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 py-12 px-4">
+    <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4">
+      <Seo title={meta.title} description={meta.desc} />
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-slate-900 mb-8">Blog</h1>
+        <div className="mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-sm font-medium mb-4">
+            <Icon className="w-4 h-4" />
+            <span>{section === 'saglikli-yasam' ? 'Sağlıklı Yaşam' : 'Makaleler'}</span>
+          </div>
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3">{meta.title}</h1>
+          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl">{meta.desc}</p>
+        </div>
 
         {posts.length === 0 ? (
           <div className="text-center py-20">
             <Search className="w-20 h-20 text-amber-700 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-slate-900 mb-2">Henüz Blog Yazısı Yok</h3>
-            <p className="text-slate-600">Yakında yeni yazılar eklenecek!</p>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Henüz Yazı Yok</h3>
+            <p className="text-slate-600 dark:text-slate-400">Yakında yeni yazılar eklenecek!</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -69,7 +98,7 @@ export default function Blog() {
               <Link
                 key={post.id}
                 to={`/blog/${post.id}`}
-                className="group bg-white rounded-3xl overflow-hidden border-2 border-stone-200 hover:border-amber-600 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                className="group bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border-2 border-stone-200 dark:border-slate-700 hover:border-amber-600 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
               >
                 {post.imageUrl && (
                   <div className="aspect-video overflow-hidden">
@@ -86,10 +115,10 @@ export default function Blog() {
                       {post.category}
                     </span>
                   </div>
-                  <h2 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-amber-600 transition-colors">
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-amber-600 transition-colors">
                     {post.title}
                   </h2>
-                  <p className="text-slate-600 line-clamp-3">{post.excerpt}</p>
+                  <p className="text-slate-600 dark:text-slate-400 line-clamp-3">{post.excerpt}</p>
                 </div>
               </Link>
             ))}

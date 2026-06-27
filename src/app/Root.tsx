@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router';
-import { Heart, Menu, X, User, LogOut, LayoutDashboard, Facebook, Twitter, Instagram, Youtube, Linkedin, Search, Bell } from 'lucide-react';
+import { Heart, Menu, X, User, LogOut, LayoutDashboard, Facebook, Twitter, Instagram, Youtube, Linkedin, Search, Bell, ChevronDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import DarkModeToggle from './components/DarkModeToggle';
 import FloatingActionButton from './components/FloatingActionButton';
@@ -18,18 +18,42 @@ export default function Root() {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
   const { items: notifItems, load: loadNotifs, loaded: notifLoaded, markRead: markNotifRead, markAllRead: markAllNotifsRead } = useNotificationsStore();
   const unreadNotifs = notifItems.filter((n) => !n.read).length;
 
-  const navLinks = [
+  type NavChild = { to: string; label: string };
+  type NavItem = { to?: string; label: string; children?: NavChild[] };
+  const navItems: NavItem[] = [
     { to: '/videolar', label: 'Video Arşivi' },
-    { to: '/blog', label: 'Blog' },
-    { to: '/forum', label: 'Forum' },
     { to: '/saglik-sozlugu', label: 'Sözlük' },
-    { to: '/gunun-terimi', label: 'Oyun' },
-    { to: '/hakkimizda', label: 'Hakkımızda' },
-    { to: '/iletisim', label: 'İletişim' },
+    {
+      label: 'Oyun',
+      children: [
+        { to: '/gunun-terimi', label: 'Günün Terimi' },
+        { to: '/mit-avi', label: 'Mit Avı' },
+      ],
+    },
+    { to: '/kaleminden', label: "Defne Hoca'nın Kaleminden" },
+    {
+      label: 'Omurgam Köşeleri',
+      children: [
+        { to: '/forum', label: 'Sizden Gelenler' },
+        { to: '/saglikli-yasam', label: 'Sağlıklı Yaşam' },
+      ],
+    },
+    { to: '/klinisyenler', label: 'Klinisyenler Buraya' },
+    {
+      label: 'Kurumsal',
+      children: [
+        { to: '/hakkimizda', label: 'Hakkımızda' },
+        { to: '/iletisim', label: 'İletişim' },
+      ],
+    },
   ];
+  const isChildActive = (children?: NavChild[]) =>
+    !!children && children.some((ch) => location.pathname === ch.to);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,24 +147,64 @@ export default function Root() {
             </Link>
 
             {/* Yüzen hap menü (ortada) */}
-            <nav className="hidden lg:flex items-center gap-0.5 bg-slate-100/70 dark:bg-slate-800/60 backdrop-blur-md rounded-full p-1 border border-white/60 dark:border-slate-700/50 shadow-sm">
-              {navLinks.map((l) => (
-                <Link
-                  key={l.to}
-                  to={l.to}
-                  className={`px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                    isActive(l.to)
-                      ? 'bg-white dark:bg-slate-700 text-amber-700 dark:text-amber-300 shadow-sm'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-white/70 dark:hover:bg-slate-700/50'
-                  }`}
-                >
-                  {l.label}
-                </Link>
-              ))}
+            <nav className="hidden xl:flex items-center gap-0.5 bg-slate-100/70 dark:bg-slate-800/60 backdrop-blur-md rounded-full p-1 border border-white/60 dark:border-slate-700/50 shadow-sm">
+              {navItems.map((item) =>
+                item.children ? (
+                  <div
+                    key={item.label}
+                    className="relative"
+                    onMouseEnter={() => setOpenMenu(item.label)}
+                    onMouseLeave={() => setOpenMenu(null)}
+                  >
+                    <button
+                      className={`flex items-center gap-1 px-3 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-all duration-200 ${
+                        isChildActive(item.children) || openMenu === item.label
+                          ? 'bg-white dark:bg-slate-700 text-amber-700 dark:text-amber-300 shadow-sm'
+                          : 'text-slate-600 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-white/70 dark:hover:bg-slate-700/50'
+                      }`}
+                    >
+                      {item.label}
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${openMenu === item.label ? 'rotate-180' : ''}`} />
+                    </button>
+                    {openMenu === item.label && (
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 z-50">
+                        <div className="min-w-[200px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-1.5">
+                          {item.children.map((ch) => (
+                            <Link
+                              key={ch.to}
+                              to={ch.to}
+                              onClick={() => setOpenMenu(null)}
+                              className={`block px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
+                                isActive(ch.to)
+                                  ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'
+                                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
+                              }`}
+                            >
+                              {ch.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    key={item.to}
+                    to={item.to!}
+                    className={`px-3 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-all duration-200 ${
+                      isActive(item.to!)
+                        ? 'bg-white dark:bg-slate-700 text-amber-700 dark:text-amber-300 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-white/70 dark:hover:bg-slate-700/50'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              )}
             </nav>
 
             {/* Sağ taraf araçları */}
-            <div className="hidden lg:flex items-center gap-1.5 flex-shrink-0">
+            <div className="hidden xl:flex items-center gap-1.5 flex-shrink-0">
               {/* Arama */}
               <button
                 onClick={() => setSearchOpen(true)}
@@ -250,7 +314,7 @@ export default function Root() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-800 rounded-xl transition-colors"
+              className="xl:hidden p-2 text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-800 rounded-xl transition-colors"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -258,89 +322,59 @@ export default function Root() {
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <nav className="lg:hidden py-4 space-y-3 border-t border-amber-500/10 dark:border-slate-700">
-              <Link 
-                to="/videolar" 
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2 text-sm font-medium ${
-                  isActive('/videolar') ? 'text-amber-700' : 'text-slate-700'
-                }`}
-              >
-                Video Arşivi
-              </Link>
-              <Link 
-                to="/blog" 
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2 text-sm font-medium ${
-                  isActive('/blog') ? 'text-amber-700' : 'text-slate-700'
-                }`}
-              >
-                Blog
-              </Link>
-              <Link 
-  to="/forum" 
-  onClick={() => setMobileMenuOpen(false)}
-  className={`block py-2 text-sm font-medium ${
-    isActive('/forum') ? 'text-amber-700' : 'text-slate-700'
-  }`}
->
-  Forum
-</Link>
-              <Link
-                to="/saglik-sozlugu"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2 text-sm font-medium ${
-                  isActive('/saglik-sozlugu') ? 'text-amber-700' : 'text-slate-700'
-                }`}
-              >
-                Sağlık Sözlüğü
-              </Link>
-              <Link
-                to="/gunun-terimi"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2 text-sm font-medium ${
-                  isActive('/gunun-terimi') ? 'text-amber-700' : 'text-slate-700'
-                }`}
-              >
-                Günün Terimi (Oyun)
-              </Link>
-              <Link
-                to="/mit-avi"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2 text-sm font-medium ${
-                  isActive('/mit-avi') ? 'text-amber-700' : 'text-slate-700'
-                }`}
-              >
-                Mit Avı (Oyun)
-              </Link>
-              <Link 
-                to="/hakkimizda" 
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2 text-sm font-medium ${
-                  isActive('/hakkimizda') ? 'text-amber-700' : 'text-slate-700'
-                }`}
-              >
-                Hakkımızda
-              </Link>
-              <Link 
-                to="/iletisim" 
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2 text-sm font-medium ${
-                  isActive('/iletisim') ? 'text-amber-700' : 'text-slate-700'
-                }`}
-              >
-                İletişim
-              </Link>
+            <nav className="xl:hidden py-4 space-y-1 border-t border-amber-500/10 dark:border-slate-700">
+              {navItems.map((item) =>
+                item.children ? (
+                  <div key={item.label}>
+                    <button
+                      onClick={() => setMobileSubmenu(mobileSubmenu === item.label ? null : item.label)}
+                      className={`w-full flex items-center justify-between py-2.5 text-sm font-medium ${
+                        isChildActive(item.children) ? 'text-amber-700 dark:text-amber-300' : 'text-slate-700 dark:text-slate-200'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${mobileSubmenu === item.label ? 'rotate-180' : ''}`} />
+                    </button>
+                    {mobileSubmenu === item.label && (
+                      <div className="pl-4 pb-1 space-y-1 border-l-2 border-amber-200 dark:border-slate-700 ml-1">
+                        {item.children.map((ch) => (
+                          <Link
+                            key={ch.to}
+                            to={ch.to}
+                            onClick={() => { setMobileMenuOpen(false); setMobileSubmenu(null); }}
+                            className={`block py-2 text-sm ${
+                              isActive(ch.to) ? 'text-amber-700 dark:text-amber-300 font-semibold' : 'text-slate-600 dark:text-slate-300'
+                            }`}
+                          >
+                            {ch.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    key={item.to}
+                    to={item.to!}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block py-2.5 text-sm font-medium ${
+                      isActive(item.to!) ? 'text-amber-700 dark:text-amber-300' : 'text-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              )}
               <Link
                 to="/randevu"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2 text-sm font-medium ${
-                  isActive('/randevu') ? 'text-amber-700' : 'text-slate-700'
+                className={`block py-2.5 text-sm font-medium ${
+                  isActive('/randevu') ? 'text-amber-700 dark:text-amber-300' : 'text-slate-700 dark:text-slate-200'
                 }`}
               >
                 Randevu / Danışma
               </Link>
-              <div className="pt-3 border-t border-amber-500/10 space-y-3">
+              <div className="pt-3 mt-2 border-t border-amber-500/10 dark:border-slate-700 space-y-3">
                 {isAuthenticated && isAdmin && (
                   <Link
                     to="/admin"
@@ -349,6 +383,16 @@ export default function Root() {
                   >
                     <LayoutDashboard className="w-4 h-4" />
                     Admin Paneli
+                  </Link>
+                )}
+                {isAuthenticated && (
+                  <Link
+                    to="/profil"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 py-2 text-sm font-medium text-slate-700 dark:text-slate-200"
+                  >
+                    <User className="w-4 h-4" />
+                    Profilim
                   </Link>
                 )}
                 {!isAuthenticated && (
@@ -433,15 +477,14 @@ export default function Root() {
             <div>
               <h4 className="font-semibold mb-4">{settings?.footer?.quickLinksTitle || 'Hızlı Erişim'}</h4>
               <ul className="space-y-2 text-sm text-slate-300">
-                <li><Link to="/hakkimizda" className="hover:text-amber-300 transition-colors">Hakkımızda</Link></li>
                 <li><Link to="/videolar" className="hover:text-amber-300 transition-colors">Video Arşivi</Link></li>
-                <li><Link to="/blog" className="hover:text-amber-300 transition-colors">Blog</Link></li>
+                <li><Link to="/kaleminden" className="hover:text-amber-300 transition-colors">Defne Hoca'nın Kaleminden</Link></li>
+                <li><Link to="/forum" className="hover:text-amber-300 transition-colors">Sizden Gelenler</Link></li>
+                <li><Link to="/saglikli-yasam" className="hover:text-amber-300 transition-colors">Sağlıklı Yaşam</Link></li>
+                <li><Link to="/klinisyenler" className="hover:text-amber-300 transition-colors">Klinisyenler Buraya</Link></li>
                 <li><Link to="/mr-analiz" className="hover:text-amber-300 transition-colors">MR Terim Sözlüğü</Link></li>
                 <li><Link to="/saglik-sozlugu" className="hover:text-amber-300 transition-colors">Sağlık Sözlüğü</Link></li>
-                <li><Link to="/gunun-terimi" className="hover:text-amber-300 transition-colors">Günün Terimi (Oyun)</Link></li>
-                <li><Link to="/mit-avi" className="hover:text-amber-300 transition-colors">Mit Avı (Oyun)</Link></li>
                 <li><Link to="/randevu" className="hover:text-amber-300 transition-colors">Randevu / Danışma</Link></li>
-                <li><Link to="/soru-sor" className="hover:text-amber-300 transition-colors">Soru Sor</Link></li>
                 <li><Link to="/sorular" className="hover:text-amber-300 transition-colors">Sıkça Sorulan Sorular</Link></li>
               </ul>
             </div>
@@ -449,6 +492,7 @@ export default function Root() {
             <div>
               <h4 className="font-semibold mb-4">{settings?.footer?.infoTitle || 'Bilgi'}</h4>
               <ul className="space-y-2 text-sm text-slate-300">
+                <li><Link to="/hakkimizda" className="hover:text-amber-300 transition-colors">Hakkımızda</Link></li>
                 <li><Link to="/iletisim" className="hover:text-amber-300 transition-colors">İletişim</Link></li>
                 <li><Link to="/gizlilik" className="hover:text-amber-300 transition-colors">Gizlilik Politikası</Link></li>
                 <li><Link to="/kullanim-kosullari" className="hover:text-amber-300 transition-colors">Kullanım Koşulları</Link></li>

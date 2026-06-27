@@ -10,10 +10,16 @@ interface BlogPost {
   excerpt: string;
   category: string;
   imageUrl?: string;
+  section?: string;
   views: number;
   published: boolean;
   created_at: string;
 }
+
+const BLOG_SECTIONS = [
+  { value: 'saglikli-yasam', label: 'Sağlıklı Yaşam' },
+  { value: 'kaleminden', label: "Defne Hoca'nın Kaleminden" },
+];
 
 export default function AdminBlog() {
   // 📝 BLOG YÖNETİMİ SAYFASI - v2.0
@@ -30,6 +36,7 @@ export default function AdminBlog() {
     excerpt: '',
     category: 'Bel Fıtığı',
     imageUrl: '',
+    section: 'saglikli-yasam',
     published: false,
   });
 
@@ -144,6 +151,7 @@ export default function AdminBlog() {
         excerpt: formData.excerpt || formData.content.substring(0, 150) + '...',
         category: formData.category,
         imageUrl: formData.imageUrl,
+        section: formData.section,
         published: formData.published,
       });
       console.log('✅ Blog eklendi:', result);
@@ -155,6 +163,7 @@ export default function AdminBlog() {
         excerpt: '',
         category: 'Bel Fıtığı',
         imageUrl: '',
+        section: 'saglikli-yasam',
         published: false,
       });
       await loadPosts();
@@ -182,6 +191,7 @@ export default function AdminBlog() {
         excerpt: formData.excerpt || formData.content.substring(0, 150) + '...',
         category: formData.category,
         imageUrl: formData.imageUrl,
+        section: formData.section,
         published: formData.published,
       });
       console.log('✅ Blog güncellendi:', result);
@@ -193,6 +203,7 @@ export default function AdminBlog() {
         excerpt: '',
         category: 'Bel Fıtığı',
         imageUrl: '',
+        section: 'saglikli-yasam',
         published: false,
       });
       await loadPosts();
@@ -373,6 +384,7 @@ export default function AdminBlog() {
                                   excerpt: post.excerpt,
                                   category: post.category,
                                   imageUrl: post.imageUrl || '',
+                                  section: post.section || 'saglikli-yasam',
                                   published: post.published,
                                 });
                                 setShowEditModal(true);
@@ -448,6 +460,20 @@ export default function AdminBlog() {
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[200px]"
                     placeholder="Blog içeriği..."
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Bölüm</label>
+                  <select
+                    value={formData.section}
+                    onChange={(e) => setFormData({ ...formData, section: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  >
+                    {BLOG_SECTIONS.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-slate-500 mt-1">Sağlıklı Yaşam genel yazılar; Defne Hoca'nın Kaleminden yalnızca omurga makaleleri için.</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -550,6 +576,20 @@ export default function AdminBlog() {
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[200px]"
                     placeholder="Blog içeriği..."
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Bölüm</label>
+                  <select
+                    value={formData.section}
+                    onChange={(e) => setFormData({ ...formData, section: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  >
+                    {BLOG_SECTIONS.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-slate-500 mt-1">Sağlıklı Yaşam genel yazılar; Defne Hoca'nın Kaleminden yalnızca omurga makaleleri için.</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

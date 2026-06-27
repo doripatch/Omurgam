@@ -87,9 +87,9 @@ export default function AdminClinicalNotes() {
             <Link to="/admin" className="text-sm text-slate-600 hover:text-slate-900 mb-2 inline-block">← Admin Panel</Link>
             <h1 className="text-4xl font-black text-slate-900 flex items-center gap-3">
               <Stethoscope className="w-10 h-10 text-teal-600" />
-              Klinisyenlere Notlar
+              Klinisyenler Buraya
             </h1>
-            <p className="text-slate-600 mt-2">Hastalardan gelen soruları harmanlayıp klinisyenlere genel tavsiyeler yazın</p>
+            <p className="text-slate-600 mt-2">Klinisyenlere yönelik yazılarınızı buradan ekleyin; /klinisyenler sayfasında yayınlanır</p>
           </div>
           <button onClick={openAdd} className="px-6 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-2xl font-bold hover:shadow-lg transition-all hover:scale-105 flex items-center gap-2">
             <Plus className="w-5 h-5" /> <span>Yeni Not</span>
