@@ -29,14 +29,6 @@ export default function Root() {
   type NavItem = { to?: string; label: string; children?: NavChild[] };
   const navItems: NavItem[] = [
     { to: '/videolar', label: 'Omurgam Anlatıyor' },
-    { to: '/saglik-sozlugu', label: 'Sözlük' },
-    {
-      label: 'Oyun',
-      children: [
-        { to: '/gunun-terimi', label: 'Günün Terimi' },
-        { to: '/mit-avi', label: 'Mit Avı' },
-      ],
-    },
     {
       label: 'Omurgam Köşeleri',
       children: [
@@ -46,6 +38,14 @@ export default function Root() {
       ],
     },
     { to: '/klinisyenler', label: 'Klinisyenler Buraya' },
+    { to: '/saglik-sozlugu', label: 'Sözlük' },
+    {
+      label: 'Oyun',
+      children: [
+        { to: '/gunun-terimi', label: 'Günün Terimi' },
+        { to: '/mit-avi', label: 'Mit Avı' },
+      ],
+    },
     {
       label: 'Kurumsal',
       children: [

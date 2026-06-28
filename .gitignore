@@ -50,3 +50,6 @@ DerivedData/
 # Misc
 *.tsbuildinfo
 .cache/
+
+# Legal kaynak Word dosyaları (içerik siteye gömülü)
+omurgam legal/
