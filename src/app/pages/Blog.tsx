@@ -76,7 +76,38 @@ export default function Blog() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4">
-      <Seo title={meta.title} description={meta.desc} />
+      <Seo
+        title={meta.title}
+        description={meta.desc}
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'CollectionPage',
+              name: meta.title,
+              description: meta.desc,
+              inLanguage: 'tr-TR',
+              url: `https://omurgam.com${section === 'saglikli-yasam' ? '/saglikli-yasam' : '/omurgam-ne-diyor'}`,
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: 'https://omurgam.com/' },
+                { '@type': 'ListItem', position: 2, name: meta.title },
+              ],
+            },
+            {
+              '@type': 'ItemList',
+              itemListElement: posts.slice(0, 40).map((p, i) => ({
+                '@type': 'ListItem',
+                position: i + 1,
+                name: p.title,
+                url: `https://omurgam.com/blog/${p.id}`,
+              })),
+            },
+          ],
+        }}
+      />
       <div className="max-w-7xl mx-auto">
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-sm font-medium mb-4">

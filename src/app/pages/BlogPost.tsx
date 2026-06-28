@@ -14,9 +14,17 @@ interface BlogPostData {
   category: string;
   imageUrl?: string;
   readingTime?: string;
+  section?: string;
   views: number;
   published: boolean;
   created_at: string;
+  updatedAt?: string;
+}
+
+function sectionMeta(section?: string) {
+  if (section === 'kaleminden') return { path: '/omurgam-ne-diyor', name: 'Omurgam Ne Diyor?' };
+  if (section === 'saglikli-yasam') return { path: '/saglikli-yasam', name: 'Sağlıklı Yaşam' };
+  return { path: '/blog', name: 'Blog' };
 }
 
 export default function BlogPost() {
@@ -67,18 +75,35 @@ export default function BlogPost() {
         type="article"
         jsonLd={post ? {
           '@context': 'https://schema.org',
-          '@type': 'Article',
-          headline: post.title,
-          articleSection: post.category,
-          datePublished: post.created_at,
-          author: { '@type': 'Person', name: 'Prof. Dr. Defne Kaya Utlu' },
-          publisher: { '@type': 'Organization', name: 'Omurgam', logo: { '@type': 'ImageObject', url: 'https://omurgam.com/assets/logo.svg' } },
+          '@graph': [
+            {
+              '@type': 'Article',
+              headline: post.title,
+              description: post.excerpt || undefined,
+              articleSection: post.category,
+              inLanguage: 'tr-TR',
+              datePublished: post.created_at,
+              dateModified: post.updatedAt || post.created_at,
+              image: post.imageUrl || 'https://omurgam.com/assets/logo-og.png',
+              mainEntityOfPage: { '@type': 'WebPage', '@id': `https://omurgam.com/blog/${post.id}` },
+              author: { '@type': 'Person', name: 'Prof. Dr. Defne Kaya Utlu', jobTitle: 'Fizyoterapi Profesörü' },
+              publisher: { '@type': 'Organization', name: 'Omurgam', logo: { '@type': 'ImageObject', url: 'https://omurgam.com/assets/logo-og.png' } },
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: 'https://omurgam.com/' },
+                { '@type': 'ListItem', position: 2, name: sectionMeta(post.section).name, item: `https://omurgam.com${sectionMeta(post.section).path}` },
+                { '@type': 'ListItem', position: 3, name: post.title },
+              ],
+            },
+          ],
         } : null}
       />
       <div className="max-w-4xl mx-auto">
-        <Link to="/blog" className="inline-flex items-center gap-2 text-amber-700 hover:text-amber-800 mb-8">
+        <Link to={post ? sectionMeta(post.section).path : '/blog'} className="inline-flex items-center gap-2 text-amber-700 hover:text-amber-800 mb-8">
           <ArrowLeft className="w-4 h-4" />
-          Blog'a Dön
+          {post ? sectionMeta(post.section).name : 'Blog'}
         </Link>
         
         <div className="backdrop-blur-xl bg-white/90 border border-amber-200/30 rounded-3xl p-8 md:p-12">

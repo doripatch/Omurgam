@@ -29,6 +29,33 @@ export default function Clinicians() {
       <Seo
         title="Klinisyenler Buraya"
         description="Prof. Dr. Defne Kaya Utlu'dan klinisyenlere yönelik değerlendirmeler, genel tavsiyeler ve klinik notlar."
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'CollectionPage',
+              name: 'Klinisyenler Buraya',
+              description: "Prof. Dr. Defne Kaya Utlu'dan klinisyenlere yönelik klinik değerlendirme ve tavsiyeler.",
+              inLanguage: 'tr-TR',
+              url: 'https://omurgam.com/klinisyenler',
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: 'https://omurgam.com/' },
+                { '@type': 'ListItem', position: 2, name: 'Klinisyenler Buraya' },
+              ],
+            },
+            {
+              '@type': 'ItemList',
+              itemListElement: notes.slice(0, 40).map((n, i) => ({
+                '@type': 'ListItem',
+                position: i + 1,
+                name: n.title,
+              })),
+            },
+          ],
+        }}
       />
       <div className="max-w-3xl mx-auto">
         {/* Header */}
