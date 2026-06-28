@@ -74,6 +74,7 @@ export const router = createBrowserRouter([
       { path: "admin/videolar", Component: AdminVideos },
       { path: "admin/sorular", Component: AdminQuestions },
       { path: "admin/blog", Component: AdminBlog },
+      { path: "admin/omurgam-ne-diyor", Component: AdminBlog },
       { path: "admin/kosullar", Component: AdminTerms },
       { path: "admin/saglik-sozlugu", Component: AdminMedicalTerms },
       { path: "admin/sss", Component: AdminFAQ },

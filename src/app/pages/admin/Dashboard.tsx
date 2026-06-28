@@ -267,8 +267,21 @@ export default function AdminDashboard() {
                   <FileText className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <div className="font-semibold text-slate-900">Blog Yaz</div>
-                  <div className="text-xs text-slate-600">Yeni yazı oluştur</div>
+                  <div className="font-semibold text-slate-900">Blog — Sağlıklı Yaşam</div>
+                  <div className="text-xs text-slate-600">Genel yaşam yazıları</div>
+                </div>
+              </Link>
+
+              <Link
+                to="/admin/omurgam-ne-diyor"
+                className="flex items-center gap-3 p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl hover:shadow-md transition-all"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-slate-900">Omurgam Ne Diyor?</div>
+                  <div className="text-xs text-slate-600">Omurga yazıları (toplu yükleme)</div>
                 </div>
               </Link>
 

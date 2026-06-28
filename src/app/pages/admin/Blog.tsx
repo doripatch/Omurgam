@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router';
 import { Plus, Edit, Trash2, Eye, Loader2, AlertCircle, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { blogAPI } from '../../lib/api';
@@ -16,13 +17,24 @@ interface BlogPost {
   created_at: string;
 }
 
-const BLOG_SECTIONS = [
-  { value: 'saglikli-yasam', label: 'Sağlıklı Yaşam' },
-  { value: 'kaleminden', label: 'Omurgam Ne Diyor? (Omurga yazıları)' },
-];
+const SECTION_META: Record<string, { label: string; title: string; desc: string }> = {
+  'saglikli-yasam': {
+    label: 'Sağlıklı Yaşam',
+    title: 'Blog — Sağlıklı Yaşam',
+    desc: 'Genel sağlık ve yaşam yazıları (Sağlıklı Yaşam bölümü)',
+  },
+  'kaleminden': {
+    label: 'Omurgam Ne Diyor?',
+    title: 'Omurgam Ne Diyor? Yönetimi',
+    desc: 'Omurga hakkında halka yönelik yazılar (Omurgam Ne Diyor? bölümü)',
+  },
+};
 
 export default function AdminBlog() {
-  // 📝 BLOG YÖNETİMİ SAYFASI - v2.0
+  // 📝 BLOG YÖNETİMİ SAYFASI - bölüme göre (Sağlıklı Yaşam / Omurgam Ne Diyor)
+  const location = useLocation();
+  const SECTION = location.pathname.includes('omurgam-ne-diyor') ? 'kaleminden' : 'saglikli-yasam';
+  const META = SECTION_META[SECTION];
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -55,7 +67,7 @@ export default function AdminBlog() {
             excerpt: item.excerpt || item.content.substring(0, 150) + '...',
             category: item.category || 'Genel',
             imageUrl: item.imageUrl || '',
-            section: item.section || 'saglikli-yasam',
+            section: SECTION,
             readingTime: item.readingTime || '',
             published: item.published !== false,
           });
@@ -79,29 +91,24 @@ export default function AdminBlog() {
     excerpt: '',
     category: 'Bel Fıtığı',
     imageUrl: '',
-    section: 'saglikli-yasam',
+    section: SECTION,
     published: false,
   });
 
-  // Debug: Component mounted
-  useEffect(() => {
-    console.log('📝 AdminBlog component mounted!');
-  }, []);
-
   useEffect(() => {
     loadPosts();
-  }, []);
+  }, [SECTION]);
 
   const loadPosts = async () => {
     try {
       setIsLoading(true);
-      console.log('📥 Blog yazıları yükleniyor...');
       const data = await blogAPI.getAll();
-      console.log('📚 Yüklenen blog yazıları:', data);
-      setPosts(data.posts || []);
+      // Yalnızca bu sayfanın bölümüne ait yazılar
+      const mine = (data.posts || []).filter((p: BlogPost) => (p.section || 'saglikli-yasam') === SECTION);
+      setPosts(mine);
     } catch (error: any) {
       console.error('❌ Load posts error:', error);
-      toast.error('Blog yazıları yüklenemedi');
+      toast.error('Yazılar yüklenemedi');
     } finally {
       setIsLoading(false);
     }
@@ -194,7 +201,7 @@ export default function AdminBlog() {
         excerpt: formData.excerpt || formData.content.substring(0, 150) + '...',
         category: formData.category,
         imageUrl: formData.imageUrl,
-        section: formData.section,
+        section: SECTION,
         published: formData.published,
       });
       console.log('✅ Blog eklendi:', result);
@@ -206,7 +213,7 @@ export default function AdminBlog() {
         excerpt: '',
         category: 'Bel Fıtığı',
         imageUrl: '',
-        section: 'saglikli-yasam',
+        section: SECTION,
         published: false,
       });
       await loadPosts();
@@ -234,7 +241,7 @@ export default function AdminBlog() {
         excerpt: formData.excerpt || formData.content.substring(0, 150) + '...',
         category: formData.category,
         imageUrl: formData.imageUrl,
-        section: formData.section,
+        section: SECTION,
         published: formData.published,
       });
       console.log('✅ Blog güncellendi:', result);
@@ -246,7 +253,7 @@ export default function AdminBlog() {
         excerpt: '',
         category: 'Bel Fıtığı',
         imageUrl: '',
-        section: 'saglikli-yasam',
+        section: SECTION,
         published: false,
       });
       await loadPosts();
@@ -285,8 +292,8 @@ export default function AdminBlog() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">Blog Yönetimi</h1>
-            <p className="text-slate-600">Blog yazılarını yönetin</p>
+            <h1 className="text-4xl font-bold text-slate-900 mb-2">{META.title}</h1>
+            <p className="text-slate-600">{META.desc}</p>
           </div>
           <div className="flex gap-3">
             {!isDeleteMode ? (
@@ -442,7 +449,7 @@ export default function AdminBlog() {
                                   excerpt: post.excerpt,
                                   category: post.category,
                                   imageUrl: post.imageUrl || '',
-                                  section: post.section || 'saglikli-yasam',
+                                  section: SECTION,
                                   published: post.published,
                                 });
                                 setShowEditModal(true);
@@ -518,20 +525,6 @@ export default function AdminBlog() {
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[200px]"
                     placeholder="Blog içeriği..."
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">Bölüm</label>
-                  <select
-                    value={formData.section}
-                    onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  >
-                    {BLOG_SECTIONS.map((s) => (
-                      <option key={s.value} value={s.value}>{s.label}</option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-slate-500 mt-1">Sağlıklı Yaşam genel yazılar; "Omurgam Ne Diyor?" omurga ile ilgili yazılar için.</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -634,20 +627,6 @@ export default function AdminBlog() {
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[200px]"
                     placeholder="Blog içeriği..."
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">Bölüm</label>
-                  <select
-                    value={formData.section}
-                    onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  >
-                    {BLOG_SECTIONS.map((s) => (
-                      <option key={s.value} value={s.value}>{s.label}</option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-slate-500 mt-1">Sağlıklı Yaşam genel yazılar; "Omurgam Ne Diyor?" omurga ile ilgili yazılar için.</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
