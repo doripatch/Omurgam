@@ -222,26 +222,33 @@ export default function AdminVideos() {
     }
   };
 
-  // Fix thumbnails for all videos
+  // Fix thumbnails for all videos — YouTube'daki GÜNCEL kapakları yeniden çeker
   const handleFixAllThumbnails = async () => {
-    if (!confirm('Tüm videoların thumbnail\'larını YouTube\'dan otomatik çekmek ister misiniz?')) {
+    if (!confirm('Tüm videoların kapak görsellerini YouTube\'daki güncel hâliyle yenilemek ister misiniz?')) {
       return;
     }
 
     try {
+      const ts = Date.now(); // önbelleği kırmak için (yeni kapak hemen görünsün)
       let fixedCount = 0;
+      let failCount = 0;
       for (const video of videos) {
-        // If thumbnail is missing or empty, extract from YouTube URL
-        if (video.videoUrl && (!video.thumbnailUrl || video.thumbnailUrl.trim() === '')) {
-          const videoId = getYouTubeVideoId(video.videoUrl);
-          if (videoId) {
-            const newThumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-            await videosAPI.update(video.id, { thumbnailUrl: newThumbnail });
-            fixedCount++;
-          }
+        const videoId = video.videoUrl ? getYouTubeVideoId(video.videoUrl) : null;
+        if (!videoId) continue;
+        // Her videoda mevcut olan hqdefault'u, önbellek kırıcı parametreyle güncelle
+        const newThumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg?u=${ts}`;
+        try {
+          await videosAPI.update(video.id, { thumbnailUrl: newThumbnail });
+          fixedCount++;
+        } catch {
+          failCount++;
         }
       }
-      toast.success(`${fixedCount} videonun thumbnail'ı güncellendi! 🎉`);
+      if (failCount > 0) {
+        toast.success(`${fixedCount} kapak güncellendi, ${failCount} başarısız.`);
+      } else {
+        toast.success(`${fixedCount} videonun kapağı YouTube'dan yenilendi! 🎉`);
+      }
       await loadVideos();
     } catch (error: any) {
       toast.error('Thumbnail güncelleme hatası: ' + error.message);
