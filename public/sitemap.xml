@@ -1,17 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://omurgam.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://omurgam.com/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
   <url><loc>https://omurgam.com/videolar</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://omurgam.com/blog</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://omurgam.com/omurgam-ne-diyor</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://omurgam.com/saglikli-yasam</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://omurgam.com/klinisyenler</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://omurgam.com/forum</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://omurgam.com/mr-analiz</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://omurgam.com/saglik-sozlugu</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://omurgam.com/gunun-terimi</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://omurgam.com/mit-avi</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://omurgam.com/soru-sor</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://omurgam.com/hakkimizda</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://omurgam.com/sorular</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://omurgam.com/iletisim</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
   <url><loc>https://omurgam.com/randevu</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://omurgam.com/iletisim</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://omurgam.com/blog</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://omurgam.com/gizlilik</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://omurgam.com/kullanim-kosullari</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://omurgam.com/politika/cerez-politikasi</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://omurgam.com/politika/telif-haklari</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://omurgam.com/politika/editoryal-ilkeler</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://omurgam.com/politika/bilimsel-kaynak-guncelleme</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://omurgam.com/politika/reklam-editoryal-bagimsizlik</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://omurgam.com/politika/yapay-zeka-icerik</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://omurgam.com/politika/kaynak-atif</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://omurgam.com/politika/duzeltme-geri-bildirim</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://omurgam.com/politika/erisilebilirlik</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://omurgam.com/politika/icerik-kaldirma-ihlal</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>

@@ -1,0 +1,34 @@
+# Omurgam
+
+> Omurgam, Prof. Dr. Defne Kaya Utlu öncülüğünde hazırlanan, omurga sağlığı konusunda bilimsel ve anlaşılır bilgi sunan Türkçe bir bilgi platformudur. Bel ağrısı, boyun ağrısı, bel fıtığı, postür bozuklukları ve MR raporu terimleri gibi konularda kanıta dayalı, sade dilde içerik üretir. İçerikler bilgilendirme amaçlıdır; hekim değerlendirmesinin yerine geçmez.
+
+## Hakkında
+- Kurucu ve bilimsel direktör: Prof. Dr. Defne Kaya Utlu — Fizyoterapi Profesörü, Sağlık Bilimleri Üniversitesi Hamidiye Sağlık Bilimleri Fakültesi öğretim üyesi (Google Scholar h-index 28, 2.350+ atıf, 39 bilimsel yayın).
+- Geliştiren: DKU Akademi (https://www.dkuakademi.com)
+- Yaklaşım: kanıta dayalı sağlık; uluslararası klinik rehberler, sistematik derlemeler ve hakemli yayınlar temel alınır.
+
+## Ana Bölümler
+- [Omurgam Anlatıyor — bilgilendirme videoları](https://omurgam.com/videolar)
+- [Omurgam Ne Diyor? — omurga hakkında halka yönelik yazılar](https://omurgam.com/omurgam-ne-diyor)
+- [Sizden Gelenler — soru & cevap](https://omurgam.com/forum)
+- [Sağlıklı Yaşam — genel sağlık yazıları](https://omurgam.com/saglikli-yasam)
+- [Klinisyenler Buraya — meslektaşlara yönelik klinik değerlendirmeler](https://omurgam.com/klinisyenler)
+- [Sağlık Sözlüğü — tıbbi terimlerin sade açıklamaları](https://omurgam.com/saglik-sozlugu)
+- [MR Terim Sözlüğü — MR raporu terimleri](https://omurgam.com/mr-analiz)
+
+## Sık Konular
+- Bel fıtığı (lomber disk hernisi): tanım, belirtiler, MR bulgularının yorumu
+- Boyun fıtığı ve boyun ağrısı
+- Bel kayması (spondilolistezis) ile bel fıtığının farkı
+- Postür/duruş bozuklukları
+- Egzersiz, günlük yaşam ve omurga sağlığı
+
+## Kurumsal
+- [Hakkımızda](https://omurgam.com/hakkimizda)
+- [İletişim](https://omurgam.com/iletisim)
+- [Gizlilik Politikası](https://omurgam.com/gizlilik)
+
+## İletişim
+- E-posta: iletisim@omurgam.com
+- Web: https://omurgam.com
+- Instagram: https://www.instagram.com/omurgam_com

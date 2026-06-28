@@ -34,8 +34,8 @@ export const DEFAULT_CONTENT = {
   termsOfService: '',
 
   // ---- SEO ----
-  metaDescription: 'Omurga sağlığı hakkında bilimsel bilgiler, videolar ve uzman yanıtlar.',
-  metaKeywords: 'omurga, bel ağrısı, boyun ağrısı, fizyoterapi',
+  metaDescription: "Bel ağrısı, boyun ağrısı ve bel fıtığını bilimsel kaynaklarla anlayın. Prof. Dr. Defne Kaya Utlu'dan videolar, MR terim sözlüğü ve uzman yanıtları — Omurgam.",
+  metaKeywords: 'omurga sağlığı, bel ağrısı, boyun ağrısı, bel fıtığı, fizyoterapi, MR raporu, Defne Kaya Utlu',
 
   // ---- Hakkımda (kısa alanlar; detaylı özgeçmiş sayfada) ----
   aboutTitle: 'Prof. Dr. Defne Kaya Utlu',
