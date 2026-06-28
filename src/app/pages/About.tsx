@@ -67,8 +67,9 @@ export default function About() {
                   yayımlanan çok sayıda uluslararası ve ulusal yayınım vardır.
                 </p>
                 <p className="leading-relaxed font-medium text-teal-700 dark:text-teal-400">
-                  Hâlen Sağlık Bilimleri Üniversitesi Hamidiye Sağlık Bilimleri Fakültesi, 
-                  Fizyoterapi ve Rehabilitasyon Bölüm Başkanı ve öğretim üyesiyim.
+                  Hâlen Sağlık Bilimleri Üniversitesi Hamidiye Sağlık Bilimleri Fakültesi
+                  Fizyoterapi ve Rehabilitasyon Bölümü'nde öğretim üyesiyim. Ayrıca SBÜ Teknopol İstanbul
+                  bünyesinde DKU Akademi kapsamında sanayi–üniversite iş birlikleri yürütüyorum.
                 </p>
               </div>
             </div>
@@ -123,22 +124,23 @@ export default function About() {
             {/* İstatistikler */}
             <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl p-8 text-white shadow-lg">
               <h3 className="text-xl font-bold mb-6">Akademik Başarılar</h3>
+              <p className="text-xs text-teal-100/80 mb-4 -mt-3">Nisan 2026 itibarıyla</p>
               <div className="space-y-4">
                 <div>
-                  <div className="text-3xl font-bold">30+</div>
-                  <div className="text-sm text-teal-100">SCI Makale</div>
+                  <div className="text-3xl font-bold">39</div>
+                  <div className="text-sm text-teal-100">Bilimsel Yayın (Q1–Q2)</div>
                 </div>
                 <div className="border-t border-teal-400/30 pt-4">
-                  <div className="text-3xl font-bold">9</div>
+                  <div className="text-3xl font-bold">28</div>
+                  <div className="text-sm text-teal-100">h-index (Google Scholar)</div>
+                </div>
+                <div className="border-t border-teal-400/30 pt-4">
+                  <div className="text-3xl font-bold">2.350+</div>
+                  <div className="text-sm text-teal-100">Toplam Atıf</div>
+                </div>
+                <div className="border-t border-teal-400/30 pt-4">
+                  <div className="text-3xl font-bold">10+</div>
                   <div className="text-sm text-teal-100">Kitap Editörlüğü</div>
-                </div>
-                <div className="border-t border-teal-400/30 pt-4">
-                  <div className="text-3xl font-bold">20+</div>
-                  <div className="text-sm text-teal-100">Yıl Deneyim</div>
-                </div>
-                <div className="border-t border-teal-400/30 pt-4">
-                  <div className="text-3xl font-bold">3</div>
-                  <div className="text-sm text-teal-100">Dergi Editörlüğü</div>
                 </div>
               </div>
             </div>
@@ -184,7 +186,8 @@ export default function About() {
               <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                 <strong>Sağlık Bilimleri Üniversitesi</strong><br />
                 Hamidiye Sağlık Bilimleri Fakültesi<br />
-                Fizyoterapi ve Rehabilitasyon Bölüm Başkanı
+                Fizyoterapi ve Rehabilitasyon Bölümü — Öğretim Üyesi<br />
+                <span className="text-xs text-slate-500 dark:text-slate-400">DKU Akademi (SBÜ Teknopol İstanbul)</span>
               </p>
             </div>
           </div>
@@ -201,10 +204,10 @@ export default function About() {
             <div className="relative pl-8 border-l-2 border-purple-200 dark:border-purple-800">
               <div className="mb-8">
                 <div className="absolute -left-2 w-4 h-4 bg-purple-500 rounded-full"></div>
-                <div className="text-sm font-semibold text-purple-600 dark:text-purple-400 mb-1">2020 - Halen</div>
+                <div className="text-sm font-semibold text-purple-600 dark:text-purple-400 mb-1">2022 - Halen</div>
                 <h3 className="font-bold text-slate-900 dark:text-white">Sağlık Bilimleri Üniversitesi</h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                  Hamidiye Sağlık Bilimleri Fakültesi, Fizyoterapi ve Rehabilitasyon Bölüm Başkanı
+                  Hamidiye Sağlık Bilimleri Fakültesi, Fizyoterapi ve Rehabilitasyon Bölümü — Öğretim Üyesi
                 </p>
               </div>
 
@@ -371,6 +374,34 @@ export default function About() {
                   </h4>
                   <p className="text-sm text-slate-700 dark:text-slate-300">
                     Springer Verlag, 2015 (Editör Yardımcısı, 3295 sayfa)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-slate-700 dark:to-slate-600 p-6 rounded-xl">
+              <div className="flex items-start gap-3 mb-3">
+                <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-1" />
+                <div>
+                  <h4 className="font-bold text-slate-900 dark:text-white mb-2">
+                    Kas ve Tendon Mimarisinin Temelleri ve Klinik Egzersiz Rehberi
+                  </h4>
+                  <p className="text-sm text-slate-700 dark:text-slate-300">
+                    Hipokrat Yayınevi, 2025 (416 sayfa, Editör)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-rose-50 to-rose-100 dark:from-slate-700 dark:to-slate-600 p-6 rounded-xl">
+              <div className="flex items-start gap-3 mb-3">
+                <BookOpen className="w-5 h-5 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-1" />
+                <div>
+                  <h4 className="font-bold text-slate-900 dark:text-white mb-2">
+                    Uygulamalı PNF
+                  </h4>
+                  <p className="text-sm text-slate-700 dark:text-slate-300">
+                    Hipokrat Yayınevi, 2023 (368 sayfa, Çeviri Baş Editörü)
                   </p>
                 </div>
               </div>

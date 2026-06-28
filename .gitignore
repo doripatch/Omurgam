@@ -53,3 +53,6 @@ DerivedData/
 
 # Legal kaynak Word dosyaları (içerik siteye gömülü)
 omurgam legal/
+
+# Kaynak Word dosyaları (içerik siteye gömülü, repoya gitmesin)
+*.docx
