@@ -129,7 +129,7 @@ export default function Home() {
           '@type': 'MedicalOrganization',
           name: settings.siteName || 'Omurgam',
           url: 'https://omurgam.com',
-          logo: 'https://omurgam.com/assets/logo.svg',
+          logo: 'https://omurgam.com/assets/logo-og.png',
           description: settings.metaDescription,
           founder: {
             '@type': 'Person',

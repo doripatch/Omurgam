@@ -12,6 +12,27 @@ const cleanId = (id: string | number) => {
   return cleaned;
 };
 
+// 🔔 IndexNow: yeni/güncellenen içerik yayınlandığında Bing/Copilot'a anında bildir.
+const INDEXNOW_KEY = "27600bd943324abba61b3df8ff35c089";
+const SITE_ORIGIN = "https://omurgam.com";
+async function pingIndexNow(paths: string[]) {
+  try {
+    const urlList = paths.map((p) => (p.startsWith("http") ? p : `${SITE_ORIGIN}${p}`));
+    await fetch("https://api.indexnow.org/indexnow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        host: "omurgam.com",
+        key: INDEXNOW_KEY,
+        keyLocation: `${SITE_ORIGIN}/${INDEXNOW_KEY}.txt`,
+        urlList,
+      }),
+    });
+  } catch (e) {
+    console.log("IndexNow ping başarısız (önemsiz):", e);
+  }
+}
+
 // 1. basePath DOĞRU ŞEKİLDE EKLENDİ
 const app = new Hono().basePath("/server");
 
@@ -877,6 +898,7 @@ app.post("/blog", async (c) => {
       updatedAt: new Date().toISOString(),
     };
     await kv.set(`blog:${id}`, post);
+    pingIndexNow([`/blog/${id}`, post.section === "kaleminden" ? "/omurgam-ne-diyor" : "/saglikli-yasam"]);
     return c.json(post);
   } catch (error) {
     return c.json({ error: "Failed to create blog post" }, 500);
@@ -892,6 +914,7 @@ app.put("/blog/:id", async (c) => {
     
     const updated = { ...existing, ...body, updatedAt: new Date().toISOString() };
     await kv.set(`blog:${id}`, updated);
+    pingIndexNow([`/blog/${id}`]);
     return c.json(updated);
   } catch (error) {
     return c.json({ error: "Failed to update blog post" }, 500);
@@ -1535,6 +1558,7 @@ app.post("/clinical-notes", async (c) => {
     const id = body.id ? cleanId(body.id) : crypto.randomUUID();
     const note = { published: true, ...body, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     await kv.set(`clinnote_${id}`, note);
+    pingIndexNow(["/klinisyenler"]);
     return c.json(note);
   } catch (error) {
     return c.json({ error: "Failed to create clinical note" }, 500);
@@ -1550,6 +1574,7 @@ app.put("/clinical-notes/:id", async (c) => {
     const body = await c.req.json();
     const updated = { ...existing, ...body, id, updatedAt: new Date().toISOString() };
     await kv.set(`clinnote_${id}`, updated);
+    pingIndexNow(["/klinisyenler"]);
     return c.json(updated);
   } catch (error) {
     return c.json({ error: "Failed to update clinical note" }, 500);

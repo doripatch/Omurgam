@@ -56,3 +56,8 @@ omurgam legal/
 
 # Kaynak Word dosyaları (içerik siteye gömülü, repoya gitmesin)
 *.docx
+
+# Kök dizindeki kaynak görseller (işlenmiş olanlar public/assets içinde)
+/*.jpg
+/*.jpeg
+/*.png
