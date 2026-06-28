@@ -979,6 +979,23 @@ app.get("/terms", async (c) => {
   }
 });
 
+// Arama rotası ":id" rotasından ÖNCE tanımlanmalı (statik segment önceliği)
+app.get("/terms/search", async (c) => {
+  try {
+    const query = c.req.query("q")?.toLowerCase().trim() || "";
+    const allTerms = await kv.getByPrefix("term_");
+    const filtered = allTerms.filter((term: any) =>
+      term.term?.toLowerCase().includes(query) ||
+      term.description?.toLowerCase().includes(query) ||
+      term.explanation?.toLowerCase().includes(query) ||
+      term.aliases?.toLowerCase().includes(query)
+    );
+    return c.json({ terms: filtered });
+  } catch (error) {
+    return c.json({ error: "Failed to search terms" }, 500);
+  }
+});
+
 app.get("/terms/:id", async (c) => {
   try {
     const id = cleanId(c.req.param("id"));
@@ -1027,22 +1044,6 @@ app.delete("/terms/:id", async (c) => {
     return c.json({ success: true });
   } catch (error) {
     return c.json({ error: "Failed to delete term" }, 500);
-  }
-});
-
-app.get("/terms/search", async (c) => {
-  try {
-    const query = c.req.query("q")?.toLowerCase() || "";
-    const allTerms = await kv.getByPrefix("term_");
-    const filtered = allTerms.filter((term: any) =>
-      term.term?.toLowerCase().includes(query) ||
-      term.description?.toLowerCase().includes(query) ||
-      term.explanation?.toLowerCase().includes(query) ||
-      term.aliases?.toLowerCase().includes(query)
-    );
-    return c.json({ terms: filtered });
-  } catch (error) {
-    return c.json({ error: "Failed to search terms" }, 500);
   }
 });
 
