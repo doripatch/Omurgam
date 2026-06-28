@@ -13,6 +13,7 @@ interface BlogPostData {
   excerpt: string;
   category: string;
   imageUrl?: string;
+  readingTime?: string;
   views: number;
   published: boolean;
   created_at: string;
@@ -115,6 +116,12 @@ export default function BlogPost() {
                   <Clock className="w-4 h-4" />
                   <span className="text-sm">{formatDate(post.created_at)}</span>
                 </div>
+                {post.readingTime && (
+                  <div className="flex items-center gap-2 text-amber-700">
+                    <Clock className="w-4 h-4" />
+                    <span className="text-sm font-medium">{post.readingTime} okuma</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <Eye className="w-4 h-4" />
                   <span className="text-sm">{post.views.toLocaleString('tr-TR')} görüntülenme</span>

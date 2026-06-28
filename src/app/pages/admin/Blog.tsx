@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, Loader2, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Edit, Trash2, Eye, Loader2, AlertCircle, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { blogAPI } from '../../lib/api';
 
@@ -30,6 +30,49 @@ export default function AdminBlog() {
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setImporting(true);
+      const arr = JSON.parse(await file.text());
+      if (!Array.isArray(arr)) throw new Error('Dosya bir liste (JSON array) değil');
+      if (!confirm(`${arr.length} yazı içe aktarılacak. Devam edilsin mi?`)) {
+        setImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
+      let ok = 0, fail = 0;
+      for (const item of arr) {
+        if (!item || !item.title || !item.content) { fail++; continue; }
+        try {
+          await blogAPI.create({
+            title: item.title,
+            content: item.content,
+            excerpt: item.excerpt || item.content.substring(0, 150) + '...',
+            category: item.category || 'Genel',
+            imageUrl: item.imageUrl || '',
+            section: item.section || 'saglikli-yasam',
+            readingTime: item.readingTime || '',
+            published: item.published !== false,
+          });
+          ok++;
+        } catch {
+          fail++;
+        }
+      }
+      toast.success(`${ok} yazı eklendi${fail ? `, ${fail} başarısız` : ''} 🎉`);
+      await loadPosts();
+    } catch (err: any) {
+      toast.error('İçe aktarma hatası: ' + (err.message || 'geçersiz dosya'));
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -254,6 +297,21 @@ export default function AdminBlog() {
                 >
                   <Trash2 className="w-5 h-5" />
                   Toplu Sil
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={handleImportFile}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={importing}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-2xl hover:shadow-lg transition-all hover:scale-105 disabled:opacity-60"
+                >
+                  {importing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+                  {importing ? 'İçe Aktarılıyor...' : 'Toplu İçe Aktar'}
                 </button>
                 <button
                   onClick={() => setShowAddModal(true)}

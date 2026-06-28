@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, X, Loader2, Stethoscope } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Edit, Trash2, X, Loader2, Stethoscope, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { clinNotesAPI } from '../../lib/api';
 import { Link } from 'react-router';
@@ -21,6 +21,46 @@ export default function AdminClinicalNotes() {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<ClinNote | null>(null);
   const [formData, setFormData] = useState<any>({ ...emptyForm });
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setImporting(true);
+      const arr = JSON.parse(await file.text());
+      if (!Array.isArray(arr)) throw new Error('Dosya bir liste (JSON array) değil');
+      if (!confirm(`${arr.length} yazı içe aktarılacak. Devam edilsin mi?`)) {
+        setImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
+      let ok = 0, fail = 0;
+      for (const item of arr) {
+        if (!item || !item.title || !item.content) { fail++; continue; }
+        try {
+          await clinNotesAPI.create({
+            title: item.title,
+            content: item.content,
+            category: item.category || '',
+            readingTime: item.readingTime || '',
+            published: item.published !== false,
+          });
+          ok++;
+        } catch {
+          fail++;
+        }
+      }
+      toast.success(`${ok} yazı eklendi${fail ? `, ${fail} başarısız` : ''} 🎉`);
+      await load();
+    } catch (err: any) {
+      toast.error('İçe aktarma hatası: ' + (err.message || 'geçersiz dosya'));
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   useEffect(() => {
     load();
@@ -91,9 +131,26 @@ export default function AdminClinicalNotes() {
             </h1>
             <p className="text-slate-600 mt-2">Klinisyenlere yönelik yazılarınızı buradan ekleyin; /klinisyenler sayfasında yayınlanır</p>
           </div>
-          <button onClick={openAdd} className="px-6 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-2xl font-bold hover:shadow-lg transition-all hover:scale-105 flex items-center gap-2">
-            <Plus className="w-5 h-5" /> <span>Yeni Not</span>
-          </button>
+          <div className="flex gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={handleImportFile}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={importing}
+              className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl font-bold hover:shadow-lg transition-all hover:scale-105 flex items-center gap-2 disabled:opacity-60"
+            >
+              {importing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+              <span>{importing ? 'İçe Aktarılıyor...' : 'Toplu İçe Aktar'}</span>
+            </button>
+            <button onClick={openAdd} className="px-6 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-2xl font-bold hover:shadow-lg transition-all hover:scale-105 flex items-center gap-2">
+              <Plus className="w-5 h-5" /> <span>Yeni Not</span>
+            </button>
+          </div>
         </div>
 
         {isLoading ? (

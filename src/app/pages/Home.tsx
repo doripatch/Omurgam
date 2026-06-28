@@ -595,7 +595,7 @@ export default function Home() {
                 <ImageWithFallback
                   src={c.whyImage}
                   alt={c.whyCardName}
-                  className="w-full h-[600px] object-cover bg-white"
+                  className="w-full h-[600px] object-cover object-top bg-white"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
                 <div className="absolute bottom-8 left-8 right-8">

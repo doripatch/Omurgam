@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Stethoscope, Plus, Minus, Loader2 } from 'lucide-react';
+import { Stethoscope, Plus, Minus, Loader2, Clock } from 'lucide-react';
 import { clinNotesAPI } from '../lib/api';
 import Seo from '../components/Seo';
 
@@ -8,6 +8,7 @@ interface Note {
   title: string;
   content: string;
   category?: string;
+  readingTime?: string;
   createdAt?: string;
 }
 
@@ -59,12 +60,18 @@ export default function Clinicians() {
                 <div key={n.id} className="backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 border border-teal-200/30 dark:border-slate-700 rounded-3xl overflow-hidden">
                   <button onClick={() => setOpenId(open ? null : n.id)} className="w-full flex items-center justify-between gap-3 p-6 text-left">
                     <div>
-                      {n.category && (
-                        <div className="flex items-center gap-2 mb-1">
-                          <Stethoscope className="w-4 h-4 text-teal-600" />
-                          <span className="text-xs font-semibold text-teal-600">{n.category}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {n.category && (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-teal-600">
+                            <Stethoscope className="w-3.5 h-3.5" /> {n.category}
+                          </span>
+                        )}
+                        {n.readingTime && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 text-[11px] font-medium">
+                            <Clock className="w-3 h-3" /> {n.readingTime}
+                          </span>
+                        )}
+                      </div>
                       <h3 className="text-lg font-bold text-slate-900 dark:text-white">{n.title}</h3>
                     </div>
                     {open ? <Minus className="w-6 h-6 text-teal-600 flex-shrink-0" /> : <Plus className="w-6 h-6 text-slate-400 flex-shrink-0" />}

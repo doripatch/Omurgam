@@ -1,4 +1,4 @@
-import { Search, PenTool, Leaf } from 'lucide-react';
+import { Search, PenTool, Leaf, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { blogAPI } from '../lib/api';
 import { toast } from 'sonner';
@@ -12,6 +12,7 @@ interface BlogPost {
   category: string;
   imageUrl?: string;
   section?: string;
+  readingTime?: string;
   published?: boolean;
   views?: number;
   createdAt?: string;
@@ -110,10 +111,15 @@ export default function Blog() {
                   </div>
                 )}
                 <div className="p-6">
-                  <div className="mb-3">
+                  <div className="mb-3 flex items-center gap-2 flex-wrap">
                     <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full uppercase">
                       {post.category}
                     </span>
+                    {post.readingTime && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium rounded-full">
+                        <Clock className="w-3 h-3" /> {post.readingTime}
+                      </span>
+                    )}
                   </div>
                   <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-amber-600 transition-colors">
                     {post.title}
