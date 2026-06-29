@@ -1,7 +1,8 @@
 import { Link } from 'react-router';
 import { Video, MessageSquare, FileText, Users, TrendingUp, Eye, Clock, CheckCircle, Brain, Settings, BookOpen, HelpCircle, Inbox, CalendarCheck, Image as ImageIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { videosAPI, questionsAPI, blogAPI, adminAPI, termsAPI, medicalTermsAPI, faqAPI, contactAPI, newsletterAPI, appointmentsAPI } from '../../lib/api';
+import { videosAPI, blogAPI, adminAPI, termsAPI, medicalTermsAPI, faqAPI, contactAPI, newsletterAPI, appointmentsAPI } from '../../lib/api';
+import { supabase, TABLES } from '../../lib/supabase';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -30,9 +31,8 @@ export default function AdminDashboard() {
       setIsLoading(true);
       
       // Load all data in parallel
-      const [videosData, questionsData, blogData, usersData, termsData, medicalTermsData, faqData, messagesData, subscribersData, appointmentsData] = await Promise.all([
+      const [videosData, blogData, usersData, termsData, medicalTermsData, faqData, messagesData, subscribersData, appointmentsData] = await Promise.all([
         videosAPI.getAll(),
-        questionsAPI.getAll(),
         blogAPI.getAll(),
         adminAPI.getUsers().catch(() => ({ users: [] })),
         termsAPI.getAll().catch(() => ({ terms: [] })),
@@ -43,9 +43,23 @@ export default function AdminDashboard() {
         appointmentsAPI.getAll().catch(() => ({ appointments: [] }))
       ]);
 
+      // Sorular: GERÇEK kaynak — Supabase questions tablosu (forum/Soru Yönetimi ile aynı)
+      let questions: any[] = [];
+      try {
+        const { data: qData } = await supabase
+          .from(TABLES.QUESTIONS)
+          .select('*, users:user_id (name)')
+          .order('created_at', { ascending: false });
+        questions = qData || [];
+      } catch {
+        questions = [];
+      }
+      const answered = questions.filter((q: any) => q.is_answered).length;
+      const pending = questions.length - answered;
+
       setStats({
         videos: videosData.videos?.length || 0,
-        pendingQuestions: questionsData.questions?.filter((q: any) => !q.isAnswered).length || 0,
+        pendingQuestions: pending,
         blogPosts: blogData.posts?.length || 0,
         users: usersData.users?.length || 0,
         mrTerms: termsData.terms?.length || 0,
@@ -54,14 +68,18 @@ export default function AdminDashboard() {
         unreadMessages: (messagesData.messages || []).filter((m: any) => !m.read).length,
         subscribers: subscribersData.subscribers?.length || 0,
         newAppointments: (appointmentsData.appointments || []).filter((a: any) => a.status === 'new').length,
-        totalViews: videosData.videos?.reduce((acc: number, video: any) => acc + video.views, 0) || 0,
-        answeredQuestions: questionsData.questions?.filter((q: any) => q.isAnswered).length || 0,
+        totalViews: videosData.videos?.reduce((acc: number, video: any) => acc + (video.views || 0), 0) || 0,
+        answeredQuestions: answered,
       });
 
-      // Get latest 3 questions
-      const latest = (questionsData.questions || [])
-        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 3);
+      // Son 3 soru (gerçek tablodan)
+      const latest = questions.slice(0, 3).map((q: any) => ({
+        id: q.id,
+        username: q.users?.name || 'Anonim',
+        status: q.is_answered ? 'answered' : 'pending',
+        question: q.question,
+        time: q.created_at ? new Date(q.created_at).toLocaleDateString('tr-TR') : '',
+      }));
       setRecentQuestions(latest);
 
     } catch (error) {
