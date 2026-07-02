@@ -500,6 +500,7 @@ export default function Root() {
               <ul className="space-y-2 text-sm text-slate-300">
                 <li><Link to="/hakkimizda" className="hover:text-amber-300 transition-colors">Hakkımızda</Link></li>
                 <li><Link to="/iletisim" className="hover:text-amber-300 transition-colors">İletişim</Link></li>
+                <li><Link to="/basin" className="hover:text-amber-300 transition-colors">Basın Odası</Link></li>
                 <li><Link to="/randevu" className="hover:text-amber-300 transition-colors">Randevu / Danışma</Link></li>
                 <li><button onClick={openCookiePreferences} className="hover:text-amber-300 transition-colors text-left">Çerez Tercihleri</button></li>
               </ul>

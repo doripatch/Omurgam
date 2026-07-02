@@ -5,6 +5,7 @@ import { blogAPI } from '../lib/api';
 import { toast } from 'sonner';
 import Seo from '../components/Seo';
 import FavoriteButton from '../components/FavoriteButton';
+import AuthorBox from '../components/AuthorBox';
 
 interface BlogPostData {
   id: string;
@@ -166,6 +167,8 @@ export default function BlogPost() {
                   {post.content}
                 </div>
               </div>
+
+              <AuthorBox updatedDate={formatDate(post.updatedAt || post.created_at)} />
             </>
           ) : (
             <div className="text-center py-12">

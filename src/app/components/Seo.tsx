@@ -29,7 +29,7 @@ function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
 
 export default function Seo({ title, description, image, type = 'website', jsonLd }: SeoProps) {
   useEffect(() => {
-    const fullTitle = title ? `${title} | ${SITE}` : `${SITE} — Omurga Sağlığı Platformu`;
+    const fullTitle = title ? `${title} | ${SITE}` : `${SITE} — Türkiye'nin Omurga Sağlığı Platformu`;
     document.title = fullTitle;
 
     const url = window.location.href;
