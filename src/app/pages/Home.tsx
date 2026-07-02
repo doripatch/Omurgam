@@ -165,7 +165,7 @@ export default function Home() {
               <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 tracking-[0.08em] uppercase">{c.badge}</span>
             </Link>
 
-            <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-black tracking-tighter mb-4 leading-[0.9]">
+            <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-black tracking-tighter mb-8 leading-[0.9]">
               <span className="block text-slate-900 dark:text-white">{c.title}</span>
             </h1>
 
@@ -173,23 +173,11 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.8 }}
-              className="text-2xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 mb-4 max-w-3xl mx-auto"
+              className="text-2xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 mb-12 max-w-3xl mx-auto"
             >
               Türkiye'nin{' '}
               <span className="bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">Omurga Sağlığı</span>{' '}
               Platformu
-            </motion.p>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.45, duration: 0.8 }}
-              className="text-lg md:text-2xl font-light text-slate-600 dark:text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed"
-            >
-              {c.subtitlePrefix}{' '}
-              <span className="font-semibold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
-                {c.subtitleHighlight}
-              </span>
             </motion.p>
 
             <motion.div
