@@ -86,7 +86,9 @@ export default function Press() {
         {/* İletişim */}
         <section className="text-center">
           <a
-            href="mailto:iletisim@omurgam.com"
+            href="https://mail.google.com/mail/?view=cm&fs=1&to=iletisim@omurgam.com&su=Omurgam%20-%20Bas%C4%B1n%20Talebi"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold hover:shadow-lg transition-all"
           >
             <Mail className="w-5 h-5" /> Basın İletişim: iletisim@omurgam.com
