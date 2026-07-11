@@ -16,12 +16,18 @@
 - [Sağlık Sözlüğü — tıbbi terimlerin sade açıklamaları](https://omurgam.com/saglik-sozlugu)
 - [MR Terim Sözlüğü — MR raporu terimleri](https://omurgam.com/mr-analiz)
 
+## Konu Rehberleri (kapsamlı sayfalar)
+- [Bel Fıtığı (Lomber Disk Hernisi) — belirtiler, nedenler, tedavi](https://omurgam.com/bel-fitigi)
+- [Boyun Fıtığı (Servikal Disk Hernisi) — belirtiler, nedenler, tedavi](https://omurgam.com/boyun-fitigi)
+- [Skolyoz — belirtiler, türler, tanı ve tedavi](https://omurgam.com/skolyoz)
+
 ## Sık Konular
 - Bel fıtığı (lomber disk hernisi): tanım, belirtiler, MR bulgularının yorumu
 - Boyun fıtığı ve boyun ağrısı
 - Bel kayması (spondilolistezis) ile bel fıtığının farkı
 - Postür/duruş bozuklukları
 - Egzersiz, günlük yaşam ve omurga sağlığı
+- MR raporu terimleri: protrüzyon, ekstrüzyon, bulging ne demek (https://omurgam.com/mr-analiz)
 
 ## Kurumsal
 - [Hakkımızda](https://omurgam.com/hakkimizda)

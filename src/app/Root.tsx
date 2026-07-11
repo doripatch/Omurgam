@@ -30,6 +30,15 @@ export default function Root() {
   const navItems: NavItem[] = [
     { to: '/videolar', label: 'Omurgam Anlatıyor' },
     {
+      label: 'Konular',
+      children: [
+        { to: '/bel-fitigi', label: 'Bel Fıtığı' },
+        { to: '/boyun-fitigi', label: 'Boyun Fıtığı' },
+        { to: '/skolyoz', label: 'Skolyoz' },
+        { to: '/mr-analiz', label: 'MR Terim Sözlüğü' },
+      ],
+    },
+    {
       label: 'Omurgam Köşeleri',
       children: [
         { to: '/forum', label: 'Sizden Gelenler' },

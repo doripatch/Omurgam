@@ -23,6 +23,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import PolicyPage from "./pages/PolicyPage";
 import Press from "./pages/Press";
+import Pillar from "./pages/Pillar";
 import FAQ from "./pages/FAQ";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminVideos from "./pages/admin/Videos";
@@ -58,6 +59,7 @@ export const router = createBrowserRouter([
       { path: "soru/:id", Component: QuestionDetail },
       { path: "forum", Component: Forum },
       { path: "mr-analiz", Component: MRAnalyzer },
+      { path: "mr-analiz/:slug", Component: MRAnalyzer },
       { path: "saglik-sozlugu", Component: MedicalGlossary },
       { path: "gunun-terimi", Component: WordGame },
       { path: "mit-avi", Component: MythGame },
@@ -68,6 +70,9 @@ export const router = createBrowserRouter([
       { path: "kullanim-kosullari", Component: Terms },
       { path: "politika/:slug", Component: PolicyPage },
       { path: "basin", Component: Press },
+      { path: "bel-fitigi", Component: Pillar },
+      { path: "boyun-fitigi", Component: Pillar },
+      { path: "skolyoz", Component: Pillar },
       { path: "sorular", Component: FAQ },
       { path: "giris", Component: Login },
       { path: "kayit", Component: Register },

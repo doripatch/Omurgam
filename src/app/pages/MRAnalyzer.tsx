@@ -1,8 +1,55 @@
 import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { Search, Brain, AlertTriangle, CheckCircle, Info, TrendingUp, Shield, AlertCircle } from 'lucide-react';
 import { termsAPI } from '../lib/api';
 import { toast } from 'sonner';
 import FavoriteButton from '../components/FavoriteButton';
+import Seo from '../components/Seo';
+
+const MR_JSONLD = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'MedicalWebPage',
+      '@id': 'https://omurgam.com/mr-analiz#webpage',
+      url: 'https://omurgam.com/mr-analiz',
+      name: 'MR Raporu Terim Sözlüğü — Bel ve Boyun MR Raporu Nasıl Okunur?',
+      description:
+        'MR raporunuzda geçen protrüzyon, ekstrüzyon, bulging, dejenerasyon gibi terimlerin ne anlama geldiğini sade bir dille öğrenin.',
+      inLanguage: 'tr-TR',
+      publisher: { '@id': 'https://omurgam.com/#org' },
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'MR raporunda protrüzyon ne demek?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Protrüzyon, diskin dış halkası (anulus fibrosus) tamamen yırtılmadan, iç kısmının dışarı doğru çıkıntı yapmasıdır. Fıtıklaşmanın erken evresi olarak kabul edilir ve tek başına ameliyat gerektiği anlamına gelmez.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'MR raporunda ekstrüzyon ne demek?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Ekstrüzyon, diskin dış halkasının yırtılıp iç materyalin dışarı taşmasıdır. Protrüzyona göre daha ileri bir fıtık tipidir; ancak tedavi kararı görüntüleme değil, kişinin şikâyetleri ve muayenesiyle verilir.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'MR raporunda fıtık görülmesi ameliyat gerektiği anlamına mı gelir?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Hayır. Hiçbir şikâyeti olmayan kişilerde de MR’da disk taşması bulunabilir. Fıtık bulgusu tek başına ameliyat kararı vermez; her zaman klinik muayene ile birlikte yorumlanır.',
+          },
+        },
+      ],
+    },
+  ],
+};
 
 interface MRTerm {
   id: string;
@@ -15,7 +62,20 @@ interface MRTerm {
 
 const hasRisk = (level?: string) => level === 'low' || level === 'medium' || level === 'high';
 
+// Türkçe karakter duyarlı slug (sitemap ile birebir aynı mantık)
+const TR_MAP: Record<string, string> = {
+  'ç': 'c', 'ğ': 'g', 'ı': 'i', 'İ': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u',
+  'â': 'a', 'î': 'i', 'û': 'u', 'Ç': 'c', 'Ğ': 'g', 'Ö': 'o', 'Ş': 's', 'Ü': 'u',
+};
+const slugify = (s: string) =>
+  s.split('').map((c) => TR_MAP[c] ?? c).join('')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/-+/g, '-');
+
 export default function MRAnalyzer() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const routeSlug = decodeURIComponent(location.pathname.replace(/^\/mr-analiz\/?/, '')).trim();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<MRTerm[]>([]);
   const [selectedTerm, setSelectedTerm] = useState<MRTerm | null>(null);
@@ -26,6 +86,65 @@ export default function MRAnalyzer() {
   useEffect(() => {
     loadTerms();
   }, []);
+
+  // URL'de bir terim slug'ı varsa o terimi seç (derin bağlantı / SEO)
+  useEffect(() => {
+    if (!routeSlug || allTerms.length === 0) return;
+    const found = allTerms.find((t) => slugify(t.term) === routeSlug);
+    if (found) {
+      setSelectedTerm(found);
+      setSearchResults([found]);
+    }
+  }, [routeSlug, allTerms]);
+
+  // Bir terim seçince URL'i o terimin kalıcı adresine güncelle
+  const selectTerm = (term: MRTerm) => {
+    setSelectedTerm(term);
+    const sl = slugify(term.term);
+    if (sl && `/mr-analiz/${sl}` !== location.pathname) {
+      navigate(`/mr-analiz/${sl}`);
+    }
+  };
+
+  const termDescription = selectedTerm
+    ? `${selectedTerm.term}: ${selectedTerm.explanation.replace(/\s+/g, ' ').slice(0, 155)}`
+    : 'MR raporunuzda geçen protrüzyon, ekstrüzyon, bulging, dejenerasyon gibi terimlerin ne anlama geldiğini sade ve bilimsel bir dille öğrenin. 290+ MR terimi, Prof. Dr. Defne Kaya Utlu editörlüğünde.';
+  const termTitle = selectedTerm
+    ? `${selectedTerm.term} Nedir? — MR Raporu Terimi`
+    : 'MR Raporu Terim Sözlüğü — Bel ve Boyun MR Raporu Nasıl Okunur?';
+  const seoJsonLd = selectedTerm
+    ? {
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'MedicalWebPage',
+            url: `https://omurgam.com/mr-analiz/${slugify(selectedTerm.term)}`,
+            name: termTitle,
+            description: termDescription,
+            inLanguage: 'tr-TR',
+            publisher: { '@id': 'https://omurgam.com/#org' },
+          },
+          {
+            '@type': 'DefinedTerm',
+            name: selectedTerm.term,
+            description: selectedTerm.explanation,
+            inDefinedTermSet: {
+              '@type': 'DefinedTermSet',
+              name: 'Omurgam MR Raporu Terim Sözlüğü',
+              url: 'https://omurgam.com/mr-analiz',
+            },
+          },
+          {
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: 'https://omurgam.com' },
+              { '@type': 'ListItem', position: 2, name: 'MR Terim Sözlüğü', item: 'https://omurgam.com/mr-analiz' },
+              { '@type': 'ListItem', position: 3, name: selectedTerm.term, item: `https://omurgam.com/mr-analiz/${slugify(selectedTerm.term)}` },
+            ],
+          },
+        ],
+      }
+    : MR_JSONLD;
 
   const loadTerms = async () => {
     try {
@@ -55,7 +174,7 @@ export default function MRAnalyzer() {
       setSearchResults(data.terms || []);
       
       if (data.terms && data.terms.length > 0) {
-        setSelectedTerm(data.terms[0]);
+        selectTerm(data.terms[0]);
       } else {
         setSelectedTerm(null);
         toast.info('Aradığınız terim bulunamadı');
@@ -70,7 +189,7 @@ export default function MRAnalyzer() {
     setSearchQuery(termName);
     const result = allTerms.find(t => t.term === termName);
     if (result) {
-      setSelectedTerm(result);
+      selectTerm(result);
       setSearchResults([result]);
     }
   };
@@ -116,6 +235,7 @@ export default function MRAnalyzer() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-emerald-50/20">
+      <Seo title={termTitle} description={termDescription} jsonLd={seoJsonLd} />
       {/* Hero Header */}
       <div className="relative bg-gradient-to-br from-amber-700 via-orange-800 to-amber-900 text-white py-12 md:py-20 px-4 overflow-hidden">
         {/* Decorative Elements */}
@@ -279,7 +399,7 @@ export default function MRAnalyzer() {
               {searchResults.map((term) => (
                 <button
                   key={term.term}
-                  onClick={() => setSelectedTerm(term)}
+                  onClick={() => selectTerm(term)}
                   className="text-left backdrop-blur-xl bg-white/80 border border-teal-200/30 rounded-2xl md:rounded-3xl p-4 md:p-6 hover:shadow-xl transition-all hover:scale-105"
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -357,6 +477,27 @@ export default function MRAnalyzer() {
                 Sürekli güncellenen veri tabanımız ile MR raporu terimlerini anlayın
               </p>
             </div>
+
+            {/* Tüm terimler dizini — her terimin kalıcı adresi (SEO / crawler keşfi) */}
+            {allTerms.length > 0 && (
+              <div className="md:col-span-3 backdrop-blur-xl bg-white/80 border border-teal-200/30 rounded-3xl p-6 md:p-8">
+                <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">Tüm Terimler (A–Z)</h3>
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                  {[...allTerms]
+                    .sort((a, b) => a.term.localeCompare(b.term, 'tr'))
+                    .map((t) => (
+                      <a
+                        key={t.id || t.term}
+                        href={`/mr-analiz/${slugify(t.term)}`}
+                        onClick={(e) => { e.preventDefault(); selectTerm(t); }}
+                        className="text-sm text-teal-700 hover:underline"
+                      >
+                        {t.term}
+                      </a>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
