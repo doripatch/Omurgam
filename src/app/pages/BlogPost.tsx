@@ -18,7 +18,8 @@ interface BlogPostData {
   section?: string;
   views: number;
   published: boolean;
-  created_at: string;
+  created_at?: string;
+  createdAt?: string;
   updatedAt?: string;
 }
 
@@ -49,6 +50,8 @@ export default function BlogPost() {
       setError(null);
       const data = await blogAPI.getById(postId);
       setPost(data.post);
+      // Görüntülenmeyi artır (hata olsa da sayfayı etkilemesin)
+      blogAPI.incrementViews(postId).catch(() => {});
     } catch (error: any) {
       console.error('❌ Blog yükleme hatası:', error);
       setError(error.message || 'Blog yazısı yüklenemedi');
@@ -58,8 +61,10 @@ export default function BlogPost() {
     }
   };
 
-  const formatDate = (isoDate: string) => {
+  const formatDate = (isoDate?: string) => {
+    if (!isoDate) return '';
     const date = new Date(isoDate);
+    if (isNaN(date.getTime())) return '';
     return date.toLocaleDateString('tr-TR', {
       day: 'numeric',
       month: 'long',
@@ -83,8 +88,8 @@ export default function BlogPost() {
               description: post.excerpt || undefined,
               articleSection: post.category,
               inLanguage: 'tr-TR',
-              datePublished: post.created_at,
-              dateModified: post.updatedAt || post.created_at,
+              datePublished: post.createdAt || post.created_at,
+              dateModified: post.updatedAt || post.createdAt || post.created_at,
               image: post.imageUrl || 'https://omurgam.com/assets/logo-og.png',
               mainEntityOfPage: { '@type': 'WebPage', '@id': `https://omurgam.com/blog/${post.id}` },
               author: { '@type': 'Person', name: 'Prof. Dr. Defne Kaya Utlu', jobTitle: 'Fizyoterapi Profesörü' },
@@ -140,7 +145,7 @@ export default function BlogPost() {
               <div className="flex items-center gap-6 text-slate-600 mb-8 pb-8 border-b border-slate-200">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
-                  <span className="text-sm">{formatDate(post.created_at)}</span>
+                  <span className="text-sm">{formatDate(post.createdAt || post.created_at)}</span>
                 </div>
                 {post.readingTime && (
                   <div className="flex items-center gap-2 text-amber-700">
@@ -168,7 +173,7 @@ export default function BlogPost() {
                 </div>
               </div>
 
-              <AuthorBox updatedDate={formatDate(post.updatedAt || post.created_at)} />
+              <AuthorBox updatedDate={formatDate(post.updatedAt || post.createdAt || post.created_at)} />
             </>
           ) : (
             <div className="text-center py-12">

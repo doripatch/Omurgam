@@ -884,6 +884,20 @@ app.get("/blog/:id", async (c) => {
   }
 });
 
+// Blog görüntülenme sayacı (video ile aynı mantık)
+app.post("/blog/:id/view", async (c) => {
+  try {
+    const id = cleanId(c.req.param("id"));
+    const post = await kv.get(`blog:${id}`);
+    if (!post) return c.json({ error: "Blog post not found" }, 404);
+    post.views = (post.views || 0) + 1;
+    await kv.set(`blog:${id}`, post);
+    return c.json({ views: post.views });
+  } catch (error) {
+    return c.json({ error: "Failed to increment views" }, 500);
+  }
+});
+
 app.post("/blog", async (c) => {
   try {
     const body = await c.req.json();

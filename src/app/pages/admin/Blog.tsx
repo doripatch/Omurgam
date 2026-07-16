@@ -14,7 +14,8 @@ interface BlogPost {
   section?: string;
   views: number;
   published: boolean;
-  created_at: string;
+  created_at?: string;
+  createdAt?: string;
 }
 
 const SECTION_META: Record<string, { label: string; title: string; desc: string }> = {
@@ -277,8 +278,10 @@ export default function AdminBlog() {
     }
   };
 
-  const formatDate = (isoDate: string) => {
+  const formatDate = (isoDate?: string) => {
+    if (!isoDate) return '—';
     const date = new Date(isoDate);
+    if (isNaN(date.getTime())) return '—';
     return date.toLocaleDateString('tr-TR', {
       day: 'numeric',
       month: 'long',
@@ -414,7 +417,7 @@ export default function AdminBlog() {
                           {post.category}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{formatDate(post.created_at)}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{formatDate(post.createdAt || post.created_at)}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-slate-600">
                           <Eye className="w-4 h-4" />
