@@ -47,7 +47,7 @@ export default function Home() {
 
   const renderBanner = (b: any) => {
     const inner = (
-      <div className="group relative h-48 md:h-56 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all">
+      <div className="group relative h-72 md:h-96 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all">
         <ImageWithFallback src={b.imageUrl} alt={b.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-slate-900/30 to-transparent"></div>
         <div className="absolute bottom-0 left-0 right-0 p-5">
@@ -139,7 +139,7 @@ export default function Home() {
         }}
       />
       {/* HERO */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 pt-20 pb-36">
+      <section className="relative min-h-[68vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 pt-8 pb-20">
         <div className="absolute inset-0 opacity-[0.02]">
           <div className="absolute inset-0" style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, rgb(120, 53, 15) 1px, transparent 0)`,
