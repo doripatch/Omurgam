@@ -63,7 +63,7 @@ export default function Home() {
   };
 
   const scrollDown = () => {
-    window.scrollTo({ top: window.innerHeight * 0.9, behavior: 'smooth' });
+    window.scrollBy({ top: window.innerHeight * 0.85, behavior: 'smooth' });
   };
 
   const loadAnsweredQuestions = async () => {
@@ -211,25 +211,32 @@ export default function Home() {
           </motion.div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 1 }}
-          onClick={scrollDown}
-          className="absolute bottom-5 left-1/2 -translate-x-1/2 hidden sm:flex cursor-pointer"
-        >
-          <div className="flex flex-col items-center gap-2 text-slate-400 hover:text-amber-600 transition-colors">
-            <span className="text-xs uppercase tracking-wider font-semibold">{c.scrollText}</span>
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-              className="w-6 h-10 border-2 border-slate-300 rounded-full flex items-start justify-center p-2"
-            >
-              <div className="w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
-            </motion.div>
-          </div>
-        </motion.div>
       </section>
+
+      {/* BANNERLAR (hero'nun hemen altında) */}
+      {banners.length > 0 && (
+        <section className="pt-2 pb-6 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
+          <div className="max-w-7xl mx-auto">
+            <div className={`grid gap-5 ${banners.length === 1 ? 'grid-cols-1' : banners.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
+              {banners.slice(0, 6).map(renderBanner)}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* AŞAĞI KAYDIR (banner'ın altında) */}
+      <div className="flex justify-center pt-2 pb-10 bg-stone-50 dark:bg-slate-900">
+        <div onClick={scrollDown} className="hidden sm:flex cursor-pointer flex-col items-center gap-2 text-slate-400 hover:text-amber-600 transition-colors">
+          <span className="text-xs uppercase tracking-wider font-semibold">{c.scrollText}</span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            className="w-6 h-10 border-2 border-slate-300 rounded-full flex items-start justify-center p-2"
+          >
+            <div className="w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
+          </motion.div>
+        </div>
+      </div>
 
       {/* STATS BAR */}
       <section className="py-12 px-4 bg-white dark:bg-slate-800 border-y border-slate-200 dark:border-slate-700">
@@ -251,17 +258,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* BANNERLAR */}
-      {banners.length > 0 && (
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
-          <div className="max-w-7xl mx-auto">
-            <div className={`grid gap-5 ${banners.length === 1 ? 'grid-cols-1' : banners.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
-              {banners.slice(0, 6).map(renderBanner)}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* FORUM / COMMUNITY QUESTIONS */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 to-slate-800">
