@@ -5,43 +5,44 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useState, useEffect } from 'react';
 import { supabase, TABLES } from '../lib/supabase';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
-import { faqAPI, medicalTermsAPI, bannersAPI, blogAPI } from '../lib/api';
+import { faqAPI, medicalTermsAPI, bannersAPI } from '../lib/api';
 import Seo from '../components/Seo';
 
-// En çok okunan yazılar için otomatik dönen carousel
-function TopReadCarousel({ posts }: { posts: any[] }) {
+// Tek banner slaytı (admin panelinden gelen banner: imageUrl, title, subtitle, link)
+function BannerSlide({ b, active }: { b: any; active: boolean }) {
+  const cls = `absolute inset-0 transition-opacity duration-700 ${active ? 'opacity-100' : 'opacity-0 pointer-events-none'}`;
+  const inner = (
+    <>
+      <ImageWithFallback src={b.imageUrl} alt={b.title} className="absolute inset-0 w-full h-full object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+        <h3 className="text-2xl md:text-4xl font-black text-white mb-2 line-clamp-2">{b.title}</h3>
+        {b.subtitle && <p className="text-slate-200 text-sm md:text-base line-clamp-2 max-w-2xl">{b.subtitle}</p>}
+        {b.link && <span className="inline-flex items-center gap-1 mt-3 text-amber-300 font-semibold text-sm">İncele <ArrowRight className="w-4 h-4" /></span>}
+      </div>
+    </>
+  );
+  if (!b.link) return <div className={cls}>{inner}</div>;
+  if (b.link.startsWith('/')) return <Link to={b.link} className={cls}>{inner}</Link>;
+  return <a href={b.link} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>;
+}
+
+// Admin panelindeki banner'lardan beslenen otomatik dönen carousel
+function BannerCarousel({ items }: { items: any[] }) {
   const [i, setI] = useState(0);
   useEffect(() => {
-    if (posts.length <= 1) return;
-    const t = setInterval(() => setI((p) => (p + 1) % posts.length), 5000);
+    if (items.length <= 1) return;
+    const t = setInterval(() => setI((p) => (p + 1) % items.length), 5000);
     return () => clearInterval(t);
-  }, [posts.length]);
-  if (!posts.length) return null;
-  const go = (n: number) => setI((n + posts.length) % posts.length);
+  }, [items.length]);
+  if (!items.length) return null;
+  const go = (n: number) => setI((n + items.length) % items.length);
   return (
     <div className="relative">
       <div className="relative h-72 md:h-96 rounded-3xl overflow-hidden shadow-sm">
-        {posts.map((p, idx) => (
-          <Link
-            key={p.id}
-            to={`/blog/${p.id}`}
-            className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-          >
-            <ImageWithFallback src={p.imageUrl} alt={p.title} className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
-            <div className="absolute top-4 left-4 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500 text-white text-xs font-bold">
-              <Star className="w-3 h-3" /> {idx + 1}. sırada
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
-              {p.category && <span className="text-xs text-amber-300 font-semibold uppercase tracking-wide">{p.category}</span>}
-              <h3 className="text-2xl md:text-4xl font-black text-white mb-2 line-clamp-2">{p.title}</h3>
-              {p.excerpt && <p className="text-slate-200 text-sm md:text-base line-clamp-2 max-w-2xl">{p.excerpt}</p>}
-              <span className="inline-flex items-center gap-1 mt-3 text-amber-300 font-semibold text-sm">Oku <ArrowRight className="w-4 h-4" /></span>
-            </div>
-          </Link>
-        ))}
+        {items.map((b, idx) => <BannerSlide key={b.id || idx} b={b} active={idx === i} />)}
       </div>
-      {posts.length > 1 && (
+      {items.length > 1 && (
         <>
           <button onClick={() => go(i - 1)} aria-label="Önceki" className="absolute left-3 top-[calc(50%-1.25rem)] w-10 h-10 rounded-full bg-white/85 hover:bg-white shadow-md flex items-center justify-center text-slate-800">
             <ChevronLeft className="w-5 h-5" />
@@ -50,8 +51,8 @@ function TopReadCarousel({ posts }: { posts: any[] }) {
             <ChevronRight className="w-5 h-5" />
           </button>
           <div className="flex justify-center gap-2 mt-4">
-            {posts.map((_, idx) => (
-              <button key={idx} onClick={() => go(idx)} aria-label={`${idx + 1}. yazı`} className={`h-2 rounded-full transition-all ${idx === i ? 'w-6 bg-amber-600' : 'w-2 bg-slate-300 dark:bg-slate-600'}`} />
+            {items.map((_, idx) => (
+              <button key={idx} onClick={() => go(idx)} aria-label={`${idx + 1}. banner`} className={`h-2 rounded-full transition-all ${idx === i ? 'w-6 bg-amber-600' : 'w-2 bg-slate-300 dark:bg-slate-600'}`} />
             ))}
           </div>
         </>
@@ -83,7 +84,6 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<string | null>(null);
   const [myths, setMyths] = useState<any[]>([]);
   const [banners, setBanners] = useState<any[]>([]);
-  const [topPosts, setTopPosts] = useState<any[]>([]);
 
   // Tüm metinler buradan gelir (panelden düzenlenebilir, varsayılanlar her zaman dolu)
   const settings = useSiteSettingsStore((s) => s.settings);
@@ -96,13 +96,6 @@ export default function Home() {
       .then((d) => setMyths((d.terms || []).filter((t: any) => t.mistakeWrong && t.mistakeRight).slice(0, 3)))
       .catch(() => {});
     bannersAPI.getAll().then((d) => setBanners(d.banners || [])).catch(() => {});
-    blogAPI.getAll().then((d) => {
-      const posts = (d.posts || [])
-        .filter((p: any) => p.published)
-        .sort((a: any, b: any) => (b.views || 0) - (a.views || 0))
-        .slice(0, 8);
-      setTopPosts(posts);
-    }).catch(() => {});
   }, []);
 
   const renderBanner = (b: any) => {
@@ -273,9 +266,9 @@ export default function Home() {
 
       </section>
 
-      {/* EN ÇOK OKUNANLAR — otomatik dönen carousel */}
-      {topPosts.length > 0 && (
-        <section className="pt-6 pb-4 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
+      {/* EN ÇOK OKUNANLAR — admin panelindeki banner'lardan beslenen carousel */}
+      {banners.length > 0 && (
+        <section className="pt-6 pb-6 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-end justify-between mb-5">
               <div>
@@ -288,18 +281,7 @@ export default function Home() {
                 Tüm yazılar <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-            <TopReadCarousel posts={topPosts} />
-          </div>
-        </section>
-      )}
-
-      {/* BANNERLAR (hero'nun hemen altında) */}
-      {banners.length > 0 && (
-        <section className="pt-2 pb-6 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
-          <div className="max-w-7xl mx-auto">
-            <div className={`grid gap-5 ${banners.length === 1 ? 'grid-cols-1' : banners.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
-              {banners.slice(0, 6).map(renderBanner)}
-            </div>
+            <BannerCarousel items={banners} />
           </div>
         </section>
       )}
