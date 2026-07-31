@@ -28,38 +28,16 @@ export default function Root() {
   type NavChild = { to: string; label: string };
   type NavItem = { to?: string; label: string; children?: NavChild[] };
   const navItems: NavItem[] = [
-    { to: '/videolar', label: 'Omurgam Anlatıyor' },
+    { to: '/videolar', label: 'Omurga Sağlığı Videoları' },
+    { to: '/omurgam-ne-diyor', label: 'Omurga Sağlığı Yazıları' },
+    { to: '/klinisyenler', label: 'Klinisyenlere Notlar' },
+    { to: '/mr-analiz', label: 'MR Terimler Sözlüğü' },
     {
       label: 'Konular',
       children: [
         { to: '/bel-fitigi', label: 'Bel Fıtığı' },
         { to: '/boyun-fitigi', label: 'Boyun Fıtığı' },
         { to: '/skolyoz', label: 'Skolyoz' },
-        { to: '/mr-analiz', label: 'MR Terim Sözlüğü' },
-      ],
-    },
-    {
-      label: 'Omurgam Köşeleri',
-      children: [
-        { to: '/forum', label: 'Sizden Gelenler' },
-        { to: '/omurgam-ne-diyor', label: 'Omurgam Ne Diyor?' },
-        { to: '/saglikli-yasam', label: 'Sağlıklı Yaşam' },
-      ],
-    },
-    { to: '/klinisyenler', label: 'Klinisyenler Buraya' },
-    { to: '/saglik-sozlugu', label: 'Sözlük' },
-    {
-      label: 'Oyun',
-      children: [
-        { to: '/gunun-terimi', label: 'Günün Terimi' },
-        { to: '/mit-avi', label: 'Mit Avı' },
-      ],
-    },
-    {
-      label: 'Kurumsal',
-      children: [
-        { to: '/hakkimizda', label: 'Hakkımızda' },
-        { to: '/iletisim', label: 'İletişim' },
       ],
     },
   ];
@@ -145,18 +123,13 @@ export default function Root() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[4.5rem] gap-2">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden p-1 group-hover:shadow-md group-hover:scale-105 transition-all">
+            <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
+              <div className="w-14 h-14 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden p-0.5 group-hover:shadow-md group-hover:scale-105 transition-all">
                 <img src="/assets/logo.png" alt="Omurgam Logo" className="w-full h-full object-contain" />
               </div>
-              <div className="leading-none -mt-0.5">
-                <h1 className="text-lg font-extrabold leading-none bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
-                  {settings?.logoText || 'Omurgam'}
-                </h1>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium whitespace-nowrap mt-0.5 hidden sm:block">
-                  Bugün omurgan ne sordu?
-                </p>
-              </div>
+              <h1 className="text-2xl font-extrabold leading-none bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
+                {settings?.logoText || 'Omurgam'}
+              </h1>
             </Link>
 
             {/* Yüzen hap menü (ortada) */}
@@ -233,12 +206,14 @@ export default function Root() {
               <DarkModeToggle />
 
               {/* Randevu CTA */}
-              <Link
-                to="/randevu"
+              <a
+                href="https://www.doktortakvimi.com/z/ELoZmY"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="ml-0.5 text-[13px] font-semibold px-3.5 py-2 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-sm hover:shadow-lg hover:shadow-amber-500/30 hover:scale-105 transition-all whitespace-nowrap"
               >
                 Randevu Al
-              </Link>
+              </a>
 
               {/* Ayraç */}
               <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
@@ -380,15 +355,15 @@ export default function Root() {
                   </Link>
                 )
               )}
-              <Link
-                to="/randevu"
+              <a
+                href="https://www.doktortakvimi.com/z/ELoZmY"
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2.5 text-sm font-medium ${
-                  isActive('/randevu') ? 'text-amber-700 dark:text-amber-300' : 'text-slate-700 dark:text-slate-200'
-                }`}
+                className="block py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200"
               >
-                Randevu / Danışma
-              </Link>
+                Randevu Al
+              </a>
               <div className="pt-3 mt-2 border-t border-amber-500/10 dark:border-slate-700 space-y-3">
                 {isAuthenticated && isAdmin && (
                   <Link
@@ -492,14 +467,14 @@ export default function Root() {
             <div>
               <h4 className="font-semibold mb-4">{settings?.footer?.quickLinksTitle || 'Hızlı Erişim'}</h4>
               <ul className="space-y-2 text-sm text-slate-300">
-                <li><Link to="/videolar" className="hover:text-amber-300 transition-colors">Omurgam Anlatıyor</Link></li>
+                <li><Link to="/videolar" className="hover:text-amber-300 transition-colors">Omurga Sağlığı Videoları</Link></li>
                 <li><Link to="/forum" className="hover:text-amber-300 transition-colors">Sizden Gelenler</Link></li>
-                <li><Link to="/omurgam-ne-diyor" className="hover:text-amber-300 transition-colors">Omurgam Ne Diyor?</Link></li>
+                <li><Link to="/omurgam-ne-diyor" className="hover:text-amber-300 transition-colors">Omurga Sağlığı Yazıları</Link></li>
                 <li><Link to="/saglikli-yasam" className="hover:text-amber-300 transition-colors">Sağlıklı Yaşam</Link></li>
                 <li><Link to="/klinisyenler" className="hover:text-amber-300 transition-colors">Klinisyenler Buraya</Link></li>
                 <li><Link to="/mr-analiz" className="hover:text-amber-300 transition-colors">MR Terim Sözlüğü</Link></li>
                 <li><Link to="/saglik-sozlugu" className="hover:text-amber-300 transition-colors">Sağlık Sözlüğü</Link></li>
-                <li><Link to="/randevu" className="hover:text-amber-300 transition-colors">Randevu / Danışma</Link></li>
+                <li><a href="https://www.doktortakvimi.com/z/ELoZmY" target="_blank" rel="noopener noreferrer" className="hover:text-amber-300 transition-colors">Randevu Al</a></li>
                 <li><Link to="/sorular" className="hover:text-amber-300 transition-colors">Sıkça Sorulan Sorular</Link></li>
               </ul>
             </div>
@@ -510,7 +485,7 @@ export default function Root() {
                 <li><Link to="/hakkimizda" className="hover:text-amber-300 transition-colors">Hakkımızda</Link></li>
                 <li><Link to="/iletisim" className="hover:text-amber-300 transition-colors">İletişim</Link></li>
                 <li><Link to="/basin" className="hover:text-amber-300 transition-colors">Basın Odası</Link></li>
-                <li><Link to="/randevu" className="hover:text-amber-300 transition-colors">Randevu / Danışma</Link></li>
+                <li><a href="https://www.doktortakvimi.com/z/ELoZmY" target="_blank" rel="noopener noreferrer" className="hover:text-amber-300 transition-colors">Randevu Al</a></li>
                 <li><button onClick={openCookiePreferences} className="hover:text-amber-300 transition-colors text-left">Çerez Tercihleri</button></li>
               </ul>
               

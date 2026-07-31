@@ -43,7 +43,7 @@ export const DEFAULT_CONTENT = {
 
   // ---- Menü (Navigasyon) ----
   nav: {
-    videos: 'Omurgam Anlatıyor',
+    videos: 'Omurga Sağlığı Videoları',
     blog: 'Blog',
     forum: 'Forum',
     glossary: 'Sözlük',
@@ -71,7 +71,7 @@ export const DEFAULT_CONTENT = {
     subtitlePrefix: 'Omurga sağlığınız için',
     subtitleHighlight: 'bilimsel bilgilendirme',
     subtitleSuffix: 'platformu',
-    ctaVideos: 'Omurgam Anlatıyor',
+    ctaVideos: 'Omurga Sağlığı Videoları',
     ctaGlossary: 'Terim Sözlüğü',
     scrollText: 'Aşağı Kaydır',
 
@@ -95,7 +95,7 @@ export const DEFAULT_CONTENT = {
     featuresTitle: 'Neler Sunuyoruz?',
     featuresDesc: 'Omurga sağlığınız için ihtiyacınız olan her şey, bir arada',
     cardVideoBadge: '150+ VİDEO',
-    cardVideoTitle: 'Omurgam Anlatıyor',
+    cardVideoTitle: 'Omurga Sağlığı Videoları',
     cardVideoDesc: 'Profesyonel fizyoterapist rehberliğinde hazırlanmış egzersiz ve bilgilendirme videoları',
     cardVideoCta: 'Keşfet',
     cardGlossaryTitle: 'Terim Sözlüğü',

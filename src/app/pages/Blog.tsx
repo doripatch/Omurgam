@@ -25,7 +25,7 @@ const SECTIONS: Record<string, { title: string; desc: string; accent: string }> 
     accent: 'emerald',
   },
   'kaleminden': {
-    title: 'Omurgam Ne Diyor?',
+    title: 'Omurga Sağlığı Yazıları',
     desc: 'Omurga sağlığına dair bilimsel makaleler ve değerlendirmeler.',
     accent: 'amber',
   },

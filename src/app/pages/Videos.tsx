@@ -79,7 +79,7 @@ export default function Videos() {
 
     // Toast notification
     toast.success('🎉 Tebrikler!', {
-      description: `${video.title} tamamlandı! ${video.duration} dakika egzersiz yaptın.`,
+      description: `${video.title} videosunu tamamladın!`,
     });
   };
 
@@ -89,10 +89,10 @@ export default function Videos() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white mb-4">
-            Omurgam Anlatıyor
+            Omurga Sağlığı Videoları
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400">
-            Profesyonel rehberliğinde egzersiz videoları
+            Prof. Dr. Defne Kaya Utlu ile omurga sağlığı üzerine bilimsel bilgilendirme videoları
           </p>
         </div>
 

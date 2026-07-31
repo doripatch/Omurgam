@@ -24,7 +24,7 @@ interface BlogPostData {
 }
 
 function sectionMeta(section?: string) {
-  if (section === 'kaleminden') return { path: '/omurgam-ne-diyor', name: 'Omurgam Ne Diyor?' };
+  if (section === 'kaleminden') return { path: '/omurgam-ne-diyor', name: 'Omurga Sağlığı Yazıları' };
   if (section === 'saglikli-yasam') return { path: '/saglikli-yasam', name: 'Sağlıklı Yaşam' };
   return { path: '/blog', name: 'Blog' };
 }

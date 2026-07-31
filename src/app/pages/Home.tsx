@@ -193,7 +193,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-600 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative flex items-center gap-3">
                   <Play className="w-5 h-5" />
-                  <span>{c.ctaVideos && c.ctaVideos !== 'Video Arşivi' ? c.ctaVideos : 'Omurgam Anlatıyor'}</span>
+                  <span>{c.ctaVideos && c.ctaVideos !== 'Video Arşivi' ? c.ctaVideos : 'Omurga Sağlığı Videoları'}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
@@ -254,6 +254,36 @@ export default function Home() {
                 <div className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-2">{stat.number}</div>
                 <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">{stat.label}</div>
               </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* KEŞFET — menüden çıkarılan bölümler burada görünür */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-2">Keşfet</h2>
+            <p className="text-slate-600 dark:text-slate-400">Omurgam'ın diğer bölümlerine göz at</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { to: '/forum', label: 'Sizden Gelenler', desc: 'Soru & cevap', Icon: MessageCircle },
+              { to: '/saglikli-yasam', label: 'Sağlıklı Yaşam', desc: 'Genel sağlık yazıları', Icon: Heart },
+              { to: '/saglik-sozlugu', label: 'Sağlık Sözlüğü', desc: 'Tıbbi terimler', Icon: BookOpen },
+              { to: '/gunun-terimi', label: 'Günün Terimi', desc: 'Oyunla öğren', Icon: Star },
+              { to: '/mit-avi', label: 'Mit Avı', desc: 'Doğru mu, yanlış mı?', Icon: HelpCircle },
+            ].map(({ to, label, desc, Icon }) => (
+              <Link key={to} to={to} className="group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 hover:border-amber-400 hover:shadow-lg transition-all">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-slate-700 dark:to-slate-700 flex items-center justify-center mb-3">
+                  <Icon className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                  {label}
+                  <ArrowRight className="w-3.5 h-3.5 text-amber-600 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{desc}</div>
+              </Link>
             ))}
           </div>
         </div>
@@ -404,7 +434,7 @@ export default function Home() {
                 <div className="absolute inset-0">
                   <ImageWithFallback
                     src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200"
-                    alt="Omurgam Anlatıyor"
+                    alt="Omurga Sağlığı Videoları"
                     className="w-full h-full object-cover opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
@@ -415,7 +445,7 @@ export default function Home() {
                     <Play className="w-4 h-4 text-amber-300" />
                     <span className="text-sm font-bold text-amber-300">{c.cardVideoBadge}</span>
                   </div>
-                  <h3 className="text-4xl md:text-5xl font-black text-white mb-3">{c.cardVideoTitle && c.cardVideoTitle !== 'Video Arşivi' ? c.cardVideoTitle : 'Omurgam Anlatıyor'}</h3>
+                  <h3 className="text-4xl md:text-5xl font-black text-white mb-3">{c.cardVideoTitle && c.cardVideoTitle !== 'Video Arşivi' ? c.cardVideoTitle : 'Omurga Sağlığı Videoları'}</h3>
                   <p className="text-lg text-slate-300 mb-6 max-w-lg">
                     {c.cardVideoDesc}
                   </p>
