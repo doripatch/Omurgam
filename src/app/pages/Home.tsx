@@ -1,12 +1,64 @@
 import { Link } from 'react-router';
-import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, ThumbsUp, Clock, HelpCircle, Plus, Minus, BookOpen, XCircle, CheckCircle2, Instagram, Youtube, Linkedin, Facebook, Twitter } from 'lucide-react';
+import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, ThumbsUp, Clock, HelpCircle, Plus, Minus, BookOpen, XCircle, CheckCircle2, Instagram, Youtube, Linkedin, Facebook, Twitter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useState, useEffect } from 'react';
 import { supabase, TABLES } from '../lib/supabase';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
-import { faqAPI, medicalTermsAPI, bannersAPI } from '../lib/api';
+import { faqAPI, medicalTermsAPI, bannersAPI, blogAPI } from '../lib/api';
 import Seo from '../components/Seo';
+
+// En çok okunan yazılar için otomatik dönen carousel
+function TopReadCarousel({ posts }: { posts: any[] }) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (posts.length <= 1) return;
+    const t = setInterval(() => setI((p) => (p + 1) % posts.length), 5000);
+    return () => clearInterval(t);
+  }, [posts.length]);
+  if (!posts.length) return null;
+  const go = (n: number) => setI((n + posts.length) % posts.length);
+  return (
+    <div className="relative">
+      <div className="relative h-72 md:h-96 rounded-3xl overflow-hidden shadow-sm">
+        {posts.map((p, idx) => (
+          <Link
+            key={p.id}
+            to={`/blog/${p.id}`}
+            className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          >
+            <ImageWithFallback src={p.imageUrl} alt={p.title} className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
+            <div className="absolute top-4 left-4 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500 text-white text-xs font-bold">
+              <Star className="w-3 h-3" /> {idx + 1}. sırada
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+              {p.category && <span className="text-xs text-amber-300 font-semibold uppercase tracking-wide">{p.category}</span>}
+              <h3 className="text-2xl md:text-4xl font-black text-white mb-2 line-clamp-2">{p.title}</h3>
+              {p.excerpt && <p className="text-slate-200 text-sm md:text-base line-clamp-2 max-w-2xl">{p.excerpt}</p>}
+              <span className="inline-flex items-center gap-1 mt-3 text-amber-300 font-semibold text-sm">Oku <ArrowRight className="w-4 h-4" /></span>
+            </div>
+          </Link>
+        ))}
+      </div>
+      {posts.length > 1 && (
+        <>
+          <button onClick={() => go(i - 1)} aria-label="Önceki" className="absolute left-3 top-[calc(50%-1.25rem)] w-10 h-10 rounded-full bg-white/85 hover:bg-white shadow-md flex items-center justify-center text-slate-800">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button onClick={() => go(i + 1)} aria-label="Sonraki" className="absolute right-3 top-[calc(50%-1.25rem)] w-10 h-10 rounded-full bg-white/85 hover:bg-white shadow-md flex items-center justify-center text-slate-800">
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <div className="flex justify-center gap-2 mt-4">
+            {posts.map((_, idx) => (
+              <button key={idx} onClick={() => go(idx)} aria-label={`${idx + 1}. yazı`} className={`h-2 rounded-full transition-all ${idx === i ? 'w-6 bg-amber-600' : 'w-2 bg-slate-300 dark:bg-slate-600'}`} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 interface Question {
   id: string;
@@ -31,6 +83,7 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<string | null>(null);
   const [myths, setMyths] = useState<any[]>([]);
   const [banners, setBanners] = useState<any[]>([]);
+  const [topPosts, setTopPosts] = useState<any[]>([]);
 
   // Tüm metinler buradan gelir (panelden düzenlenebilir, varsayılanlar her zaman dolu)
   const settings = useSiteSettingsStore((s) => s.settings);
@@ -43,6 +96,13 @@ export default function Home() {
       .then((d) => setMyths((d.terms || []).filter((t: any) => t.mistakeWrong && t.mistakeRight).slice(0, 3)))
       .catch(() => {});
     bannersAPI.getAll().then((d) => setBanners(d.banners || [])).catch(() => {});
+    blogAPI.getAll().then((d) => {
+      const posts = (d.posts || [])
+        .filter((p: any) => p.published)
+        .sort((a: any, b: any) => (b.views || 0) - (a.views || 0))
+        .slice(0, 8);
+      setTopPosts(posts);
+    }).catch(() => {});
   }, []);
 
   const renderBanner = (b: any) => {
@@ -212,6 +272,26 @@ export default function Home() {
         </div>
 
       </section>
+
+      {/* EN ÇOK OKUNANLAR — otomatik dönen carousel */}
+      {topPosts.length > 0 && (
+        <section className="pt-6 pb-4 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-end justify-between mb-5">
+              <div>
+                <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <Star className="w-6 h-6 text-amber-500" /> En Çok Okunanlar
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Okuyucuların en çok tercih ettiği yazılar</p>
+              </div>
+              <Link to="/omurgam-ne-diyor" className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-amber-700 hover:text-amber-800">
+                Tüm yazılar <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <TopReadCarousel posts={topPosts} />
+          </div>
+        </section>
+      )}
 
       {/* BANNERLAR (hero'nun hemen altında) */}
       {banners.length > 0 && (
