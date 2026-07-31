@@ -127,7 +127,7 @@ export default function Root() {
               <div className="w-14 h-14 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden p-0.5 group-hover:shadow-md group-hover:scale-105 transition-all">
                 <img src="/assets/logo.png" alt="Omurgam Logo" className="w-full h-full object-contain" />
               </div>
-              <h1 className="text-2xl font-extrabold leading-none bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-extrabold leading-tight pb-0.5 bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
                 {settings?.logoText || 'Omurgam'}
               </h1>
             </Link>
