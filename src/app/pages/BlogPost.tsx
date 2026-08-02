@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import Seo from '../components/Seo';
 import FavoriteButton from '../components/FavoriteButton';
 import AuthorBox from '../components/AuthorBox';
+import RichText, { hasMarkdown } from '../components/RichText';
 
 interface BlogPostData {
   id: string;
@@ -169,9 +170,13 @@ export default function BlogPost() {
 
               {/* Content */}
               <div className="prose prose-lg max-w-none">
-                <div className="text-slate-800 leading-relaxed whitespace-pre-wrap">
-                  {post.content}
-                </div>
+                {hasMarkdown(post.content) ? (
+                  <RichText text={post.content} />
+                ) : (
+                  <div className="text-slate-800 leading-relaxed whitespace-pre-wrap">
+                    {post.content}
+                  </div>
+                )}
               </div>
 
               <AuthorBox updatedDate={formatDate(post.updatedAt || post.createdAt || post.created_at)} />
