@@ -124,13 +124,8 @@ export default function Root() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[4.5rem] gap-2">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-              <div className="w-14 h-14 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden p-0.5 group-hover:shadow-md group-hover:scale-105 transition-all">
-                <img src="/assets/logo.png" alt="Omurgam Logo" className="w-full h-full object-contain" />
-              </div>
-              <h1 className="text-2xl font-extrabold leading-tight pb-0.5 bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
-                {settings?.logoText || 'Omurgam'}
-              </h1>
+            <Link to="/" className="flex items-center group flex-shrink-0">
+              <img src="/assets/logo-full.png" alt="Omurgam" className="h-14 md:h-16 w-auto object-contain group-hover:scale-105 transition-transform" />
             </Link>
 
             {/* Yüzen hap menü (ortada) */}
