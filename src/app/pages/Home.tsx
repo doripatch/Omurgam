@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, ThumbsUp, Clock, HelpCircle, Plus, Minus, BookOpen, XCircle, CheckCircle2, Instagram, Youtube, Linkedin, Facebook, Twitter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, ThumbsUp, Clock, HelpCircle, Plus, Minus, BookOpen, XCircle, CheckCircle2, Instagram, Youtube, Linkedin, Facebook, Twitter, ChevronLeft, ChevronRight, BedDouble } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useState, useEffect } from 'react';
@@ -330,6 +330,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
+              { to: '/yatak-yastik-rehberi', label: 'Yatak & Yastık Rehberi', desc: 'Doğru yatak & yastık seçimi', Icon: BedDouble },
               { to: '/forum', label: 'Sizden Gelenler', desc: 'Soru & cevap', Icon: MessageCircle },
               { to: '/saglikli-yasam', label: 'Sağlıklı Yaşam', desc: 'Genel sağlık yazıları', Icon: Heart },
               { to: '/saglik-sozlugu', label: 'Sağlık Sözlüğü', desc: 'Tıbbi terimler', Icon: BookOpen },

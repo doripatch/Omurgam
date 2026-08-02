@@ -1,4 +1,4 @@
-import { Search, PenTool, Leaf, Clock } from 'lucide-react';
+import { Search, PenTool, Leaf, Clock, BedDouble } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { blogAPI } from '../lib/api';
 import { toast } from 'sonner';
@@ -29,11 +29,20 @@ const SECTIONS: Record<string, { title: string; desc: string; accent: string }> 
     desc: 'Omurga sağlığına dair bilimsel makaleler ve değerlendirmeler.',
     accent: 'amber',
   },
+  'yatak-yastik': {
+    title: 'Yatak ve Yastık Seçim Rehberi',
+    desc: 'Omurga sağlığınız için doğru yatak ve yastığı seçmenize yardımcı olacak rehber yazılar.',
+    accent: 'amber',
+  },
 };
 
 export default function Blog() {
   const location = useLocation();
-  const section = location.pathname.includes('saglikli-yasam') ? 'saglikli-yasam' : 'kaleminden';
+  const section = location.pathname.includes('saglikli-yasam')
+    ? 'saglikli-yasam'
+    : location.pathname.includes('yatak-yastik')
+    ? 'yatak-yastik'
+    : 'kaleminden';
   const meta = SECTIONS[section];
 
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -59,7 +68,7 @@ export default function Blog() {
     }
   };
 
-  const Icon = section === 'saglikli-yasam' ? Leaf : PenTool;
+  const Icon = section === 'saglikli-yasam' ? Leaf : section === 'yatak-yastik' ? BedDouble : PenTool;
 
   if (isLoading) {
     return (
@@ -87,7 +96,7 @@ export default function Blog() {
               name: meta.title,
               description: meta.desc,
               inLanguage: 'tr-TR',
-              url: `https://omurgam.com${section === 'saglikli-yasam' ? '/saglikli-yasam' : '/omurgam-ne-diyor'}`,
+              url: `https://omurgam.com${section === 'saglikli-yasam' ? '/saglikli-yasam' : section === 'yatak-yastik' ? '/yatak-yastik-rehberi' : '/omurgam-ne-diyor'}`,
             },
             {
               '@type': 'BreadcrumbList',
@@ -112,7 +121,7 @@ export default function Blog() {
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-sm font-medium mb-4">
             <Icon className="w-4 h-4" />
-            <span>{section === 'saglikli-yasam' ? 'Sağlıklı Yaşam' : 'Makaleler'}</span>
+            <span>{section === 'saglikli-yasam' ? 'Sağlıklı Yaşam' : section === 'yatak-yastik' ? 'Rehber' : 'Makaleler'}</span>
           </div>
           <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3">{meta.title}</h1>
           <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl">{meta.desc}</p>

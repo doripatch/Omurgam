@@ -912,7 +912,7 @@ app.post("/blog", async (c) => {
       updatedAt: new Date().toISOString(),
     };
     await kv.set(`blog:${id}`, post);
-    pingIndexNow([`/blog/${id}`, post.section === "kaleminden" ? "/omurgam-ne-diyor" : "/saglikli-yasam"]);
+    pingIndexNow([`/blog/${id}`, post.section === "kaleminden" ? "/omurgam-ne-diyor" : post.section === "yatak-yastik" ? "/yatak-yastik-rehberi" : "/saglikli-yasam"]);
     return c.json(post);
   } catch (error) {
     return c.json({ error: "Failed to create blog post" }, 500);

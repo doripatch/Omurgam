@@ -29,12 +29,21 @@ const SECTION_META: Record<string, { label: string; title: string; desc: string 
     title: 'Omurgam Ne Diyor? Yönetimi',
     desc: 'Omurga hakkında halka yönelik yazılar (Omurgam Ne Diyor? bölümü)',
   },
+  'yatak-yastik': {
+    label: 'Yatak & Yastık Rehberi',
+    title: 'Yatak ve Yastık Seçim Rehberi Yönetimi',
+    desc: 'Yatak ve yastık seçimi üzerine rehber yazılar (Yatak & Yastık Rehberi bölümü)',
+  },
 };
 
 export default function AdminBlog() {
   // 📝 BLOG YÖNETİMİ SAYFASI - bölüme göre (Sağlıklı Yaşam / Omurgam Ne Diyor)
   const location = useLocation();
-  const SECTION = location.pathname.includes('omurgam-ne-diyor') ? 'kaleminden' : 'saglikli-yasam';
+  const SECTION = location.pathname.includes('omurgam-ne-diyor')
+    ? 'kaleminden'
+    : location.pathname.includes('yatak-yastik')
+    ? 'yatak-yastik'
+    : 'saglikli-yasam';
   const META = SECTION_META[SECTION];
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);

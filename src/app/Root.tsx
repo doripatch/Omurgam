@@ -30,6 +30,7 @@ export default function Root() {
   const navItems: NavItem[] = [
     { to: '/videolar', label: 'Omurga Sağlığı Videoları' },
     { to: '/omurgam-ne-diyor', label: 'Omurga Sağlığı Yazıları' },
+    { to: '/yatak-yastik-rehberi', label: 'Yatak & Yastık Rehberi' },
     { to: '/klinisyenler', label: 'Klinisyenlere Notlar' },
     { to: '/mr-analiz', label: 'MR Terimler Sözlüğü' },
     {
@@ -470,6 +471,7 @@ export default function Root() {
                 <li><Link to="/videolar" className="hover:text-amber-300 transition-colors">Omurga Sağlığı Videoları</Link></li>
                 <li><Link to="/forum" className="hover:text-amber-300 transition-colors">Sizden Gelenler</Link></li>
                 <li><Link to="/omurgam-ne-diyor" className="hover:text-amber-300 transition-colors">Omurga Sağlığı Yazıları</Link></li>
+                <li><Link to="/yatak-yastik-rehberi" className="hover:text-amber-300 transition-colors">Yatak & Yastık Rehberi</Link></li>
                 <li><Link to="/saglikli-yasam" className="hover:text-amber-300 transition-colors">Sağlıklı Yaşam</Link></li>
                 <li><Link to="/klinisyenler" className="hover:text-amber-300 transition-colors">Klinisyenler Buraya</Link></li>
                 <li><Link to="/mr-analiz" className="hover:text-amber-300 transition-colors">MR Terim Sözlüğü</Link></li>
