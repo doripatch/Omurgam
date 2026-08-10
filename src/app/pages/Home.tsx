@@ -177,19 +177,6 @@ export default function Home() {
       <Seo
         title="Türkiye'nin Omurga Sağlığı Platformu"
         description={settings.metaDescription}
-        jsonLd={{
-          '@context': 'https://schema.org',
-          '@type': 'MedicalOrganization',
-          name: settings.siteName || 'Omurgam',
-          url: 'https://omurgam.com',
-          logo: 'https://omurgam.com/assets/logo-og.png',
-          description: settings.metaDescription,
-          founder: {
-            '@type': 'Person',
-            name: 'Prof. Dr. Defne Kaya Utlu',
-            jobTitle: 'Fizyoterapi Profesörü',
-          },
-        }}
       />
       {/* HERO */}
       <section className="relative min-h-[68vh] flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 pt-8 pb-20">
