@@ -8,3 +8,4 @@ Disallow: /giris
 Disallow: /kayit
 
 Sitemap: https://omurgam.com/sitemap.xml
+Sitemap: https://omurgam.com/blog-sitemap.xml
