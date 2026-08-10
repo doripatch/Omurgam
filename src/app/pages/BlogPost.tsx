@@ -94,7 +94,7 @@ export default function BlogPost() {
               dateModified: post.updatedAt || post.createdAt || post.created_at,
               image: post.imageUrl || 'https://omurgam.com/assets/logo-og.png',
               mainEntityOfPage: { '@type': 'WebPage', '@id': `https://omurgam.com/blog/${post.id}` },
-              author: { '@type': 'Person', name: 'Prof. Dr. Defne Kaya Utlu', jobTitle: 'Fizyoterapi Profesörü' },
+              author: { '@id': 'https://omurgam.com/#defne-kaya-utlu' },
               publisher: { '@type': 'Organization', name: 'Omurgam', logo: { '@type': 'ImageObject', url: 'https://omurgam.com/assets/logo-og.png' } },
             },
             {

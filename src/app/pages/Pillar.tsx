@@ -33,10 +33,7 @@ export default function Pillar() {
         inLanguage: 'tr-TR',
         about: { '@type': 'MedicalCondition', name: data.keyword },
         author: {
-          '@type': 'Person',
-          name: 'Prof. Dr. Defne Kaya Utlu',
-          jobTitle: 'Fizyoterapi Profesörü',
-          url: `${ORIGIN}/hakkimizda`,
+          '@id': `${ORIGIN}/#defne-kaya-utlu`,
         },
         publisher: { '@id': `${ORIGIN}/#org` },
         lastReviewed: '2026-07-11',
