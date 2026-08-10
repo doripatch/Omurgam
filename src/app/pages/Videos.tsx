@@ -7,6 +7,7 @@ import { useStore } from '../store/useStore';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 import { videosAPI } from '../lib/api';
+import Seo from '../components/Seo';
 
 interface Video {
   id: string;
@@ -85,6 +86,10 @@ export default function Videos() {
 
   return (
     <div className="w-full min-h-screen bg-stone-50 dark:bg-slate-900 py-12 px-4">
+      <Seo
+        title="Omurga Sağlığı Videoları"
+        description="Prof. Dr. Defne Kaya Utlu ile omurga sağlığı üzerine bilimsel bilgilendirme videoları. Bel, boyun, skolyoz ve postür konularında uzman anlatımlar."
+      />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

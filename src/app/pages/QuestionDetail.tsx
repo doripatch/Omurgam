@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, ThumbsUp, MessageCircle, User, Shield, Loader2 } from
 import { motion } from 'motion/react';
 import { supabase, TABLES } from '../lib/supabase';
 import { toast } from 'sonner';
+import Seo from '../components/Seo';
 
 interface Answer {
   id: string;
@@ -114,6 +115,7 @@ export default function QuestionDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-emerald-50/20 flex items-center justify-center">
+        <Seo title="Soru & Cevap" description="Omurgam'da omurga sağlığı soruları ve uzman yanıtları." />
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-teal-600 animate-spin mx-auto mb-4" />
           <p className="text-slate-600">Soru yükleniyor...</p>
@@ -125,6 +127,7 @@ export default function QuestionDetail() {
   if (error || !question) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-emerald-50/20 flex items-center justify-center">
+        <Seo title="Soru bulunamadı" description="Aradığınız soru bulunamadı. Omurgam'da omurga sağlığı sorularına göz atın." />
         <div className="backdrop-blur-xl bg-white/90 border border-red-200/30 rounded-3xl p-8 max-w-md text-center">
           <p className="text-red-600 mb-4">{error || 'Soru bulunamadı'}</p>
           <button
@@ -140,6 +143,12 @@ export default function QuestionDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-emerald-50/20 py-12 px-4">
+      <Seo
+        title={question.question}
+        description={question.excerpt && question.excerpt.trim()
+          ? question.excerpt.trim().slice(0, 155)
+          : `${question.question} — Omurgam'da uzman yanıtları ve bilimsel bilgilendirme.`}
+      />
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <Link

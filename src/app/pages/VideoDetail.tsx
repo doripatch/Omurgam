@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router';
 import { ThumbsUp, MessageSquare, Eye, ArrowLeft, Send, Trash2, Clock, Tag, Loader2, Play } from 'lucide-react';
 import { toast } from 'sonner';
 import { videosAPI } from '../lib/api';
+import Seo from '../components/Seo';
 import { getConsent, subscribeConsent, setConsent, openCookiePreferences } from '../lib/consent';
 import { useAuthStore } from '../store/authStore';
 import FavoriteButton from '../components/FavoriteButton';
@@ -199,6 +200,7 @@ export default function VideoDetail() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
+        <Seo title="Omurga Sağlığı Videosu" description="Prof. Dr. Defne Kaya Utlu ile omurga sağlığı videoları." />
         <Loader2 className="w-12 h-12 animate-spin text-amber-600" />
       </div>
     );
@@ -207,6 +209,7 @@ export default function VideoDetail() {
   if (!video) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
+        <Seo title="Video bulunamadı" description="Aradığınız video bulunamadı. Omurgam video arşivine göz atın." />
         <h1 className="text-4xl font-bold text-slate-900 mb-4">Video bulunamadı</h1>
         <Link to="/videolar" className="text-amber-600 hover:underline">
           Video arşivine dön
@@ -219,6 +222,13 @@ export default function VideoDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 py-8 px-4">
+      <Seo
+        title={video.title}
+        description={video.description && video.description.trim()
+          ? video.description.trim().slice(0, 155)
+          : `Prof. Dr. Defne Kaya Utlu ile omurga sağlığı videosu: ${video.title}.`}
+        image={video.thumbnailUrl}
+      />
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <Link
