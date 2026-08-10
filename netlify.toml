@@ -13,11 +13,158 @@ to = "https://omurgam.com/:splat"
 status = 301
 force = true
 
-# Redirect all routes to index.html for SPA routing
+# SPA routing + gerçek 404 (soft-404 düzeltmesi)
+# Bilinen tüm route'lar index.html'e 200 ile rewrite edilir (SPA bozulmaz, refresh çalışır).
+# Statik dosyalar (assets, sitemap.xml, robots.txt) ve /blog-sitemap.xml fonksiyonu
+# bu kurallardan ÖNCE servis edildiği için etkilenmez.
+# En sondaki kural: listede olmayan (gerçekten var olmayan) URL'ler HTTP 404 alır.
+# ÖNEMLİ: Yeni bir route eklenirse buraya da eklenmeli, yoksa 404 döner.
+
+# --- Statik (tam eşleşen) route'lar ---
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/videolar"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/blog"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/saglikli-yasam"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/omurgam-ne-diyor"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/yatak-yastik-rehberi"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/kaleminden"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/klinisyenler"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/soru-sor"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/forum"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/mr-analiz"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/saglik-sozlugu"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/gunun-terimi"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/mit-avi"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/hakkimizda"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/iletisim"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/randevu"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/gizlilik"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/kullanim-kosullari"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/basin"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/bel-fitigi"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/boyun-fitigi"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/skolyoz"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/sorular"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/giris"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/kayit"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/profil"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/admin"
+  to = "/index.html"
+  status = 200
+
+# --- Dinamik route'lar (prefix) ---
+[[redirects]]
+  from = "/blog/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/video/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/soru/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/mr-analiz/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/politika/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/admin/*"
+  to = "/index.html"
+  status = 200
+
+# --- Bilinmeyen URL -> gerçek HTTP 404 (SPA kabuğu 404 statüsüyle servis edilir) ---
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200
+  status = 404
 
 # Headers for security and performance
 [[headers]]
