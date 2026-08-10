@@ -6,6 +6,13 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# Redirect Netlify subdomain to canonical domain
+[[redirects]]
+from = "https://omurgam.netlify.app/*"
+to = "https://omurgam.com/:splat"
+status = 301
+force = true
+
 # Redirect all routes to index.html for SPA routing
 [[redirects]]
   from = "/*"
