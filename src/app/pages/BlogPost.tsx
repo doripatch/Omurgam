@@ -85,7 +85,7 @@ export default function BlogPost() {
           '@context': 'https://schema.org',
           '@graph': [
             {
-              '@type': 'Article',
+              '@type': 'BlogPosting',
               headline: post.title,
               description: post.excerpt || undefined,
               articleSection: post.category,
@@ -95,7 +95,7 @@ export default function BlogPost() {
               image: post.imageUrl || 'https://omurgam.com/assets/logo-og.png',
               mainEntityOfPage: { '@type': 'WebPage', '@id': `https://omurgam.com/blog/${post.id}` },
               author: { '@id': 'https://omurgam.com/#defne-kaya-utlu' },
-              publisher: { '@type': 'Organization', name: 'Omurgam', logo: { '@type': 'ImageObject', url: 'https://omurgam.com/assets/logo-og.png' } },
+              publisher: { '@id': 'https://omurgam.com/#org' },
             },
             {
               '@type': 'BreadcrumbList',
