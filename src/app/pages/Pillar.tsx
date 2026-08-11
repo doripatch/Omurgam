@@ -36,7 +36,14 @@ export default function Pillar() {
           '@id': `${ORIGIN}/#defne-kaya-utlu`,
         },
         publisher: { '@id': `${ORIGIN}/#org` },
-        lastReviewed: '2026-07-11',
+        // Yalnızca GERÇEK inceleme verisi varsa üretilir (uydurma yok).
+        ...(data.reviewDate ? { lastReviewed: data.reviewDate } : {}),
+        ...(data.reviewedBy ? { reviewedBy: { '@type': 'Person', name: data.reviewedBy } } : {}),
+        ...(data.sources && data.sources.length > 0 ? {
+          citation: data.sources.map((s) =>
+            s.url ? { '@type': 'CreativeWork', name: s.label, url: s.url } : { '@type': 'CreativeWork', name: s.label }
+          ),
+        } : {}),
       },
       {
         '@type': 'BreadcrumbList',
@@ -75,6 +82,7 @@ export default function Pillar() {
 
         <div className="text-xs text-slate-500 dark:text-slate-400 mb-8">
           Editör: Prof. Dr. Defne Kaya Utlu · Son güncelleme: {data.updated}
+          {data.reviewedBy && ` · Tıbben inceleyen: ${data.reviewedBy}${data.reviewDate ? ` (${data.reviewDate})` : ''}`}
         </div>
 
         {/* İçindekiler */}
@@ -146,6 +154,21 @@ export default function Pillar() {
             ))}
           </div>
         </section>
+
+        {data.sources && data.sources.length > 0 && (
+          <section className="mb-10">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Kaynaklar</h2>
+            <ol className="list-decimal list-inside space-y-2 text-sm text-slate-700 dark:text-slate-300">
+              {data.sources.map((s, i) => (
+                <li key={i}>
+                  {s.url ? (
+                    <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-teal-700 dark:text-teal-300 hover:underline">{s.label}</a>
+                  ) : s.label}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
         <AuthorBox updatedDate={data.updated} />
       </article>

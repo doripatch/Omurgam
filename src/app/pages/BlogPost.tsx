@@ -1,4 +1,4 @@
-import { ArrowLeft, Clock, Eye, Tag } from 'lucide-react';
+import { ArrowLeft, Clock, Eye, Tag, BadgeCheck } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 import { useState, useEffect } from 'react';
 import { blogAPI } from '../lib/api';
@@ -22,6 +22,10 @@ interface BlogPostData {
   created_at?: string;
   createdAt?: string;
   updatedAt?: string;
+  // Opsiyonel — yalnızca GERÇEK veri varsa (uydurma yok, eski kayıtları kırmaz).
+  reviewedBy?: string;
+  reviewDate?: string;
+  sources?: { label: string; url?: string }[];
 }
 
 function sectionMeta(section?: string) {
@@ -93,9 +97,20 @@ export default function BlogPost() {
               datePublished: post.createdAt || post.created_at,
               dateModified: post.updatedAt || post.createdAt || post.created_at,
               image: post.imageUrl || 'https://omurgam.com/assets/logo-og.png',
-              mainEntityOfPage: { '@type': 'WebPage', '@id': `https://omurgam.com/blog/${post.id}` },
+              mainEntityOfPage: {
+                '@type': 'WebPage',
+                '@id': `https://omurgam.com/blog/${post.id}`,
+                // reviewedBy/lastReviewed Schema.org'da WebPage property'leridir — yalnızca GERÇEK veri varsa.
+                ...(post.reviewedBy ? { reviewedBy: { '@type': 'Person', name: post.reviewedBy } } : {}),
+                ...(post.reviewDate ? { lastReviewed: post.reviewDate } : {}),
+              },
               author: { '@id': 'https://omurgam.com/#defne-kaya-utlu' },
               publisher: { '@id': 'https://omurgam.com/#org' },
+              ...(post.sources && post.sources.length > 0 ? {
+                citation: post.sources.map((s) =>
+                  s.url ? { '@type': 'CreativeWork', name: s.label, url: s.url } : { '@type': 'CreativeWork', name: s.label }
+                ),
+              } : {}),
             },
             {
               '@type': 'BreadcrumbList',
@@ -159,6 +174,12 @@ export default function BlogPost() {
                   <Eye className="w-4 h-4" />
                   <span className="text-sm">{post.views.toLocaleString('tr-TR')} görüntülenme</span>
                 </div>
+                {post.reviewedBy && (
+                  <div className="flex items-center gap-2 text-teal-700">
+                    <BadgeCheck className="w-4 h-4" />
+                    <span className="text-sm">Tıbben inceleyen: {post.reviewedBy}{post.reviewDate ? ` · ${formatDate(post.reviewDate)}` : ''}</span>
+                  </div>
+                )}
               </div>
 
               {/* Excerpt */}
@@ -178,6 +199,21 @@ export default function BlogPost() {
                   </div>
                 )}
               </div>
+
+              {post.sources && post.sources.length > 0 && (
+                <section className="mt-10 border-t border-slate-200 pt-6">
+                  <h2 className="text-xl font-bold text-slate-900 mb-4">Kaynaklar</h2>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-slate-700">
+                    {post.sources.map((s, i) => (
+                      <li key={i}>
+                        {s.url ? (
+                          <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-amber-700 hover:underline">{s.label}</a>
+                        ) : s.label}
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
 
               <AuthorBox updatedDate={formatDate(post.updatedAt || post.createdAt || post.created_at)} />
             </>

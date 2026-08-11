@@ -68,24 +68,33 @@ export default function AdminBlog() {
         return;
       }
       let ok = 0, fail = 0;
+      const failedTitles: string[] = [];
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
       for (const item of arr) {
         if (!item || !item.title || !item.content) { fail++; continue; }
-        try {
-          await blogAPI.create({
-            title: item.title,
-            content: item.content,
-            excerpt: item.excerpt || item.content.substring(0, 150) + '...',
-            category: item.category || 'Genel',
-            imageUrl: item.imageUrl || '',
-            section: SECTION,
-            readingTime: item.readingTime || '',
-            published: item.published !== false,
-          });
-          ok++;
-        } catch {
-          fail++;
+        let created = false;
+        for (let attempt = 1; attempt <= 3 && !created; attempt++) {
+          try {
+            await blogAPI.create({
+              title: item.title,
+              content: item.content,
+              excerpt: item.excerpt || item.content.substring(0, 150) + '...',
+              category: item.category || 'Genel',
+              imageUrl: item.imageUrl || '',
+              section: SECTION,
+              readingTime: item.readingTime || '',
+              published: item.published !== false,
+            });
+            created = true;
+            ok++;
+          } catch {
+            if (attempt < 3) await sleep(500 * attempt);
+          }
         }
+        if (!created) { fail++; failedTitles.push(item.title); }
+        await sleep(250);
       }
+      if (failedTitles.length) console.warn('İçe aktarılamayan yazılar:', failedTitles);
       toast.success(`${ok} yazı eklendi${fail ? `, ${fail} başarısız` : ''} 🎉`);
       await loadPosts();
     } catch (err: any) {
@@ -95,6 +104,15 @@ export default function AdminBlog() {
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
+  // Kaynak metin <-> yapı dönüşümü (her satır: "Başlık" veya "Başlık | https://...")
+  const parseSources = (text: string) =>
+    text.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+      const [label, url] = l.split('|').map((x) => x.trim());
+      return url ? { label, url } : { label };
+    });
+  const sourcesToText = (arr?: { label: string; url?: string }[]) =>
+    (arr || []).map((s) => (s.url ? `${s.label} | ${s.url}` : s.label)).join('\n');
+
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -103,6 +121,9 @@ export default function AdminBlog() {
     imageUrl: '',
     section: SECTION,
     published: false,
+    reviewedBy: '',
+    reviewDate: '',
+    sources: '',
   });
 
   useEffect(() => {
@@ -213,6 +234,9 @@ export default function AdminBlog() {
         imageUrl: formData.imageUrl,
         section: SECTION,
         published: formData.published,
+        reviewedBy: formData.reviewedBy.trim(),
+        reviewDate: formData.reviewDate,
+        sources: parseSources(formData.sources),
       });
       console.log('✅ Blog eklendi:', result);
       toast.success('Blog yazısı başarıyla eklendi!');
@@ -225,6 +249,9 @@ export default function AdminBlog() {
         imageUrl: '',
         section: SECTION,
         published: false,
+        reviewedBy: '',
+        reviewDate: '',
+        sources: '',
       });
       await loadPosts();
     } catch (error: any) {
@@ -253,6 +280,9 @@ export default function AdminBlog() {
         imageUrl: formData.imageUrl,
         section: SECTION,
         published: formData.published,
+        reviewedBy: formData.reviewedBy.trim(),
+        reviewDate: formData.reviewDate,
+        sources: parseSources(formData.sources),
       });
       console.log('✅ Blog güncellendi:', result);
       toast.success('Blog yazısı başarıyla güncellendi!');
@@ -265,6 +295,9 @@ export default function AdminBlog() {
         imageUrl: '',
         section: SECTION,
         published: false,
+        reviewedBy: '',
+        reviewDate: '',
+        sources: '',
       });
       await loadPosts();
     } catch (error: any) {
@@ -463,6 +496,9 @@ export default function AdminBlog() {
                                   imageUrl: post.imageUrl || '',
                                   section: SECTION,
                                   published: post.published,
+                                  reviewedBy: (post as any).reviewedBy || '',
+                                  reviewDate: (post as any).reviewDate || '',
+                                  sources: sourcesToText((post as any).sources),
                                 });
                                 setShowEditModal(true);
                               }}
@@ -569,6 +605,38 @@ export default function AdminBlog() {
                   </div>
                 </div>
 
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Kaynaklar (isteğe bağlı — her satır bir kaynak: "Başlık | https://...")</label>
+                  <textarea
+                    value={formData.sources}
+                    onChange={(e) => setFormData({ ...formData, sources: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[80px]"
+                    placeholder="Kovacs FM et al. The Lancet 2003 | https://doi.org/..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">Tıbben inceleyen (yalnızca gerçekten inceleyen varsa)</label>
+                    <input
+                      type="text"
+                      value={formData.reviewedBy}
+                      onChange={(e) => setFormData({ ...formData, reviewedBy: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder="Örn: Prof. Dr. ..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">İnceleme tarihi</label>
+                    <input
+                      type="date"
+                      value={formData.reviewDate}
+                      onChange={(e) => setFormData({ ...formData, reviewDate: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                  </div>
+                </div>
+
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
@@ -668,6 +736,38 @@ export default function AdminBlog() {
                       <option value="draft">Taslak</option>
                       <option value="published">Yayınla</option>
                     </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">Kaynaklar (isteğe bağlı — her satır bir kaynak: "Başlık | https://...")</label>
+                  <textarea
+                    value={formData.sources}
+                    onChange={(e) => setFormData({ ...formData, sources: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[80px]"
+                    placeholder="Kovacs FM et al. The Lancet 2003 | https://doi.org/..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">Tıbben inceleyen (yalnızca gerçekten inceleyen varsa)</label>
+                    <input
+                      type="text"
+                      value={formData.reviewedBy}
+                      onChange={(e) => setFormData({ ...formData, reviewedBy: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder="Örn: Prof. Dr. ..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">İnceleme tarihi</label>
+                    <input
+                      type="date"
+                      value={formData.reviewDate}
+                      onChange={(e) => setFormData({ ...formData, reviewDate: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
                   </div>
                 </div>
 

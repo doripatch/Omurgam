@@ -16,6 +16,10 @@ export interface PillarLink {
   to: string;
   label: string;
 }
+export interface PillarSource {
+  label: string;
+  url?: string;
+}
 export interface Pillar {
   slug: string;
   keyword: string;
@@ -24,6 +28,10 @@ export interface Pillar {
   h1: string;
   lead: string;
   updated: string;
+  // Opsiyonel — yalnızca GERÇEK veri varsa doldurulur (uydurma yok).
+  reviewedBy?: string;        // tıbben inceleyen kişi
+  reviewDate?: string;        // ISO (YYYY-MM-DD) — schema lastReviewed için
+  sources?: PillarSource[];   // kaynakça
   sections: PillarSection[];
   faqs: PillarFAQ[];
   related: PillarLink[];
