@@ -8,6 +8,13 @@ import FavoriteButton from '../components/FavoriteButton';
 import AuthorBox from '../components/AuthorBox';
 import RichText, { hasMarkdown } from '../components/RichText';
 
+// Blog kategorisi -> pillar konu rehberi. Yalnızca AÇIK ve TARTIŞMASIZ eşleşmeler
+// ("Boyun Ağrısı" pillar'ı "boyun fıtığı" olduğundan bilinçli olarak eşlenmedi).
+const PILLAR_BY_CATEGORY: Record<string, string> = {
+  'Bel Fıtığı': '/bel-fitigi',
+  'Skolyoz': '/skolyoz',
+};
+
 interface BlogPostData {
   id: string;
   title: string;
@@ -181,6 +188,15 @@ export default function BlogPost() {
                   </div>
                 )}
               </div>
+
+              {PILLAR_BY_CATEGORY[post.category] && (
+                <Link
+                  to={PILLAR_BY_CATEGORY[post.category]}
+                  className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-xl bg-teal-50 border border-teal-200 text-teal-800 text-sm font-medium hover:bg-teal-100 transition-colors"
+                >
+                  <Tag className="w-4 h-4" /> {post.category} konu rehberini oku →
+                </Link>
+              )}
 
               {/* Excerpt */}
               {post.excerpt && (

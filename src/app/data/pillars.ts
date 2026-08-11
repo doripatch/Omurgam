@@ -151,7 +151,11 @@ export const PILLARS: Record<string, Pillar> = {
         a: 'Hayır. Bel fıtığı diskin taşmasıyken, bel kayması (spondilolistezis) bir omurun alttaki omura göre öne kaymasıdır. Belirtileri benzeşebilir ama farklı durumlardır ve değerlendirmeleri farklıdır.',
       },
     ],
-    related: RELATED_COMMON,
+    related: [
+      { to: '/boyun-fitigi', label: 'Boyun Fıtığı' },
+      { to: '/skolyoz', label: 'Skolyoz' },
+      ...RELATED_COMMON,
+    ],
   },
 
   'boyun-fitigi': {
@@ -248,7 +252,11 @@ export const PILLARS: Record<string, Pillar> = {
         a: 'Amaç, uyurken boynun omurga ile aynı hizada, nötr pozisyonda kalmasıdır. Çok yüksek veya çok düz yastıklar boynu zorlayabilir. En uygun yükseklik kişinin omuz genişliği ve uyku pozisyonuna göre değişir.',
       },
     ],
-    related: RELATED_COMMON,
+    related: [
+      { to: '/bel-fitigi', label: 'Bel Fıtığı' },
+      { to: '/skolyoz', label: 'Skolyoz' },
+      ...RELATED_COMMON,
+    ],
   },
 
   skolyoz: {
@@ -336,7 +344,11 @@ export const PILLARS: Record<string, Pillar> = {
         a: 'Ergenlerde skolyoz çoğu zaman ağrısızdır ve önce duruş asimetrisiyle fark edilir. Erişkinlerde, özellikle dejeneratif skolyozda ise bel ağrısı ve yorgunluk eşlik edebilir.',
       },
     ],
-    related: RELATED_COMMON,
+    related: [
+      { to: '/bel-fitigi', label: 'Bel Fıtığı' },
+      { to: '/boyun-fitigi', label: 'Boyun Fıtığı' },
+      ...RELATED_COMMON,
+    ],
   },
 };
 

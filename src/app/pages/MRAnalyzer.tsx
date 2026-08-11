@@ -146,6 +146,14 @@ export default function MRAnalyzer() {
       }
     : MR_JSONLD;
 
+  // Aynı kategorideki diğer terimler (deterministik sıralı, en fazla 5, kendisi hariç)
+  const relatedTerms = selectedTerm
+    ? allTerms
+        .filter((t) => t.category === selectedTerm.category && t.term !== selectedTerm.term)
+        .sort((a, b) => a.term.localeCompare(b.term, 'tr'))
+        .slice(0, 5)
+    : [];
+
   const loadTerms = async () => {
     try {
       setIsLoading(true);
@@ -369,6 +377,25 @@ export default function MRAnalyzer() {
                       <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-teal-600 flex-shrink-0 mt-0.5" />
                       <span className="text-sm md:text-base text-slate-700">{rec}</span>
                     </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* İlgili Terimler — aynı kategori, crawlable linkler */}
+            {relatedTerms.length > 0 && (
+              <div className="backdrop-blur-xl bg-white/80 border border-teal-200/30 rounded-2xl md:rounded-3xl p-4 md:p-8">
+                <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-4">İlgili Terimler</h3>
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                  {relatedTerms.map((t) => (
+                    <a
+                      key={t.id || t.term}
+                      href={`/mr-analiz/${slugify(t.term)}`}
+                      onClick={(e) => { e.preventDefault(); selectTerm(t); }}
+                      className="text-sm text-teal-700 hover:underline"
+                    >
+                      {t.term}
+                    </a>
                   ))}
                 </div>
               </div>
