@@ -249,7 +249,7 @@ export default function MRAnalyzer() {
           </div>
 
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
-            MR Raporu Terim Sözlüğü
+            {selectedTerm ? `${selectedTerm.term} Nedir?` : 'MR Raporu Terim Sözlüğü'}
           </h1>
           <p className="text-base md:text-xl text-amber-100 mb-4 px-2">
             MR raporunuzda geçen tıbbi terimleri arayın ve ne anlama geldiklerini öğrenin
