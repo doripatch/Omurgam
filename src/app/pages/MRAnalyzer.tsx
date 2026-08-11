@@ -251,8 +251,10 @@ export default function MRAnalyzer() {
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
             {selectedTerm ? `${selectedTerm.term} Nedir?` : 'MR Raporu Terim Sözlüğü'}
           </h1>
-          <p className="text-base md:text-xl text-amber-100 mb-4 px-2">
-            MR raporunuzda geçen tıbbi terimleri arayın ve ne anlama geldiklerini öğrenin
+          <p className="text-base md:text-xl text-amber-100 mb-4 px-2 whitespace-pre-line">
+            {selectedTerm
+              ? selectedTerm.explanation
+              : 'MR raporunuzda geçen tıbbi terimleri arayın ve ne anlama geldiklerini öğrenin'}
           </p>
           
           {/* Disclaimer */}
@@ -341,9 +343,6 @@ export default function MRAnalyzer() {
                         </div>
                       )}
                     </div>
-                    <p className="text-base md:text-lg text-slate-700 leading-relaxed whitespace-pre-line">
-                      {selectedTerm.explanation}
-                    </p>
                     <div className="mt-4">
                       <FavoriteButton type="term" itemId={selectedTerm.id} title={selectedTerm.term} />
                     </div>
