@@ -9,11 +9,22 @@ import { faqAPI, medicalTermsAPI, bannersAPI } from '../lib/api';
 import Seo from '../components/Seo';
 
 // Tek banner slaytı (admin panelinden gelen banner: imageUrl, title, subtitle, link)
-function BannerSlide({ b, active }: { b: any; active: boolean }) {
+// shouldLoad: yalnızca görülen/aktif olmuş slaytların <img src>'i oluşturulur (ilk yükte payload düşer)
+// priority: ilk (LCP) slayt -> eager + yüksek öncelik
+function BannerSlide({ b, active, shouldLoad, priority }: { b: any; active: boolean; shouldLoad: boolean; priority: boolean }) {
   const cls = `absolute inset-0 transition-opacity duration-700 ${active ? 'opacity-100' : 'opacity-0 pointer-events-none'}`;
   const inner = (
     <>
-      <ImageWithFallback src={b.imageUrl} alt={b.title} className="absolute inset-0 w-full h-full object-cover" />
+      {shouldLoad && (
+        <ImageWithFallback
+          src={b.imageUrl}
+          alt={b.title}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'low'}
+          decoding="async"
+        />
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
         <h3 className="text-2xl md:text-4xl font-black text-white mb-2 line-clamp-2">{b.title}</h3>
@@ -30,17 +41,22 @@ function BannerSlide({ b, active }: { b: any; active: boolean }) {
 // Admin panelindeki banner'lardan beslenen otomatik dönen carousel
 function BannerCarousel({ items }: { items: any[] }) {
   const [i, setI] = useState(0);
+  // Yalnızca görülen slaytların görselini yükle (ilk render'da sadece 0. slayt)
+  const [seen, setSeen] = useState<Set<number>>(() => new Set([0]));
   useEffect(() => {
     if (items.length <= 1) return;
     const t = setInterval(() => setI((p) => (p + 1) % items.length), 5000);
     return () => clearInterval(t);
   }, [items.length]);
+  useEffect(() => {
+    setSeen((prev) => (prev.has(i) ? prev : new Set(prev).add(i)));
+  }, [i]);
   if (!items.length) return null;
   const go = (n: number) => setI((n + items.length) % items.length);
   return (
     <div className="relative">
       <div className="relative h-72 md:h-96 rounded-3xl overflow-hidden shadow-sm">
-        {items.map((b, idx) => <BannerSlide key={b.id || idx} b={b} active={idx === i} />)}
+        {items.map((b, idx) => <BannerSlide key={b.id || idx} b={b} active={idx === i} shouldLoad={seen.has(idx)} priority={idx === 0} />)}
       </div>
       {items.length > 1 && (
         <>
@@ -486,6 +502,8 @@ export default function Home() {
                     src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200"
                     alt="Omurga Sağlığı Videoları"
                     className="w-full h-full object-cover opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
                 </div>
@@ -670,6 +688,8 @@ export default function Home() {
                   src={c.whyImage}
                   alt={c.whyCardName}
                   className="w-full h-[600px] object-cover object-top bg-white"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
                 <div className="absolute bottom-8 left-8 right-8">
