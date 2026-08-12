@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router';
 import { Heart, Menu, X, User, LogOut, LayoutDashboard, Facebook, Twitter, Instagram, Youtube, Linkedin, Search, Bell, ChevronDown } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import DarkModeToggle from './components/DarkModeToggle';
 import FloatingActionButton from './components/FloatingActionButton';
 import GlobalSearch from './components/GlobalSearch';
@@ -399,7 +399,9 @@ export default function Root() {
 
       {/* Main Content */}
       <main className="flex-1">
-        <Outlet />
+        <Suspense fallback={<div className="flex items-center justify-center py-24"><div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" /></div>}>
+          <Outlet />
+        </Suspense>
       </main>
 
       {/* Floating Action Button */}

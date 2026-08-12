@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router";
+import { lazy } from "react";
 import Root from "./Root";
 import Home from "./pages/Home";
 import Videos from "./pages/Videos";
@@ -25,20 +26,22 @@ import PolicyPage from "./pages/PolicyPage";
 import Press from "./pages/Press";
 import Pillar from "./pages/Pillar";
 import FAQ from "./pages/FAQ";
-import AdminDashboard from "./pages/admin/Dashboard";
-import AdminVideos from "./pages/admin/Videos";
-import AdminQuestions from "./pages/admin/Questions";
-import AdminBlog from "./pages/admin/Blog";
-import AdminTerms from "./pages/admin/Terms";
-import AdminMedicalTerms from "./pages/admin/MedicalTerms";
-import AdminFAQ from "./pages/admin/FAQ";
-import AdminMessages from "./pages/admin/Messages";
-import AdminSubscribers from "./pages/admin/Subscribers";
-import AdminAppointments from "./pages/admin/Appointments";
-import AdminBanners from "./pages/admin/Banners";
-import AdminClinicalNotes from "./pages/admin/ClinicalNotes";
-import AdminUsers from "./pages/admin/Users";
-import AdminSiteSettings from "./pages/admin/SiteSettings";
+// Admin route'ları lazy — normal (public) ziyaretçinin ana bundle'ından çıkarılır.
+// SEO'suz (robots'ta disallow) olduğundan güvenli; Root'taki Suspense fallback ile sarılır.
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const AdminVideos = lazy(() => import("./pages/admin/Videos"));
+const AdminQuestions = lazy(() => import("./pages/admin/Questions"));
+const AdminBlog = lazy(() => import("./pages/admin/Blog"));
+const AdminTerms = lazy(() => import("./pages/admin/Terms"));
+const AdminMedicalTerms = lazy(() => import("./pages/admin/MedicalTerms"));
+const AdminFAQ = lazy(() => import("./pages/admin/FAQ"));
+const AdminMessages = lazy(() => import("./pages/admin/Messages"));
+const AdminSubscribers = lazy(() => import("./pages/admin/Subscribers"));
+const AdminAppointments = lazy(() => import("./pages/admin/Appointments"));
+const AdminBanners = lazy(() => import("./pages/admin/Banners"));
+const AdminClinicalNotes = lazy(() => import("./pages/admin/ClinicalNotes"));
+const AdminUsers = lazy(() => import("./pages/admin/Users"));
+const AdminSiteSettings = lazy(() => import("./pages/admin/SiteSettings"));
 import NotFound from "./pages/NotFound";
 
 export const router = createBrowserRouter([

@@ -100,6 +100,7 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<string | null>(null);
   const [myths, setMyths] = useState<any[]>([]);
   const [banners, setBanners] = useState<any[]>([]);
+  const [bannersLoading, setBannersLoading] = useState(true);
 
   // Tüm metinler buradan gelir (panelden düzenlenebilir, varsayılanlar her zaman dolu)
   const settings = useSiteSettingsStore((s) => s.settings);
@@ -111,7 +112,7 @@ export default function Home() {
     medicalTermsAPI.getAll()
       .then((d) => setMyths((d.terms || []).filter((t: any) => t.mistakeWrong && t.mistakeRight).slice(0, 3)))
       .catch(() => {});
-    bannersAPI.getAll().then((d) => setBanners(d.banners || [])).catch(() => {});
+    bannersAPI.getAll().then((d) => setBanners(d.banners || [])).catch(() => {}).finally(() => setBannersLoading(false));
   }, []);
 
   const renderBanner = (b: any) => {
@@ -270,7 +271,7 @@ export default function Home() {
       </section>
 
       {/* EN ÇOK OKUNANLAR — admin panelindeki banner'lardan beslenen carousel */}
-      {banners.length > 0 && (
+      {(banners.length > 0 || bannersLoading) && (
         <section className="pt-6 pb-6 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-end justify-between mb-5">
@@ -284,7 +285,19 @@ export default function Home() {
                 Tüm yazılar <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-            <BannerCarousel items={banners} />
+            {banners.length > 0 ? (
+              <BannerCarousel items={banners} />
+            ) : (
+              /* Veri gelene kadar carousel ile aynı yüksekliği koruyan placeholder — CLS önler */
+              <div className="relative" aria-hidden="true">
+                <div className="relative h-72 md:h-96 rounded-3xl overflow-hidden shadow-sm bg-slate-200/70 dark:bg-slate-800/70 animate-pulse" />
+                <div className="flex justify-center gap-2 mt-4">
+                  <span className="h-2 w-6 rounded-full bg-slate-300 dark:bg-slate-600" />
+                  <span className="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-600" />
+                  <span className="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-600" />
+                </div>
+              </div>
+            )}
           </div>
         </section>
       )}
