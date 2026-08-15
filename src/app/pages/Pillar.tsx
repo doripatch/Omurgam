@@ -1,10 +1,60 @@
+import { Fragment } from 'react';
 import { useLocation, Link } from 'react-router';
 import { CheckCircle2, ArrowRight, BookOpen, HelpCircle } from 'lucide-react';
 import Seo from '../components/Seo';
 import AuthorBox from '../components/AuthorBox';
-import { PILLARS } from '../data/pillars';
+import { PILLARS, type PillarInlineLink } from '../data/pillars';
 
 const ORIGIN = 'https://omurgam.com';
+
+// Yalnızca pillars.ts'te AÇIKÇA tanımlanmış (section+paragraph+anchor) konumları
+// güvenli React <Link>'lere çevirir. Metin sözcükleri hiç değişmez.
+// Anchor paragrafta tam olarak bir kez bulunmuyorsa: DEV'de uyarı + düz metin korunur.
+function renderInline(
+  text: string,
+  links: PillarInlineLink[] | undefined,
+  section: number,
+  paragraph: number,
+) {
+  const applicable = (links || []).filter((l) => l.section === section && l.paragraph === paragraph);
+  if (applicable.length === 0) return text;
+
+  const valid: Array<PillarInlineLink & { index: number }> = [];
+  for (const link of applicable) {
+    const first = text.indexOf(link.anchor);
+    const last = text.lastIndexOf(link.anchor);
+    if (first === -1 || first !== last) {
+      if (import.meta.env.DEV) {
+        console.warn(
+          `[Pillar] "${link.anchor}" (section ${section}, paragraph ${paragraph}) paragrafta tam 1 kez bulunamadı; düz metin korunuyor.`,
+        );
+      }
+      continue;
+    }
+    valid.push({ ...link, index: first });
+  }
+  if (valid.length === 0) return text;
+
+  valid.sort((a, b) => a.index - b.index);
+  const nodes: Array<string | JSX.Element> = [];
+  let cursor = 0;
+  let key = 0;
+  for (const link of valid) {
+    if (link.index < cursor) {
+      if (import.meta.env.DEV) console.warn(`[Pillar] "${link.anchor}" çakışan bağlantı; atlanıyor.`);
+      continue;
+    }
+    if (link.index > cursor) nodes.push(<Fragment key={key++}>{text.slice(cursor, link.index)}</Fragment>);
+    nodes.push(
+      <Link key={key++} to={link.to} className="text-teal-700 dark:text-teal-300 font-medium hover:underline">
+        {link.anchor}
+      </Link>,
+    );
+    cursor = link.index + link.anchor.length;
+  }
+  if (cursor < text.length) nodes.push(<Fragment key={key++}>{text.slice(cursor)}</Fragment>);
+  return nodes;
+}
 
 export default function Pillar() {
   const location = useLocation();
@@ -107,7 +157,7 @@ export default function Pillar() {
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{s.h2}</h2>
             {s.body?.map((p, j) => (
               <p key={j} className="text-base text-slate-700 dark:text-slate-300 leading-relaxed mb-4">
-                {p}
+                {renderInline(p, data.inlineLinks, i, j)}
               </p>
             ))}
             {s.list && (

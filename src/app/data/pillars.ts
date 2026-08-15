@@ -3,6 +3,8 @@
 // İçerikler Prof. Dr. Defne Kaya Utlu editöryel gözetiminde hazırlanmıştır;
 // genel bilgilendirme amaçlıdır, tıbbi değerlendirmenin yerine geçmez.
 
+import glossaryData from './spineGlossary.json';
+
 export interface PillarSection {
   h2: string;
   body?: string[];
@@ -15,6 +17,15 @@ export interface PillarFAQ {
 export interface PillarLink {
   to: string;
   label: string;
+}
+// Satır içi (contextual) sözlük bağlantısı — açık ve denetlenebilir.
+// Bölüm + paragraf indeksi + paragrafta TAM eşleşecek anchor + hedef URL ile tanımlanır.
+// Autolink/regex YOK: yalnızca burada elle tanımlanan konumlar linklenir.
+export interface PillarInlineLink {
+  section: number;    // sections[] indeksi
+  paragraph: number;  // ilgili bölümün body[] indeksi
+  anchor: string;     // paragrafta birebir ve TEK kez geçmesi gereken metin
+  to: string;         // sözlük hedef URL'si (/omurga-sozlugu/<slug>)
 }
 export interface PillarSource {
   label: string;
@@ -35,6 +46,7 @@ export interface Pillar {
   sections: PillarSection[];
   faqs: PillarFAQ[];
   related: PillarLink[];
+  inlineLinks?: PillarInlineLink[]; // opsiyonel satır içi sözlük bağlantıları
 }
 
 const RELATED_COMMON: PillarLink[] = [
@@ -151,9 +163,16 @@ export const PILLARS: Record<string, Pillar> = {
         a: 'Hayır. Bel fıtığı diskin taşmasıyken, bel kayması (spondilolistezis) bir omurun alttaki omura göre öne kaymasıdır. Belirtileri benzeşebilir ama farklı durumlardır ve değerlendirmeleri farklıdır.',
       },
     ],
+    inlineLinks: [
+      { section: 0, paragraph: 0, anchor: 'lomber disk hernisi', to: '/omurga-sozlugu/lomber-disk-hernisi' },
+      { section: 0, paragraph: 1, anchor: 'sinir köküne baskı', to: '/omurga-sozlugu/sinir-koku-basisi' },
+      { section: 4, paragraph: 1, anchor: 'protrüzyon', to: '/omurga-sozlugu/disk-protruzyonu' },
+      { section: 4, paragraph: 1, anchor: 'ekstrüzyon', to: '/omurga-sozlugu/disk-ekstruzyonu' },
+    ],
     related: [
       { to: '/boyun-fitigi', label: 'Boyun Fıtığı' },
       { to: '/skolyoz', label: 'Skolyoz' },
+      { to: '/omurga-sozlugu/lomber-radikulopati', label: 'Lomber Radikülopati' },
       ...RELATED_COMMON,
     ],
   },
@@ -252,9 +271,14 @@ export const PILLARS: Record<string, Pillar> = {
         a: 'Amaç, uyurken boynun omurga ile aynı hizada, nötr pozisyonda kalmasıdır. Çok yüksek veya çok düz yastıklar boynu zorlayabilir. En uygun yükseklik kişinin omuz genişliği ve uyku pozisyonuna göre değişir.',
       },
     ],
+    inlineLinks: [
+      { section: 0, paragraph: 0, anchor: 'servikal disk hernisi', to: '/omurga-sozlugu/servikal-disk-hernisi' },
+      { section: 0, paragraph: 0, anchor: 'sinir köküne', to: '/omurga-sozlugu/sinir-koku-basisi' },
+    ],
     related: [
       { to: '/bel-fitigi', label: 'Bel Fıtığı' },
       { to: '/skolyoz', label: 'Skolyoz' },
+      { to: '/omurga-sozlugu/servikal-radikulopati', label: 'Servikal Radikülopati' },
       ...RELATED_COMMON,
     ],
   },
@@ -344,12 +368,32 @@ export const PILLARS: Record<string, Pillar> = {
         a: 'Ergenlerde skolyoz çoğu zaman ağrısızdır ve önce duruş asimetrisiyle fark edilir. Erişkinlerde, özellikle dejeneratif skolyozda ise bel ağrısı ve yorgunluk eşlik edebilir.',
       },
     ],
+    inlineLinks: [
+      { section: 3, paragraph: 1, anchor: 'Cobb açısı', to: '/omurga-sozlugu/cobb-acisi' },
+    ],
     related: [
       { to: '/bel-fitigi', label: 'Bel Fıtığı' },
       { to: '/boyun-fitigi', label: 'Boyun Fıtığı' },
+      { to: '/omurga-sozlugu/risser-bulgusu', label: 'Risser Bulgusu' },
       ...RELATED_COMMON,
     ],
   },
 };
 
 export const PILLAR_SLUGS = Object.keys(PILLARS);
+
+// Otomatik doğrulama (yalnız geliştirme): her sözlük hedefi spineGlossary.json'da
+// gerçekten var mı? Production build'de import.meta.env.DEV=false -> blok elenir.
+if (import.meta.env.DEV) {
+  const slugs = new Set((glossaryData.master as Array<{ slug: string }>).map((t) => t.slug));
+  const verify = (to: string, ctx: string) => {
+    const match = to.match(/^\/omurga-sozlugu\/(.+)$/);
+    if (match && !slugs.has(match[1])) {
+      console.error(`[pillars] Sözlük hedefi spineGlossary.json'da bulunamadı: ${to} (${ctx})`);
+    }
+  };
+  for (const [slug, pillar] of Object.entries(PILLARS)) {
+    (pillar.inlineLinks || []).forEach((l) => verify(l.to, `${slug} · inline "${l.anchor}"`));
+    pillar.related.forEach((r) => verify(r.to, `${slug} · related "${r.label}"`));
+  }
+}
