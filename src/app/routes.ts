@@ -12,6 +12,7 @@ import Forum from "./pages/Forum";
 import Clinicians from "./pages/Clinicians";
 import MRAnalyzer from "./pages/MRAnalyzer";
 import MedicalGlossary from "./pages/MedicalGlossary";
+import SpineGlossary from "./pages/SpineGlossary";
 import WordGame from "./pages/WordGame";
 import MythGame from "./pages/MythGame";
 import Login from "./pages/Login";
@@ -65,6 +66,8 @@ export const router = createBrowserRouter([
       { path: "mr-analiz", Component: MRAnalyzer },
       { path: "mr-analiz/:slug", Component: MRAnalyzer },
       { path: "saglik-sozlugu", Component: MedicalGlossary },
+      { path: "omurga-sozlugu", Component: SpineGlossary },
+      { path: "omurga-sozlugu/:slug", Component: SpineGlossary },
       { path: "gunun-terimi", Component: WordGame },
       { path: "mit-avi", Component: MythGame },
       { path: "hakkimizda", Component: About },

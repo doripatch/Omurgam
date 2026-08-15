@@ -70,6 +70,10 @@ force = true
   to = "/index.html"
   status = 200
 [[redirects]]
+  from = "/omurga-sozlugu"
+  to = "/index.html"
+  status = 200
+[[redirects]]
   from = "/gunun-terimi"
   to = "/index.html"
   status = 200
@@ -149,6 +153,10 @@ force = true
   status = 200
 [[redirects]]
   from = "/mr-analiz/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/omurga-sozlugu/*"
   to = "/index.html"
   status = 200
 [[redirects]]

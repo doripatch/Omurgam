@@ -26,6 +26,7 @@ const STATIC = [
   ['/boyun-fitigi', 'monthly', '0.9'],
   ['/skolyoz', 'monthly', '0.9'],
   ['/saglik-sozlugu', 'weekly', '0.8'],
+  ['/omurga-sozlugu', 'weekly', '0.9'],
   ['/gunun-terimi', 'daily', '0.7'],
   ['/mit-avi', 'daily', '0.7'],
   ['/soru-sor', 'monthly', '0.6'],
@@ -49,6 +50,8 @@ const TR = { 'ç':'c','ğ':'g','ı':'i','İ':'i','ö':'o','ş':'s','ü':'u','â'
 const slugify = (s) => s.split('').map((c) => TR[c] ?? c).join('')
   .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/-+/g, '-');
 const terms = JSON.parse(readFileSync(join(ROOT, 'mr-terimleri-iceaktarim.json'), 'utf8'));
+// (4) Omurga Sözlüğü — source of truth: src/app/data/spineGlossary.json (FINAL MASTER)
+const spineGlossary = JSON.parse(readFileSync(join(ROOT, 'src/app/data/spineGlossary.json'), 'utf8'));
 const mrSlugs = [];
 const mrSeen = new Set();
 for (const t of terms) {
@@ -64,6 +67,9 @@ const add = (loc, cf, pr) => { if (!seen.has(loc)) { seen.add(loc); rows.push({ 
 for (const [p, cf, pr] of STATIC) add(ORIGIN + p, cf, pr);
 for (const s of polSlugs) add(`${ORIGIN}/politika/${s}`, 'yearly', '0.3');
 for (const s of mrSlugs) add(`${ORIGIN}/mr-analiz/${s}`, 'monthly', '0.5');
+for (const t of spineGlossary.master) {
+  if (t?.slug) add(`${ORIGIN}/omurga-sozlugu/${t.slug}`, 'monthly', '0.7');
+}
 
 const body = rows.map((u) =>
   `  <url><loc>${u.loc}</loc><changefreq>${u.cf}</changefreq><priority>${u.pr}</priority></url>`
