@@ -175,7 +175,7 @@ function GlossaryIndex() {
 
       <div className="mx-auto max-w-6xl px-4 py-10 md:px-6">
         <Disclaimer />
-        <div className="mt-8 flex gap-2 overflow-x-auto pb-3">
+        <div className="mt-8 flex gap-2 overflow-x-auto pb-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {categories.map((item) => <button key={item} onClick={() => setCategory(item)} className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold ${category === item ? 'bg-amber-700 text-white' : 'border border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}>{item}</button>)}
         </div>
         <p className="my-5 text-sm font-semibold text-slate-500 dark:text-slate-400">{filtered.length} terim gösteriliyor</p>
