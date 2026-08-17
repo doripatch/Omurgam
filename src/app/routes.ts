@@ -6,6 +6,8 @@ import Videos from "./pages/Videos";
 import VideoDetail from "./pages/VideoDetail";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import MigratedBlogPost from "./pages/MigratedBlogPost";
+import ClinicianNote from "./pages/ClinicianNote";
 import AskQuestion from "./pages/AskQuestion";
 import QuestionDetail from "./pages/QuestionDetail";
 import Forum from "./pages/Forum";
@@ -59,7 +61,12 @@ export const router = createBrowserRouter([
       { path: "yatak-yastik-rehberi", Component: Blog },
       { path: "kaleminden", Component: Blog },
       { path: "blog/:id", Component: BlogPost },
+      // Faz 1 — yeni aile detay URL'leri (slug -> UUID merkezi harita üzerinden çözülür).
+      { path: "saglikli-yasam/:slug", Component: MigratedBlogPost },
+      { path: "omurgam-ne-diyor/:slug", Component: MigratedBlogPost },
+      { path: "yatak-yastik-rehberi/:slug", Component: MigratedBlogPost },
       { path: "klinisyenler", Component: Clinicians },
+      { path: "klinisyenler/:slug", Component: ClinicianNote },
       { path: "soru-sor", Component: AskQuestion },
       { path: "soru/:id", Component: QuestionDetail },
       { path: "forum", Component: Forum },

@@ -4,6 +4,16 @@ import { blogAPI } from '../lib/api';
 import { toast } from 'sonner';
 import { Link, useLocation } from 'react-router';
 import Seo from '../components/Seo';
+import { newUrlById } from '../lib/urlMigration';
+
+// Kart/başlık navigasyon URL'si: merkezi haritadan yeni aile URL'si.
+// Manifest'te olmayan beklenmedik kayıt için eski /blog/<UUID>'ye güvenli fallback + DEV uyarısı.
+function postHref(id: string): string {
+  const u = newUrlById(id);
+  if (u) return u;
+  if (import.meta.env.DEV) console.warn(`[Blog] "${id}" manifest'te yok — /blog/${id} fallback kullanıldı.`);
+  return `/blog/${id}`;
+}
 
 interface BlogPost {
   id: string;
@@ -111,7 +121,7 @@ export default function Blog() {
                 '@type': 'ListItem',
                 position: i + 1,
                 name: p.title,
-                url: `https://omurgam.com/blog/${p.id}`,
+                url: `https://omurgam.com${postHref(p.id)}`,
               })),
             },
           ],
@@ -138,7 +148,7 @@ export default function Blog() {
             {posts.map((post) => (
               <Link
                 key={post.id}
-                to={`/blog/${post.id}`}
+                to={postHref(post.id)}
                 className="group bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border-2 border-stone-200 dark:border-slate-700 hover:border-amber-600 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
               >
                 {post.imageUrl && (

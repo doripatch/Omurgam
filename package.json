@@ -4,9 +4,9 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "prebuild": "node scripts/generate-sitemap.mjs",
+    "prebuild": "node scripts/generate-sitemap.mjs && node scripts/validate-url-map.mjs && node scripts/generate-redirects.mjs",
     "build": "vite build",
-    "postbuild": "node scripts/prerender-glossary.mjs",
+    "postbuild": "node scripts/prerender-glossary.mjs && node scripts/prerender-content.mjs",
     "dev": "vite"
   },
   "dependencies": {

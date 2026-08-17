@@ -15,6 +15,7 @@ interface SeoProps {
   image?: string;
   type?: string;
   jsonLd?: Record<string, any> | null;
+  canonical?: string;
 }
 
 function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
@@ -27,12 +28,13 @@ function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
   el.setAttribute('content', content);
 }
 
-export default function Seo({ title, description, image, type = 'website', jsonLd }: SeoProps) {
+export default function Seo({ title, description, image, type = 'website', jsonLd, canonical }: SeoProps) {
   useEffect(() => {
     const fullTitle = title ? `${title} | ${SITE}` : `${SITE} — Türkiye'nin Omurga Sağlığı Platformu`;
     document.title = fullTitle;
 
-    const url = window.location.href;
+    // canonical verilirse onu kullan (kilitli newUrl); yoksa mevcut adres.
+    const url = canonical || window.location.href;
     const img = image || DEFAULT_IMAGE;
 
     if (description) {
@@ -68,7 +70,7 @@ export default function Seo({ title, description, image, type = 'website', jsonL
     } else if (existing) {
       existing.remove();
     }
-  }, [title, description, image, type, jsonLd]);
+  }, [title, description, image, type, jsonLd, canonical]);
 
   return null;
 }
