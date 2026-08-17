@@ -115,3 +115,53 @@ export function noteBlocksToHtml(blocks) {
     return `<p>${inlineToHtml(b.inline)}</p>`;
   }).join('\n');
 }
+
+// ==========================================================================
+// EDİTORYAL parser — YALNIZ kaleminden + saglikli-yasam aileleri için.
+// ANLAMSAL BAŞLIK (h2/h3) UYDURULMAZ: soru satırı ve ':' satırı yalnız görsel
+// vurgu (<p><strong>) alır. Metin/kelime/noktalama/emoji BİREBİR korunur;
+// yalnız liste işaretleri (-, •, 1.) blok yapısına (ul/ol) dönüşür.
+// React (EditorialText) ve Node prerender AYNI bu parser'ı kullanır.
+// ==========================================================================
+const _isBullet = (l) => /^[-•]\s+\S/.test(l) || /^[-•]\t/.test(l);
+const _bulletText = (l) => l.replace(/^[-•](\s+|\t)/, '');
+const _isNum = (l) => /^\d+[.)]\s+\S/.test(l) && !l.endsWith(',');
+const _numText = (l) => l.replace(/^\d+[.)]\s+/, '');
+const _isColonSub = (l) => /[:：]$/.test(l) && l.length <= 60 && l.split(/\s+/).length <= 8;
+const _isQuote = (l) => /^["“«].+["”»]$/.test(l);
+const _conceptMatch = (l) => { const m = l.match(/^([^:：]{2,40})([:：]\s+.+)$/); return (m && !/[.,;?!]/.test(m[1])) ? m : null; };
+const _isQHead = (l, next) => l.endsWith('?') && l.length <= 70 && next !== '' && next.length > l.length && !_isBullet(next) && !_isNum(next);
+
+export function parseEditorial(text) {
+  const lines = String(text ?? '').split('\n').map((x) => x.trim());
+  const blocks = [];
+  let leadDone = false, i = 0;
+  while (i < lines.length) {
+    const l = lines[i];
+    if (!l) { i++; continue; }
+    const next = lines[i + 1] || '';
+    if (_isBullet(l)) { const items = []; while (i < lines.length && _isBullet(lines[i])) { items.push(_bulletText(lines[i])); i++; } blocks.push({ type: 'ul', items }); continue; }
+    if (_isNum(l)) { const items = []; while (i < lines.length && _isNum(lines[i])) { items.push(_numText(lines[i])); i++; } blocks.push({ type: 'ol', items }); continue; }
+    if (_isColonSub(l)) { blocks.push({ type: 'subhead', text: l }); i++; continue; }
+    if (_isQuote(l)) { blocks.push({ type: 'quote', text: l }); i++; continue; }
+    if (_isQHead(l, next)) { blocks.push({ type: 'qhead', text: l }); i++; continue; }
+    if (!leadDone) { blocks.push({ type: 'lead', text: l }); leadDone = true; i++; continue; }
+    const cm = _conceptMatch(l);
+    if (cm) { blocks.push({ type: 'concept', term: cm[1], rest: cm[2] }); i++; continue; }
+    blocks.push({ type: 'p', text: l }); i++;
+  }
+  return blocks;
+}
+
+export function editorialBlocksToHtml(blocks) {
+  return blocks.map((b) => {
+    if (b.type === 'lead') return `<p class="lead">${escapeHtml(b.text)}</p>`;
+    if (b.type === 'qhead') return `<p class="qhead"><strong>${escapeHtml(b.text)}</strong></p>`;
+    if (b.type === 'subhead') return `<p class="subhead"><strong>${escapeHtml(b.text)}</strong></p>`;
+    if (b.type === 'quote') return `<p class="quote"><em>${escapeHtml(b.text)}</em></p>`;
+    if (b.type === 'concept') return `<p><strong>${escapeHtml(b.term)}</strong>${escapeHtml(b.rest)}</p>`;
+    if (b.type === 'ul') return `<ul>${b.items.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul>`;
+    if (b.type === 'ol') return `<ol>${b.items.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ol>`;
+    return `<p>${escapeHtml(b.text)}</p>`;
+  }).join('\n');
+}

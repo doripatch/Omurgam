@@ -12,6 +12,7 @@ import Seo from '../components/Seo';
 import FavoriteButton from '../components/FavoriteButton';
 import AuthorBox from '../components/AuthorBox';
 import RichText, { hasMarkdown } from '../components/RichText';
+import EditorialText from '../components/EditorialText';
 import { ORIGIN, BASE_TO_FAMILY, FAMILY_META, idByBaseSlug, recordById } from '../lib/urlMigration';
 
 interface BlogPostData {
@@ -156,9 +157,13 @@ export default function MigratedBlogPost() {
                 </div>
               )}
               <div className="prose prose-lg max-w-none dark:prose-invert">
-                {hasMarkdown(post.content)
-                  ? <RichText text={post.content} />
-                  : <div className="text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">{post.content}</div>}
+                {/* kaleminden + saglikli-yasam: yeni editoryal render (anlamsal başlık uydurmaz).
+                    yatak-yastik ve diğerleri: ORİJİNAL davranış (hasMarkdown ? RichText : düz metin). */}
+                {(family === 'kaleminden' || family === 'saglikli-yasam')
+                  ? <EditorialText text={post.content} />
+                  : hasMarkdown(post.content)
+                    ? <RichText text={post.content} />
+                    : <div className="text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">{post.content}</div>}
               </div>
               <AuthorBox updatedDate={formatDate(post.updatedAt || post.createdAt || post.created_at)} />
             </>

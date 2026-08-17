@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseBlog, parseNote, blogBlocksToHtml, noteBlocksToHtml, escapeHtml } from '../src/app/lib/richBlocks.mjs';
+import { parseBlog, parseNote, blogBlocksToHtml, noteBlocksToHtml, parseEditorial, editorialBlocksToHtml, escapeHtml } from '../src/app/lib/richBlocks.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
@@ -131,7 +131,9 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
     const body = `<main><nav><a href="${FAM[r.contentFamily].base}">← ${esc(FAM[r.contentFamily].name)}</a></nav>`
       + `<p>${esc(p.category || '')}</p><h1>${esc(p.title)}</h1>`
       + (description ? `<p>${esc(description)}</p>` : '')
-      + `<article>${blogBlocksToHtml(parseBlog(p.content))}</article>${DISCLAIMER}</main>`;
+      + `<article>${(r.contentFamily === 'kaleminden' || r.contentFamily === 'saglikli-yasam')
+          ? editorialBlocksToHtml(parseEditorial(p.content))
+          : blogBlocksToHtml(parseBlog(p.content))}</article>${DISCLAIMER}</main>`;
     write(r.newUrl, renderPage({ title: `${p.title} | Omurgam`, description, canonical, type: 'article', jsonLd, bodyHtml: body }));
     families[r.contentFamily].push({ url: r.newUrl, title: p.title, category: p.category });
   }
