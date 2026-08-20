@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Play, Search, Filter, Clock, TrendingUp } from 'lucide-react';
+import { Play, Search, Filter, Clock, TrendingUp, AlertTriangle, RotateCw } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
 import ExerciseTracker from '../components/ExerciseTracker';
@@ -27,6 +27,7 @@ export default function Videos() {
   const [searchQuery, setSearchQuery] = useState('');
   const [videos, setVideos] = useState<Video[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [showTracker, setShowTracker] = useState(false);
   const { addCompletedExercise } = useStore();
 
@@ -38,12 +39,15 @@ export default function Videos() {
   const loadVideos = async () => {
     try {
       setIsLoading(true);
+      setHasError(false);
       const data = await videosAPI.getAll();
       // Only show published videos
       const publishedVideos = (data.videos || []).filter((v: Video) => v.published);
       setVideos(publishedVideos);
     } catch (error) {
-      console.error('Load videos error:', error);
+      // Hassas veri basma: yalnız genel bir işaret logla.
+      console.error('Load videos error');
+      setHasError(true);
       toast.error('Videolar yüklenemedi');
     } finally {
       setIsLoading(false);
@@ -157,6 +161,48 @@ export default function Videos() {
           </div>
         </motion.div>
 
+        {/* Yüklenme: skeleton (layout'u zıplatmadan) */}
+        {isLoading ? (
+          <div>
+            {/* Öne çıkan alan skeleton */}
+            <div className="aspect-video md:aspect-[21/9] rounded-3xl bg-stone-200 dark:bg-slate-800 animate-pulse mb-10" />
+            <div className="h-8 w-64 rounded bg-stone-200 dark:bg-slate-800 animate-pulse mb-5" />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border-2 border-stone-200 dark:border-slate-700"
+                >
+                  <div className="aspect-video bg-stone-200 dark:bg-slate-700 animate-pulse" />
+                  <div className="p-6 space-y-3">
+                    <div className="h-5 w-3/4 rounded bg-stone-200 dark:bg-slate-700 animate-pulse" />
+                    <div className="h-4 w-full rounded bg-stone-200 dark:bg-slate-700 animate-pulse" />
+                    <div className="h-10 w-full rounded-xl bg-stone-200 dark:bg-slate-700 animate-pulse mt-4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : hasError ? (
+          /* Hata: loading ve boş sonuçtan ayrı; Tekrar Dene loadVideos'u yeniden çağırır */
+          <div className="text-center py-20">
+            <AlertTriangle className="w-20 h-20 text-amber-500 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+              Videolar yüklenemedi
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
+              Bir bağlantı sorunu oluştu. Lütfen tekrar deneyin.
+            </p>
+            <button
+              onClick={loadVideos}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-amber-500/50 transition-all hover:scale-105"
+            >
+              <RotateCw className="w-5 h-5" />
+              Tekrar Dene
+            </button>
+          </div>
+        ) : (
+          <>
         {/* Öne Çıkan Video */}
         {featured && (
           <motion.div
@@ -220,11 +266,17 @@ export default function Videos() {
                     </div>
                   </div>
 
-                  {/* Duration badge */}
-                  <div className="absolute top-3 right-3 flex items-center gap-1 px-3 py-1 bg-slate-900/80 backdrop-blur-sm rounded-full text-white text-sm font-bold">
-                    <Clock className="w-4 h-4" />
-                    <span>{video.duration}dk</span>
-                  </div>
+                  {/* Duration badge — yalnız dolu süre için; "dk" tekrarını önle */}
+                  {(video.duration ?? '').trim() && (
+                    <div className="absolute top-3 right-3 flex items-center gap-1 px-3 py-1 bg-slate-900/80 backdrop-blur-sm rounded-full text-white text-sm font-bold">
+                      <Clock className="w-4 h-4" />
+                      <span>
+                        {/dk|dakika|:/i.test(video.duration!.trim())
+                          ? video.duration!.trim()
+                          : `${video.duration!.trim()}dk`}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Category badge */}
                   <div className="absolute top-3 left-3 px-3 py-1 bg-amber-600/90 backdrop-blur-sm rounded-full text-white text-xs font-bold uppercase tracking-wide">
@@ -240,9 +292,11 @@ export default function Videos() {
                     {video.title}
                   </h3>
                 </Link>
-                <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
-                  {video.description}
-                </p>
+                {video.description?.trim() && (
+                  <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
+                    {video.description}
+                  </p>
+                )}
 
                 {/* Action buttons */}
                 <div className="flex gap-2">
@@ -263,7 +317,7 @@ export default function Videos() {
           ))}
         </div>
 
-        {/* No results */}
+        {/* Gerçek boş sonuç: yalnız başarılı yükleme + filtre sonucu 0 */}
         {filteredVideos.length === 0 && (
           <div className="text-center py-20">
             <Search className="w-20 h-20 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
@@ -274,6 +328,8 @@ export default function Videos() {
               Arama kriterlerinize uygun video bulunamadı. Farklı bir arama deneyin.
             </p>
           </div>
+        )}
+          </>
         )}
       </div>
     </div>
