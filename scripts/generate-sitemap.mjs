@@ -66,7 +66,7 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 // (5) Faz 3 — yeni içerik aile URL'leri: kilitli manifest (src/app/data/urlMigrationMap.json)
 const manifest = JSON.parse(readFileSync(join(ROOT, 'src/app/data/urlMigrationMap.json'), 'utf8'));
 const clin = manifest.filter((r) => r.contentFamily === 'klinisyenler');
-const blogRec = manifest.filter((r) => r.oldUrl); // 182 blog
+const blogRec = manifest.filter((r) => r.oldUrl); // 183 blog
 
 // URL listesi (sıra: static -> politika -> MR -> glossary). Loc bazında tekilleştirilir.
 const rows = [];
@@ -96,7 +96,7 @@ const buildXml = (list) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmln
   + list.map((u) => `  <url><loc>${esc(u.loc)}</loc><changefreq>${u.cf}</changefreq><priority>${u.pr}</priority></url>`).join('\n')
   + `\n</urlset>\n`;
 
-// STATİK blog-sitemap.xml: yalnız 182 yeni blog URL (83/67/32)
+// STATİK blog-sitemap.xml: yalnız 183 yeni blog URL (84/67/32)
 const famCount = { kaleminden: 0, 'saglikli-yasam': 0, 'yatak-yastik': 0 };
 const blogRows = [];
 const bseen = new Set();
@@ -106,13 +106,13 @@ for (const r of blogRec) {
   famCount[r.contentFamily] = (famCount[r.contentFamily] || 0) + 1;
   blogRows.push({ loc: `${ORIGIN}${r.newUrl}`, cf: 'monthly', pr: '0.7' });
 }
-if (blogRows.length !== 182) errors.push(`blog-sitemap 182 beklenirken ${blogRows.length}`);
-if (famCount.kaleminden !== 83 || famCount['saglikli-yasam'] !== 67 || famCount['yatak-yastik'] !== 32)
-  errors.push(`blog-sitemap aile 83/67/32 değil: ${JSON.stringify(famCount)}`);
+if (blogRows.length !== 183) errors.push(`blog-sitemap 183 beklenirken ${blogRows.length}`);
+if (famCount.kaleminden !== 84 || famCount['saglikli-yasam'] !== 67 || famCount['yatak-yastik'] !== 32)
+  errors.push(`blog-sitemap aile 84/67/32 değil: ${JSON.stringify(famCount)}`);
 if (blogRows.some((r) => /\/blog\/[0-9a-f-]{36}$/.test(r.loc))) errors.push('blog-sitemap eski /blog/<UUID> içeriyor');
 
 if (errors.length) { console.error('[sitemap] BAŞARISIZ:\n - ' + errors.join('\n - ')); process.exit(1); }
 
 writeFileSync(process.env.SITEMAP_OUT || join(ROOT, 'public/sitemap.xml'), buildXml(rows));
 writeFileSync(process.env.BLOG_SITEMAP_OUT || join(ROOT, 'public/blog-sitemap.xml'), buildXml(blogRows));
-console.log(`[sitemap] OK — sitemap.xml ${rows.length} (502 + 80 klinisyen), blog-sitemap.xml ${blogRows.length} (83/67/32); eski /blog/<UUID> 0.`);
+console.log(`[sitemap] OK — sitemap.xml ${rows.length} (502 + 80 klinisyen), blog-sitemap.xml ${blogRows.length} (84/67/32); eski /blog/<UUID> 0.`);

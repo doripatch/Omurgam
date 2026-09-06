@@ -10,11 +10,11 @@ const map = JSON.parse(readFileSync(join(ROOT, 'src/app/data/urlMigrationMap.jso
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const errors = [];
 
-if (map.length !== 262) errors.push(`toplam 262 beklenirken ${map.length}`);
+if (map.length !== 263) errors.push(`toplam 263 beklenirken ${map.length}`);
 
 const counts = {};
 for (const r of map) counts[r.contentFamily] = (counts[r.contentFamily] || 0) + 1;
-const expected = { kaleminden: 83, 'saglikli-yasam': 67, 'yatak-yastik': 32, klinisyenler: 80 };
+const expected = { kaleminden: 84, 'saglikli-yasam': 67, 'yatak-yastik': 32, klinisyenler: 80 };
 for (const [fam, n] of Object.entries(expected)) {
   if (counts[fam] !== n) errors.push(`${fam}: ${n} beklenirken ${counts[fam] || 0}`);
 }
@@ -28,10 +28,10 @@ for (const r of map) {
   if (!r.slug || !SLUG_RE.test(r.slug)) errors.push(`boş/geçersiz slug: ${r.id}`);
   if (r.oldUrl) blogOld++;
 }
-if (blogOld !== 182) errors.push(`182 blog oldUrl beklenirken ${blogOld}`);
+if (blogOld !== 183) errors.push(`183 blog oldUrl beklenirken ${blogOld}`);
 
 if (errors.length) {
   console.error('[validate-url-map] BAŞARISIZ:\n - ' + errors.join('\n - '));
   process.exit(1);
 }
-console.log(`[validate-url-map] OK — 262 kayıt (83/67/32/80), benzersiz id/slug/newUrl, 182 blog oldUrl, geçersiz slug yok.`);
+console.log(`[validate-url-map] OK — 263 kayıt (84/67/32/80), benzersiz id/slug/newUrl, 183 blog oldUrl, geçersiz slug yok.`);

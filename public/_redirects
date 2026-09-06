@@ -1,5 +1,5 @@
 # Faz 3 — otomatik üretildi (scripts/generate-redirects.mjs). Elle düzenleme.
-# 182 eski blog UUID URL -> kilitli yeni URL, gerçek HTTP 301 (force).
+# 183 eski blog UUID URL -> kilitli yeni URL, gerçek HTTP 301 (force).
 /blog/c1c8075c-b4ee-4122-8f7c-50a2e431ca56  /omurgam-ne-diyor/bel-fitiginda-agrinin-ayaga-dogru-ilerlemesi-ne-anlama-gelir  301!
 /blog/d2632a29-eb13-4036-ac11-3eceda0577b1  /omurgam-ne-diyor/boyun-fitiginda-sinir-egzersizleri-neden-bazen-agriyi-artirir  301!
 /blog/12ccc2fb-8e09-4296-a4c1-363f48b3ee7d  /omurgam-ne-diyor/bel-agrisinda-kor-kaslarim-zayif-demek-dogru-mu  301!
@@ -182,3 +182,4 @@
 /blog/1c192554-86d4-48c2-947e-d7dcb3f897d8  /yatak-yastik-rehberi/ciftler-ayni-yatakta-farkli-destege-ihtiyac-duyabilir-mi  301!
 /blog/486c12ed-1b06-485f-8a95-90feb39b6e1c  /yatak-yastik-rehberi/dogru-yastik-yuksekligini-evde-nasil-degerlendirirsiniz  301!
 /blog/15cff092-ca47-4fe5-b66c-b5341f86b451  /yatak-yastik-rehberi/dogru-yatak-magazada-nasil-secilir-7-adimli-yatak-deneme-rehberi  301!
+/blog/2c932906-d3ef-474f-b774-75f4834284ea  /omurgam-ne-diyor/cocugunuzun-okul-cantasi-agir-mi  301!

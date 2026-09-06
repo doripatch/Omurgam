@@ -73,11 +73,11 @@ export function allRecords(): readonly MigrationRecord[] {
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export function validateMigrationMap(): { ok: boolean; errors: string[] } {
   const errors: string[] = [];
-  if (records.length !== 262) errors.push(`toplam 262 beklenirken ${records.length}`);
+  if (records.length !== 263) errors.push(`toplam 263 beklenirken ${records.length}`);
   const counts: Record<string, number> = {};
   for (const r of records) counts[r.contentFamily] = (counts[r.contentFamily] || 0) + 1;
   const expected: Record<ContentFamily, number> = {
-    kaleminden: 83, 'saglikli-yasam': 67, 'yatak-yastik': 32, klinisyenler: 80,
+    kaleminden: 84, 'saglikli-yasam': 67, 'yatak-yastik': 32, klinisyenler: 80,
   };
   for (const [fam, n] of Object.entries(expected)) {
     if (counts[fam] !== n) errors.push(`${fam}: ${n} beklenirken ${counts[fam] || 0}`);
@@ -91,7 +91,7 @@ export function validateMigrationMap(): { ok: boolean; errors: string[] } {
     if (!r.slug || !SLUG_RE.test(r.slug)) errors.push(`boş/geçersiz slug: ${r.id}`);
     if (r.oldUrl) blogOld++;
   }
-  if (blogOld !== 182) errors.push(`182 blog oldUrl beklenirken ${blogOld}`);
+  if (blogOld !== 183) errors.push(`183 blog oldUrl beklenirken ${blogOld}`);
   return { ok: errors.length === 0, errors };
 }
 

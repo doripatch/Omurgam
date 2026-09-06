@@ -1,8 +1,8 @@
-// Faz 3 — Blog (182) + Klinisyen (80) detay + 4 indeks statik prerender (postbuild).
+// Faz 3 — Blog (183) + Klinisyen (80) detay + 4 indeks statik prerender (postbuild).
 // Kaynak: kilitli urlMigrationMap.json + CANLI GET (/blog, /clinical-notes).
 // Ortak parser (src/app/lib/richBlocks.mjs) ile React görünümüyle YAPISAL EŞDEĞER HTML.
 // Public anon key mevcut utils/supabase/info.tsx'ten okunur (yeni secret yok, service-role yok, LOGLANMAZ).
-// Fail-fast: API erişilemezse / 182-80 tam gelmezse / manifest-eşleşme bozuksa exit(1) -> build durur.
+// Fail-fast: API erişilemezse / 183-80 tam gelmezse / manifest-eşleşme bozuksa exit(1) -> build durur.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -105,14 +105,14 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
   const clinRec = manifest.filter((r) => r.contentFamily === 'klinisyenler');
 
   // fail-fast: manifest ile canlı BİREBİR eşleşmeli
-  if (blogRec.length !== 182) die(`manifest blog 182 değil: ${blogRec.length}`);
+  if (blogRec.length !== 183) die(`manifest blog 183 değil: ${blogRec.length}`);
   if (clinRec.length !== 80) die(`manifest klinisyen 80 değil: ${clinRec.length}`);
   for (const r of blogRec) if (!postById.has(r.id)) die(`manifest blog canlıda yok: ${r.id}`);
   for (const r of clinRec) if (!noteById.has(r.id)) die(`manifest klinisyen canlıda yok: ${r.id}`);
-  if (posts.length !== 182) die(`canlı published blog 182 değil: ${posts.length}`);
+  if (posts.length !== 183) die(`canlı published blog 183 değil: ${posts.length}`);
   if (notes.length !== 80) die(`canlı published klinisyen 80 değil: ${notes.length}`);
 
-  // --- BLOG detay (182) ---
+  // --- BLOG detay (183) ---
   const families = { kaleminden: [], 'saglikli-yasam': [], 'yatak-yastik': [] };
   for (const r of blogRec) {
     const p = postById.get(r.id);
@@ -188,8 +188,8 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
   // --- ÜRETİM-GÜVENLİ DOĞRULAMALAR ---
   const errs = [];
   const detailTotal = blogRec.length + clinRec.length;
-  if (detailTotal !== 262) errs.push(`detay 262 değil: ${detailTotal}`);
-  if (families.kaleminden.length !== 83) errs.push(`omurgam-ne-diyor 83 değil: ${families.kaleminden.length}`);
+  if (detailTotal !== 263) errs.push(`detay 263 değil: ${detailTotal}`);
+  if (families.kaleminden.length !== 84) errs.push(`omurgam-ne-diyor 84 değil: ${families.kaleminden.length}`);
   if (families['saglikli-yasam'].length !== 67) errs.push(`saglikli-yasam 67 değil: ${families['saglikli-yasam'].length}`);
   if (families['yatak-yastik'].length !== 32) errs.push(`yatak-yastik 32 değil: ${families['yatak-yastik'].length}`);
   if (clinList.length !== 80) errs.push(`klinisyen 80 değil: ${clinList.length}`);
@@ -206,7 +206,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
     if (!html.includes('"@type":"BreadcrumbList"')) errs.push(`${name}: Breadcrumb yok`);
     if (/\/blog\/[0-9a-f-]{36}/.test(html)) errs.push(`${name}: eski /blog/<UUID> izi var`);
   }
-  const idxChecks = [['kaleminden', 83], ['saglikli-yasam', 67], ['yatak-yastik', 32], ['klinisyenler', 80]];
+  const idxChecks = [['kaleminden', 84], ['saglikli-yasam', 67], ['yatak-yastik', 32], ['klinisyenler', 80]];
   for (const [fam, n] of idxChecks) {
     const html = readFileSync(join(DIST, FAM[fam].base, 'index.html'), 'utf8');
     const c = (html.match(new RegExp(`<li><a href="${FAM[fam].base}/`, 'g')) || []).length;
@@ -215,5 +215,5 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
   }
   if (errs.length) die('doğrulama:\n - ' + errs.join('\n - '));
 
-  console.log(`[prerender-content] OK — 262 detay (83/67/32/80) + 4 indeks; canlı 182 blog + 80 klinisyen eşleşti; tam 1 canonical & seo-jsonld; eski /blog/<UUID> izi yok.`);
+  console.log(`[prerender-content] OK — 263 detay (84/67/32/80) + 4 indeks; canlı 183 blog + 80 klinisyen eşleşti; tam 1 canonical & seo-jsonld; eski /blog/<UUID> izi yok.`);
 })();
