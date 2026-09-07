@@ -74,9 +74,9 @@ const seen = new Set();
 const add = (loc, cf, pr) => { if (!seen.has(loc)) { seen.add(loc); rows.push({ loc, cf, pr }); } };
 for (const [p, cf, pr] of STATIC) add(ORIGIN + p, cf, pr);
 for (const s of polSlugs) add(`${ORIGIN}/politika/${s}`, 'yearly', '0.3');
-for (const s of mrSlugs) add(`${ORIGIN}/mr-analiz/${s}`, 'monthly', '0.5');
+for (const s of mrSlugs) add(`${ORIGIN}/mr-analiz/${s}/`, 'monthly', '0.5');
 for (const t of spineGlossary.master) {
-  if (t?.slug) add(`${ORIGIN}/omurga-sozlugu/${t.slug}`, 'monthly', '0.7');
+  if (t?.slug) add(`${ORIGIN}/omurga-sozlugu/${t.slug}/`, 'monthly', '0.7');
 }
 
 const errors = [];
@@ -88,7 +88,7 @@ for (const idx of ['/omurgam-ne-diyor', '/saglikli-yasam', '/yatak-yastik-rehber
 }
 
 // 80 klinisyen yeni URL ekle -> 582
-for (const r of clin) add(`${ORIGIN}${r.newUrl}`, 'monthly', '0.6');
+for (const r of clin) add(`${ORIGIN}${r.newUrl}/`, 'monthly', '0.6');
 if (rows.length !== 582) errors.push(`ana sitemap 582 beklenirken ${rows.length}`);
 if (rows.some((r) => /\/blog\/[0-9a-f-]{36}$/.test(r.loc))) errors.push('ana sitemap eski /blog/<UUID> içeriyor');
 
@@ -104,7 +104,7 @@ for (const r of blogRec) {
   if (bseen.has(r.newUrl)) errors.push(`blog-sitemap dup: ${r.newUrl}`);
   bseen.add(r.newUrl);
   famCount[r.contentFamily] = (famCount[r.contentFamily] || 0) + 1;
-  blogRows.push({ loc: `${ORIGIN}${r.newUrl}`, cf: 'monthly', pr: '0.7' });
+  blogRows.push({ loc: `${ORIGIN}${r.newUrl}/`, cf: 'monthly', pr: '0.7' });
 }
 if (blogRows.length !== 183) errors.push(`blog-sitemap 183 beklenirken ${blogRows.length}`);
 if (famCount.kaleminden !== 84 || famCount['saglikli-yasam'] !== 67 || famCount['yatak-yastik'] !== 32)

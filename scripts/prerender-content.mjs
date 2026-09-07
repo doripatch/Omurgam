@@ -116,7 +116,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
   const families = { kaleminden: [], 'saglikli-yasam': [], 'yatak-yastik': [] };
   for (const r of blogRec) {
     const p = postById.get(r.id);
-    const canonical = `${ORIGIN}${r.newUrl}`;
+    const canonical = `${ORIGIN}${r.newUrl}/`;
     const description = (p.excerpt && p.excerpt.trim()) ? p.excerpt.trim() : plainSummary(p.content);
     const jsonLd = {
       '@context': 'https://schema.org',
@@ -135,14 +135,14 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
           ? editorialBlocksToHtml(parseEditorial(p.content))
           : blogBlocksToHtml(parseBlog(p.content))}</article>${DISCLAIMER}</main>`;
     write(r.newUrl, renderPage({ title: `${p.title} | Omurgam`, description, canonical, type: 'article', jsonLd, bodyHtml: body }));
-    families[r.contentFamily].push({ url: r.newUrl, title: p.title, category: p.category });
+    families[r.contentFamily].push({ url: `${r.newUrl}/`, title: p.title, category: p.category });
   }
 
   // --- KLİNİSYEN detay (80) ---
   const clinList = [];
   for (const r of clinRec) {
     const n = noteById.get(r.id);
-    const canonical = `${ORIGIN}${r.newUrl}`;
+    const canonical = `${ORIGIN}${r.newUrl}/`;
     const description = plainSummary(n.content);
     const jsonLd = {
       '@context': 'https://schema.org',
@@ -158,7 +158,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
       + `<p>${esc(n.category || 'Klinik Değerlendirme')}</p><h1>${esc(n.title)}</h1>`
       + `<article>${noteBlocksToHtml(parseNote(n.content))}</article>${DISCLAIMER}</main>`;
     write(r.newUrl, renderPage({ title: `${n.title} | Omurgam`, description, canonical, type: 'article', jsonLd, bodyHtml: body }));
-    clinList.push({ url: r.newUrl, title: n.title, category: n.category || 'Klinik Değerlendirme' });
+    clinList.push({ url: `${r.newUrl}/`, title: n.title, category: n.category || 'Klinik Değerlendirme' });
   }
 
   // --- İNDEKS sayfaları (4) ---
@@ -200,7 +200,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
   for (const [name, html, rec, p] of [['blog', sampleBlog, blogRec[0], postById.get(blogRec[0].id)], ['klinisyen', sampleClin, clinRec[0], noteById.get(clinRec[0].id)]]) {
     if ((html.match(/rel="canonical"/g) || []).length !== 1) errs.push(`${name}: tam 1 canonical değil`);
     if ((html.match(/id="seo-jsonld"/g) || []).length !== 1) errs.push(`${name}: tam 1 seo-jsonld değil`);
-    if (!html.includes(`rel="canonical" href="${ORIGIN}${rec.newUrl}"`)) errs.push(`${name}: self-canonical yanlış`);
+    if (!html.includes(`rel="canonical" href="${ORIGIN}${rec.newUrl}/"`)) errs.push(`${name}: self-canonical yanlış`);
     if (!html.includes(`<h1>${esc(p.title)}</h1>`)) errs.push(`${name}: H1 yok`);
     if (!html.includes('"@type":"Article"')) errs.push(`${name}: Article JSON-LD yok`);
     if (!html.includes('"@type":"BreadcrumbList"')) errs.push(`${name}: Breadcrumb yok`);

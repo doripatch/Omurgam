@@ -45,7 +45,8 @@ export function recordById(id?: string | null): MigrationRecord | undefined {
 
 /** ID -> yeni URL (yoksa undefined). */
 export function newUrlById(id?: string | null): string | undefined {
-  return id ? byId.get(id)?.newUrl : undefined;
+  const url = id ? byId.get(id)?.newUrl : undefined;
+  return url ? `${url}/` : undefined;
 }
 
 /** contentFamily + slug -> ID (güvenli fallback: undefined). */

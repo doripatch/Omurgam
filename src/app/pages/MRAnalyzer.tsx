@@ -82,7 +82,8 @@ const slugify = (s: string) =>
 export default function MRAnalyzer() {
   const location = useLocation();
   const navigate = useNavigate();
-  const routeSlug = decodeURIComponent(location.pathname.replace(/^\/mr-analiz\/?/, '')).trim();
+  const routeSlug = decodeURIComponent(location.pathname.replace(/^\/mr-analiz\/?/, ''))
+    .replace(/\/+$/, '').trim();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<MRTerm[]>([]);
@@ -109,8 +110,8 @@ export default function MRAnalyzer() {
   const selectTerm = (term: MRTerm) => {
     setSelectedTerm(term);
     const sl = slugify(term.term);
-    if (sl && `/mr-analiz/${sl}` !== location.pathname) {
-      navigate(`/mr-analiz/${sl}`);
+    if (sl && `/mr-analiz/${sl}/` !== location.pathname) {
+      navigate(`/mr-analiz/${sl}/`);
     }
   };
 
@@ -120,13 +121,16 @@ export default function MRAnalyzer() {
   const termTitle = selectedTerm
     ? `${selectedTerm.term} Nedir? — MR Raporu Terimi`
     : 'MR Raporu Terim Sözlüğü — Bel ve Boyun MR Raporu Nasıl Okunur?';
+  const termCanonical = selectedTerm
+    ? `https://omurgam.com/mr-analiz/${slugify(selectedTerm.term)}/`
+    : 'https://omurgam.com/mr-analiz';
   const seoJsonLd = selectedTerm
     ? {
         '@context': 'https://schema.org',
         '@graph': [
           {
             '@type': 'MedicalWebPage',
-            url: `https://omurgam.com/mr-analiz/${slugify(selectedTerm.term)}`,
+            url: termCanonical,
             name: termTitle,
             description: termDescription,
             inLanguage: 'tr-TR',
@@ -134,8 +138,8 @@ export default function MRAnalyzer() {
           },
           {
             '@type': 'DefinedTerm',
-            '@id': `https://omurgam.com/mr-analiz/${slugify(selectedTerm.term)}#term`,
-            url: `https://omurgam.com/mr-analiz/${slugify(selectedTerm.term)}`,
+            '@id': `${termCanonical}#term`,
+            url: termCanonical,
             name: selectedTerm.term,
             description: selectedTerm.explanation,
             inDefinedTermSet: { '@id': 'https://omurgam.com/mr-analiz#termset' },
@@ -145,7 +149,7 @@ export default function MRAnalyzer() {
             itemListElement: [
               { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: 'https://omurgam.com' },
               { '@type': 'ListItem', position: 2, name: 'MR Terim Sözlüğü', item: 'https://omurgam.com/mr-analiz' },
-              { '@type': 'ListItem', position: 3, name: selectedTerm.term, item: `https://omurgam.com/mr-analiz/${slugify(selectedTerm.term)}` },
+              { '@type': 'ListItem', position: 3, name: selectedTerm.term, item: termCanonical },
             ],
           },
         ],
@@ -241,7 +245,7 @@ export default function MRAnalyzer() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-emerald-50/20">
-      <Seo title={termTitle} description={termDescription} jsonLd={seoJsonLd} />
+      <Seo title={termTitle} description={termDescription} jsonLd={seoJsonLd} canonical={termCanonical} />
       {/* Hero Header */}
       <div className="relative bg-gradient-to-br from-amber-700 via-orange-800 to-amber-900 text-white py-12 md:py-20 px-4 overflow-hidden">
         {/* Decorative Elements */}
@@ -493,7 +497,7 @@ export default function MRAnalyzer() {
                     .map((t) => (
                       <a
                         key={t.id || t.term}
-                        href={`/mr-analiz/${slugify(t.term)}`}
+                        href={`/mr-analiz/${slugify(t.term)}/`}
                         onClick={(e) => { e.preventDefault(); selectTerm(t); }}
                         className="text-sm text-teal-700 hover:underline"
                       >

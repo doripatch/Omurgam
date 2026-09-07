@@ -76,7 +76,7 @@ export default function MigratedBlogPost() {
   if (!family || !id || !rec) return <NotFound />;
 
   const meta = FAMILY_META[family];
-  const canonical = `${ORIGIN}${rec.newUrl}`;
+  const canonical = `${ORIGIN}${rec.newUrl}/`;
   const formatDate = (iso?: string) => {
     if (!iso) return '';
     const d = new Date(iso);

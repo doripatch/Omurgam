@@ -110,7 +110,7 @@ const indexJsonLd = {
   url: `${ORIGIN}${BASE}`,
 };
 const indexLinks = master
-  .map((t) => `<li><a href="${BASE}/${esc(t.slug)}">${esc(t.term)}</a> — <span>${esc(t.category)}</span></li>`)
+  .map((t) => `<li><a href="${BASE}/${esc(t.slug)}/">${esc(t.term)}</a> — <span>${esc(t.category)}</span></li>`)
   .join('\n');
 const indexBody =
   `<main><nav><a href="/">Ana Sayfa</a> / Omurga Sözlüğü</nav>` +
@@ -129,7 +129,7 @@ write('omurga-sozlugu', renderPage({
 // ---------- DETAY (188) ----------
 let count = 0;
 for (const term of master) {
-  const canonicalUrl = `${ORIGIN}${BASE}/${term.slug}`;
+  const canonicalUrl = `${ORIGIN}${BASE}/${term.slug}/`;
   const termAliases = aliasByTarget.get(term.term) || [];
   const related = splitItems(term.relatedTerms);
   const [wrong, right] = String(term.trueFalse ?? '').split('|').map((x) => x.trim());
@@ -162,7 +162,7 @@ for (const term of master) {
   // Yalnız kesin eşleşen ilgili terimler <a href> olur; eşleşmeyen düz metin kalır.
   const relatedHtml = related.map((item) => {
     const target = relatedTerm(item);
-    return target ? `<a href="${BASE}/${esc(target.slug)}">${esc(item)}</a>` : `<span>${esc(item)}</span>`;
+    return target ? `<a href="${BASE}/${esc(target.slug)}/">${esc(item)}</a>` : `<span>${esc(item)}</span>`;
   }).join(' ');
 
   const body =
@@ -217,7 +217,7 @@ const jsonLdCount = (sample.match(/id="seo-jsonld"/g) || []).length;
 assert(jsonLdCount === 1, `acdf: tam 1 id="seo-jsonld" beklenirken ${jsonLdCount} bulundu`);
 const canonCount = (sample.match(/rel="canonical"/g) || []).length;
 assert(canonCount === 1, `acdf: tam 1 canonical beklenirken ${canonCount} bulundu`);
-assert(sample.includes('rel="canonical" href="https://omurgam.com/omurga-sozlugu/acdf"'), 'acdf: mutlak canonical yanlış');
+assert(sample.includes('rel="canonical" href="https://omurgam.com/omurga-sozlugu/acdf/"'), 'acdf: mutlak canonical yanlış');
 // Detayda og:type = article
 assert(/<meta property="og:type" content="article"\s*\/?>/.test(sample), 'acdf: og:type="article" yok');
 

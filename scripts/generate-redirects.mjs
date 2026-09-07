@@ -22,7 +22,7 @@ for (const r of blog) {
   if (!r.newUrl || !newSet.has(r.newUrl)) errors.push(`hedef manifestte yok: ${r.newUrl}`);
   if (r.newUrl.startsWith('/blog/')) errors.push(`loop riski (hedef /blog/): ${r.newUrl}`);
   if (r.oldUrl === r.newUrl) errors.push(`self-redirect: ${r.oldUrl}`);
-  lines.push(`${r.oldUrl}  ${r.newUrl}  301!`);
+  lines.push(`${r.oldUrl}  ${r.newUrl}/  301!`);
 }
 
 if (blog.length !== 183) errors.push(`183 blog redirect beklenirken ${blog.length}`);

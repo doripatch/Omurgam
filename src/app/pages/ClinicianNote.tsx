@@ -77,7 +77,7 @@ export default function ClinicianNote() {
   if (!id || !rec) return <NotFound />;
 
   const meta = FAMILY_META.klinisyenler;
-  const canonical = `${ORIGIN}${rec.newUrl}`;
+  const canonical = `${ORIGIN}${rec.newUrl}/`;
   const formatDate = (iso?: string) => {
     if (!iso) return '';
     const d = new Date(iso);

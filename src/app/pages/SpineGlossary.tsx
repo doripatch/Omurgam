@@ -41,7 +41,7 @@ function TermDetail({ term }: { term: SpineTerm }) {
   const aliases = aliasByTarget.get(term.term) || [];
   const related = splitItems(term.relatedTerms);
   const [wrong, right] = term.trueFalse.split('|').map((item) => item.trim());
-  const canonicalUrl = `${ORIGIN}${BASE}/${term.slug}`;
+  const canonicalUrl = `${ORIGIN}${BASE}/${term.slug}/`;
   const jsonLd = useMemo(() => ({
     '@context': 'https://schema.org',
     '@graph': [
@@ -120,7 +120,7 @@ function TermDetail({ term }: { term: SpineTerm }) {
               {related.map((item) => {
                 const target = relatedTerm(item);
                 return target
-                  ? <Link key={item} to={`${BASE}/${target.slug}`} className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">{item}</Link>
+                  ? <Link key={item} to={`${BASE}/${target.slug}/`} className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">{item}</Link>
                   : <span key={item} className="rounded-full border border-slate-200 px-3 py-1.5 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">{item}</span>;
               })}
             </div>
@@ -181,7 +181,7 @@ function GlossaryIndex() {
         <p className="my-5 text-sm font-semibold text-slate-500 dark:text-slate-400">{filtered.length} terim gösteriliyor</p>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((term) => (
-            <Link key={term.slug} to={`${BASE}/${term.slug}`} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+            <Link key={term.slug} to={`${BASE}/${term.slug}/`} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
               <p className="mb-2 text-xs font-bold uppercase tracking-wide text-amber-700 dark:text-amber-300">{term.category}</p>
               <h2 className="text-xl font-bold text-slate-900 group-hover:text-amber-700 dark:text-white">{term.term}</h2>
               <p className="mt-3 line-clamp-3 leading-6 text-slate-600 dark:text-slate-300">{term.definition}</p>
