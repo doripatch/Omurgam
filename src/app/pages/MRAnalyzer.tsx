@@ -245,7 +245,8 @@ export default function MRAnalyzer() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-emerald-50/20">
-      <Seo title={termTitle} description={termDescription} jsonLd={seoJsonLd} canonical={termCanonical} />
+      <Seo title={termTitle} description={termDescription} jsonLd={seoJsonLd} canonical={termCanonical}
+        analyticsReady={!routeSlug || (!!selectedTerm && slugify(selectedTerm.term) === routeSlug)} />
       {/* Hero Header */}
       <div className="relative bg-gradient-to-br from-amber-700 via-orange-800 to-amber-900 text-white py-12 md:py-20 px-4 overflow-hidden">
         {/* Decorative Elements */}

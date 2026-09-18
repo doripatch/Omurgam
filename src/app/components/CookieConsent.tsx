@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Cookie, Settings2 } from 'lucide-react';
-import { trackPageview } from '../lib/analytics';
 import {
   getConsent,
   setConsent,
@@ -20,7 +19,6 @@ export default function CookieConsent() {
     const existing = getConsent();
     if (existing) {
       applyConsent(existing);
-      if (existing.analytics) trackPageview(window.location.pathname + window.location.search);
     } else {
       setShow(true);
     }
@@ -36,7 +34,6 @@ export default function CookieConsent() {
 
   const persist = (c: ConsentState) => {
     setConsent(c);
-    if (c.analytics) trackPageview(window.location.pathname + window.location.search);
     setShow(false);
     setManage(false);
   };

@@ -78,7 +78,7 @@ export default function Root() {
 
   // Sayfa geçişlerini GA'ya bildir (yalnızca çerez onayı verildiyse çalışır)
   useEffect(() => {
-    trackPageview(location.pathname + location.search);
+    trackPageview(location.pathname + location.search, location.key);
   }, [location.pathname, location.search]);
 
   // Giriş yapan kullanıcının bildirimlerini yükle

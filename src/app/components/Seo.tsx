@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { useLocation } from 'react-router';
+import { setAnalyticsPageTitle } from '../lib/analytics';
 
 // Sayfa başına başlık / meta / Open Graph / canonical / yapısal veri (JSON-LD)
 // ayarlayan hafif bir bileşen. Hiçbir şey render etmez (null döner).
@@ -16,6 +18,7 @@ interface SeoProps {
   type?: string;
   jsonLd?: Record<string, any> | null;
   canonical?: string;
+  analyticsReady?: boolean;
 }
 
 function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
@@ -28,7 +31,12 @@ function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
   el.setAttribute('content', content);
 }
 
-export default function Seo({ title, description, image, type = 'website', jsonLd, canonical }: SeoProps) {
+export default function Seo({ title, description, image, type = 'website', jsonLd, canonical, analyticsReady = true }: SeoProps) {
+  const location = useLocation();
+  useEffect(() => {
+    const fullTitle = title ? `${title} | ${SITE}` : `${SITE} — Türkiye'nin Omurga Sağlığı Platformu`;
+    setAnalyticsPageTitle(location.key, fullTitle, analyticsReady);
+  }, [location.key, title, analyticsReady]);
   useEffect(() => {
     const fullTitle = title ? `${title} | ${SITE}` : `${SITE} — Türkiye'nin Omurga Sağlığı Platformu`;
     document.title = fullTitle;

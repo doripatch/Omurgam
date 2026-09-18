@@ -3,6 +3,43 @@
 const GA_ID = 'G-V0F1HS8QCH';
 let gaScriptLoaded = false;
 let consentDefaultsSet = false;
+let analyticsAllowed = false;
+type Visit = { path: string; key: string; url: string; sent: boolean };
+let visit: Visit | null = null;
+let metadata: { key: string; title: string; ready: boolean } | null = null;
+let pageviewTimer: ReturnType<typeof setTimeout> | undefined;
+
+function cancelPageviewTimer() {
+  clearTimeout(pageviewTimer);
+  pageviewTimer = undefined;
+}
+
+function sendPageview() {
+  cancelPageviewTimer();
+  if (!analyticsAllowed || !gaScriptLoaded || !visit || visit.sent) return;
+  visit.sent = true;
+  const title = metadata?.key === visit.key && metadata.ready ? metadata.title : visit.path;
+  ensureGtag()('event', 'page_view', {
+    page_path: visit.path,
+    page_location: visit.url,
+    // Never attribute a previous page's title to this visit.
+    page_title: title,
+  });
+}
+
+function schedulePageview() {
+  cancelPageviewTimer();
+  if (!analyticsAllowed || !visit || visit.sent) return;
+  // Let React finish its effects. Async titles may arrive later; pages without
+  // SEO metadata still get counted, with their path as a neutral title.
+  const ready = metadata?.key === visit.key && metadata.ready;
+  pageviewTimer = setTimeout(sendPageview, ready ? 0 : 3000);
+}
+
+export function setAnalyticsPageTitle(key: string, title: string, ready = true) {
+  metadata = { key, title, ready };
+  schedulePageview();
+}
 
 function ensureGtag(): (...args: any[]) => void {
   const w = window as any;
@@ -32,9 +69,12 @@ export function initConsentDefaults() {
   });
 }
 
-export function loadGA() {
+function loadGA() {
   if (gaScriptLoaded || typeof window === 'undefined') return;
   gaScriptLoaded = true;
+  // Flush a short visit before a full navigation/tab close, without waiting for
+  // async metadata. The consent/sent guards still apply.
+  window.addEventListener('pagehide', sendPageview);
 
   const gtag = ensureGtag();
   const s = document.createElement('script');
@@ -53,25 +93,29 @@ export function grantAnalyticsConsent() {
   initConsentDefaults();
   const gtag = ensureGtag();
   gtag('consent', 'update', { analytics_storage: 'granted' });
+  analyticsAllowed = true;
   loadGA();
+  schedulePageview();
 }
 
 // Analitik onayı geri çekildiğinde: izni "denied" yap
 export function revokeAnalyticsConsent() {
   if (typeof window === 'undefined') return;
   initConsentDefaults();
+  analyticsAllowed = false;
+  cancelPageviewTimer();
   const gtag = ensureGtag();
   gtag('consent', 'update', { analytics_storage: 'denied' });
 }
 
-export function trackPageview(path: string) {
-  const w = window as any;
-  if (!gaScriptLoaded || !w.gtag) return;
-  w.gtag('event', 'page_view', {
-    page_path: path,
-    page_location: window.location.href,
-    page_title: document.title,
-  });
+export function trackPageview(path: string, key: string) {
+  if (typeof window === 'undefined') return;
+  // Repeated effects/consent changes are not new visits. Returning via Back
+  // after another route IS a new visit, even if its history key was seen before.
+  if (visit?.key === key && visit.path === path) return;
+  sendPageview();
+  visit = { path, key, url: window.location.href, sent: false };
+  schedulePageview();
 }
 
 export function isGALoaded() {
