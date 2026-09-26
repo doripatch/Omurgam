@@ -11,9 +11,11 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { glossaryTitle, glossaryDescription, glossaryFaq, glossaryFaqJsonLd } from '../src/app/lib/glossarySeo.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const DIST = join(ROOT, 'dist');
+// DIST varsayılan dist/; test/CI için PRERENDER_DIST ile geçersiz kılınabilir (davranış aynı).
+const DIST = process.env.PRERENDER_DIST || join(ROOT, 'dist');
 const ORIGIN = 'https://omurgam.com';
 const BASE = '/omurga-sozlugu';
 
@@ -156,6 +158,10 @@ for (const term of master) {
       },
     ],
   };
+  // FAQPage (yalnız dolu alanlardan; sayfada da GÖRÜNÜR render edilir).
+  const faq = glossaryFaq(term);
+  const faqLd = glossaryFaqJsonLd(term);
+  if (faqLd) jsonLd['@graph'].push(faqLd);
 
   const patientTags = [...splitItems(term.patientLanguage), ...termAliases]
     .map((x) => `<span>${esc(x)}</span>`).join(' ');
@@ -177,13 +183,14 @@ for (const term of master) {
     `<section><h2>Sık karıştırılan</h2><p>${esc(String(wrong || '').replace(/^❌\s*/, ''))}</p>` +
     `<h2>Doğrusu</h2><p>${esc(String(right || '').replace(/^✅\s*/, ''))}</p></section>` +
     (related.length ? `<section><h2>İlgili terimler</h2><div>${relatedHtml}</div></section>` : '') +
+    (faq.length ? `<section><h2>Sıkça Sorulan Sorular</h2>${faq.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}</section>` : '') +
     DISCLAIMER +
     `<p>Editoryal kaynak: <a href="${esc(term.sourceUrl)}" target="_blank" rel="noopener noreferrer nofollow">Kaynağı görüntüle</a></p>` +
     `</main>`;
 
   write(`omurga-sozlugu/${term.slug}`, renderPage({
-    title: `${term.term} Nedir? | Omurgam`,
-    description: `${term.term}: ${term.definition}`.slice(0, 160),
+    title: glossaryTitle(term),
+    description: glossaryDescription(term),
     canonical: canonicalUrl,
     type: 'article',
     jsonLd,
@@ -207,11 +214,16 @@ assert(slugSet.size === 188, `188 benzersiz slug bekleniyordu, ${slugSet.size} b
 const sample = readFileSync(join(DIST, 'omurga-sozlugu/acdf/index.html'), 'utf8');
 const acdf = master.find((t) => t.slug === 'acdf');
 assert(!!acdf, 'acdf terimi veri kümesinde yok');
-assert(sample.includes('<title>ACDF Nedir? | Omurgam</title>'), 'acdf: benzersiz <title> yok');
+assert(sample.includes('<title>ACDF Nedir? Anlamı ve Klinik Önemi | Omurgam</title>'), 'acdf: benzersiz <title> yok');
 assert(sample.includes(esc(acdf.definition.slice(0, 40))), 'acdf: ana tanım metni yok');
 assert(/<h1>ACDF nedir\?<\/h1>/.test(sample), 'acdf: görünür <h1> yok');
 assert(sample.includes('"@type":"DefinedTerm"'), 'acdf: DefinedTerm JSON-LD yok');
 assert(sample.includes('"@type":"BreadcrumbList"'), 'acdf: BreadcrumbList JSON-LD yok');
+assert(sample.includes('"@type":"FAQPage"'), 'acdf: FAQPage JSON-LD yok');
+assert(sample.includes('<h2>Sıkça Sorulan Sorular</h2>'), 'acdf: görünür SSS bölümü yok');
+// meta description kelime ortasında kesilmemeli (… ile biter, tam kırpık değil)
+const acdfDescM = sample.match(/<meta name="description" content="([^"]*)"/);
+assert(acdfDescM && acdfDescM[1].length <= 156, 'acdf: meta description çok uzun');
 // Tam olarak bir seo-jsonld ve bir canonical (React ile çift JSON-LD önlemi)
 const jsonLdCount = (sample.match(/id="seo-jsonld"/g) || []).length;
 assert(jsonLdCount === 1, `acdf: tam 1 id="seo-jsonld" beklenirken ${jsonLdCount} bulundu`);

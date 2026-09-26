@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router';
 import { ArrowLeft, BookOpen, CheckCircle2, ExternalLink, Search, Stethoscope, XCircle } from 'lucide-react';
 import Seo from '../components/Seo';
 import glossaryData from '../data/spineGlossary.json';
+import { glossaryTitle, glossaryDescription, glossaryFaq, glossaryFaqJsonLd } from '../lib/glossarySeo.mjs';
 
 type SpineTerm = (typeof glossaryData.master)[number];
 
@@ -62,14 +63,17 @@ function TermDetail({ term }: { term: SpineTerm }) {
           { '@type': 'ListItem', position: 3, name: term.term, item: canonicalUrl },
         ],
       },
+      // FAQPage (yalnız dolu alanlardan; aşağıda GÖRÜNÜR olarak da render edilir).
+      ...(glossaryFaqJsonLd(term) ? [glossaryFaqJsonLd(term)] : []),
     ],
   }), [aliases, canonicalUrl, term]);
+  const faq = glossaryFaq(term);
 
   return (
     <main className="min-h-screen bg-stone-50 dark:bg-slate-950">
       <Seo
-        title={`${term.term} Nedir?`}
-        description={`${term.term}: ${term.definition}`.slice(0, 160)}
+        title={glossaryTitle(term)}
+        description={glossaryDescription(term)}
         type="article"
         jsonLd={jsonLd}
       />
@@ -123,6 +127,20 @@ function TermDetail({ term }: { term: SpineTerm }) {
                   ? <Link key={item} to={`${BASE}/${target.slug}/`} className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">{item}</Link>
                   : <span key={item} className="rounded-full border border-slate-200 px-3 py-1.5 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">{item}</span>;
               })}
+            </div>
+          </section>
+        )}
+
+        {faq.length > 0 && (
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 md:p-8">
+            <h2 className="mb-4 text-xl font-bold text-slate-900 dark:text-white">Sıkça Sorulan Sorular</h2>
+            <div className="space-y-4">
+              {faq.map((f) => (
+                <div key={f.q}>
+                  <h3 className="font-semibold text-slate-900 dark:text-white">{f.q}</h3>
+                  <p className="mt-1 leading-7 text-slate-700 dark:text-slate-200">{f.a}</p>
+                </div>
+              ))}
             </div>
           </section>
         )}
