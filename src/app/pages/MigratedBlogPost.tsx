@@ -14,6 +14,8 @@ import AuthorBox from '../components/AuthorBox';
 import RichText, { hasMarkdown } from '../components/RichText';
 import EditorialText from '../components/EditorialText';
 import { ORIGIN, BASE_TO_FAMILY, FAMILY_META, idByBaseSlug, recordById } from '../lib/urlMigration';
+import glossaryData from '../data/spineGlossary.json';
+import { findGlossaryMentions, findPillar } from '../lib/glossaryLinks.mjs';
 
 interface BlogPostData {
   id: string;
@@ -165,6 +167,31 @@ export default function MigratedBlogPost() {
                     ? <RichText text={post.content} />
                     : <div className="text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">{post.content}</div>}
               </div>
+              {(() => {
+                const pillar = findPillar(`${post.title} ${post.content}`) as { name: string; url: string } | null;
+                return pillar ? (
+                  <div className="mt-8">
+                    <Link to={pillar.url} className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 px-5 py-3 font-semibold text-white transition hover:shadow-lg">
+                      Kapsamlı rehber: {pillar.name} →
+                    </Link>
+                  </div>
+                ) : null;
+              })()}
+              {(() => {
+                const mentions = findGlossaryMentions(`${post.title} ${post.content}`, (glossaryData as any).master, 6);
+                return mentions.length ? (
+                  <nav aria-label="İlgili kavramlar" className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-800/50">
+                    <h2 className="mb-3 text-lg font-bold text-slate-900 dark:text-white">İlgili Kavramlar</h2>
+                    <ul className="flex flex-wrap gap-2">
+                      {mentions.map((m: { term: string; slug: string }) => (
+                        <li key={m.slug}>
+                          <Link to={`/omurga-sozlugu/${m.slug}/`} className="inline-block rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">{m.term} nedir?</Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                ) : null;
+              })()}
               <AuthorBox updatedDate={formatDate(post.updatedAt || post.createdAt || post.created_at)} />
             </>
           ) : (
