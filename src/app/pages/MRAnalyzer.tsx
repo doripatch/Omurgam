@@ -5,6 +5,7 @@ import { termsAPI } from '../lib/api';
 import { toast } from 'sonner';
 import FavoriteButton from '../components/FavoriteButton';
 import Seo from '../components/Seo';
+import crossLinks from '../data/crossLinks.json';
 import { smartTruncate, faqPageJsonLd } from '../lib/glossarySeo.mjs';
 
 const MR_JSONLD = {
@@ -394,6 +395,17 @@ export default function MRAnalyzer() {
                   ))}
                 </div>
               </div>
+            )}
+
+            {/* Sözlük çapraz linki — aynı terim Omurga Sözlüğü'nde de varsa */}
+            {(crossLinks.mrToGlossary as Record<string, string>)[slugify(selectedTerm.term)] && (
+              <a
+                href={`/omurga-sozlugu/${(crossLinks.mrToGlossary as Record<string, string>)[slugify(selectedTerm.term)]}/`}
+                className="block backdrop-blur-xl bg-teal-50/80 border border-teal-200 rounded-2xl md:rounded-3xl p-4 md:p-6 transition hover:bg-teal-100/80"
+              >
+                <h3 className="font-bold text-teal-900 mb-1 text-base md:text-lg">Sözlükte daha ayrıntılı</h3>
+                <p className="text-teal-800 text-sm md:text-base">{selectedTerm.term} — Omurga Sözlüğü açıklaması (hasta dili, sık karıştırılanlar) →</p>
+              </a>
             )}
 
             {/* SSS Card — FAQPage şemasıyla eşleşen görünür içerik */}

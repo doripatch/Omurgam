@@ -20,6 +20,8 @@ if (!existsSync(templatePath)) {
 }
 const template = readFileSync(templatePath, 'utf8');
 const source = JSON.parse(readFileSync(join(ROOT, 'mr-terimleri-iceaktarim.json'), 'utf8'));
+// MR → Sözlük çapraz link eşlemesi (aynı terim sözlükte de varsa).
+const crossLinks = JSON.parse(readFileSync(join(ROOT, 'src/app/data/crossLinks.json'), 'utf8'));
 
 const TR = { 'ç':'c','ğ':'g','ı':'i','İ':'i','ö':'o','ş':'s','ü':'u','â':'a','î':'i','û':'u','Ç':'c','Ğ':'g','Ö':'o','Ş':'s','Ü':'u' };
 const slugify = (s) => String(s || '').split('').map((c) => TR[c] ?? c).join('')
@@ -96,10 +98,14 @@ for (const [slug, term] of bySlug) {
     ? `<section><h2>Öneriler</h2><ul>${term.recommendations.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></section>` : '';
   const faqHtml = faq.length
     ? `<section><h2>Sıkça Sorulan Sorular</h2>${faq.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}</section>` : '';
+  const glossarySlug = crossLinks.mrToGlossary[slug];
+  const crossHtml = glossarySlug
+    ? `<section><h2>Sözlükte daha ayrıntılı</h2><p><a href="/omurga-sozlugu/${esc(glossarySlug)}/">${esc(term.term)} — Omurga Sözlüğü açıklaması (hasta dili, sık karıştırılanlar) →</a></p></section>`
+    : '';
   const body = `<main><nav><a href="${BASE}">← MR Terim Sözlüğü</a></nav>`
     + `<p>${esc(term.category || 'Omurga & MR Terimleri')}</p><h1>${esc(term.term)} Nedir?</h1>`
     + `<section><h2>Kısa ve doğrudan açıklama</h2><p>${esc(term.explanation)}</p></section>`
-    + recommendations + faqHtml + DISCLAIMER + '</main>';
+    + recommendations + crossHtml + faqHtml + DISCLAIMER + '</main>';
   const dir = join(DIST, 'mr-analiz', slug);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'index.html'), renderPage({ title, description, canonical, jsonLd, bodyHtml: body }));
