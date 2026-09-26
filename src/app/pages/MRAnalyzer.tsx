@@ -5,6 +5,7 @@ import { termsAPI } from '../lib/api';
 import { toast } from 'sonner';
 import FavoriteButton from '../components/FavoriteButton';
 import Seo from '../components/Seo';
+import { smartTruncate, faqPageJsonLd } from '../lib/glossarySeo.mjs';
 
 const MR_JSONLD = {
   '@context': 'https://schema.org',
@@ -116,8 +117,17 @@ export default function MRAnalyzer() {
   };
 
   const termDescription = selectedTerm
-    ? `${selectedTerm.term}: ${selectedTerm.explanation.replace(/\s+/g, ' ').slice(0, 155)}`
+    ? smartTruncate(`${selectedTerm.term} nedir? ${selectedTerm.explanation}`, 155)
     : 'MR raporunuzda geçen protrüzyon, ekstrüzyon, bulging, dejenerasyon gibi terimlerin ne anlama geldiğini sade ve bilimsel bir dille öğrenin. 290+ MR terimi, Prof. Dr. Defne Kaya Utlu editörlüğünde.';
+  // FAQ: yalnız dolu alanlardan (açıklama + öneriler); aşağıda GÖRÜNÜR olarak da render edilir.
+  const mrFaq = selectedTerm
+    ? [
+        { q: `${selectedTerm.term} nedir?`, a: selectedTerm.explanation.replace(/\s+/g, ' ').trim() },
+        ...(selectedTerm.recommendations && selectedTerm.recommendations.length
+          ? [{ q: `${selectedTerm.term} için öneriler ve tedavi yaklaşımı nedir?`, a: selectedTerm.recommendations.join(' ') }]
+          : []),
+      ]
+    : [];
   const termTitle = selectedTerm
     ? `${selectedTerm.term} Nedir? — MR Raporu Terimi`
     : 'MR Raporu Terim Sözlüğü — Bel ve Boyun MR Raporu Nasıl Okunur?';
@@ -152,6 +162,7 @@ export default function MRAnalyzer() {
               { '@type': 'ListItem', position: 3, name: selectedTerm.term, item: termCanonical },
             ],
           },
+          ...(faqPageJsonLd(mrFaq) ? [faqPageJsonLd(mrFaq)] : []),
         ],
       }
     : MR_JSONLD;
@@ -379,6 +390,21 @@ export default function MRAnalyzer() {
                     >
                       <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-teal-600 flex-shrink-0 mt-0.5" />
                       <span className="text-sm md:text-base text-slate-700">{rec}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* SSS Card — FAQPage şemasıyla eşleşen görünür içerik */}
+            {mrFaq.length > 0 && (
+              <div className="backdrop-blur-xl bg-white/80 border border-slate-200 rounded-2xl md:rounded-3xl p-4 md:p-8">
+                <h2 className="text-lg md:text-2xl font-bold text-slate-900 mb-4 md:mb-6">Sıkça Sorulan Sorular</h2>
+                <div className="space-y-4">
+                  {mrFaq.map((f) => (
+                    <div key={f.q}>
+                      <h3 className="font-semibold text-slate-900">{f.q}</h3>
+                      <p className="mt-1 leading-7 text-slate-700">{f.a}</p>
                     </div>
                   ))}
                 </div>

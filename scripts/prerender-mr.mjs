@@ -4,6 +4,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { smartTruncate, faqPageJsonLd } from '../src/app/lib/glossarySeo.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = process.env.PRERENDER_DIST || join(ROOT, 'dist');
@@ -67,7 +68,14 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu bilgiler yalnızca bilgi
 for (const [slug, term] of bySlug) {
   const canonical = `${ORIGIN}${BASE}/${slug}/`;
   const title = `${term.term} Nedir? — MR Raporu Terimi | Omurgam`;
-  const description = `${term.term}: ${compact(term.explanation)}`.slice(0, 155);
+  // Meta: kelime sınırında biter (eski .slice(0,155) kelime ortasında kesiyordu).
+  const description = smartTruncate(`${term.term} nedir? ${compact(term.explanation)}`, 155);
+  // FAQ: yalnız dolu alanlardan (açıklama + öneriler); tıbbi ifade uydurulmaz.
+  const faq = [];
+  if (compact(term.explanation)) faq.push({ q: `${term.term} nedir?`, a: compact(term.explanation) });
+  if (Array.isArray(term.recommendations) && term.recommendations.length) {
+    faq.push({ q: `${term.term} için öneriler ve tedavi yaklaşımı nedir?`, a: term.recommendations.map(compact).join(' ') });
+  }
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -82,12 +90,16 @@ for (const [slug, term] of bySlug) {
       ] },
     ],
   };
+  const faqLd = faqPageJsonLd(faq);
+  if (faqLd) jsonLd['@graph'].push(faqLd);
   const recommendations = Array.isArray(term.recommendations) && term.recommendations.length
     ? `<section><h2>Öneriler</h2><ul>${term.recommendations.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></section>` : '';
+  const faqHtml = faq.length
+    ? `<section><h2>Sıkça Sorulan Sorular</h2>${faq.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}</section>` : '';
   const body = `<main><nav><a href="${BASE}">← MR Terim Sözlüğü</a></nav>`
     + `<p>${esc(term.category || 'Omurga & MR Terimleri')}</p><h1>${esc(term.term)} Nedir?</h1>`
     + `<section><h2>Kısa ve doğrudan açıklama</h2><p>${esc(term.explanation)}</p></section>`
-    + recommendations + DISCLAIMER + '</main>';
+    + recommendations + faqHtml + DISCLAIMER + '</main>';
   const dir = join(DIST, 'mr-analiz', slug);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'index.html'), renderPage({ title, description, canonical, jsonLd, bodyHtml: body }));
@@ -104,6 +116,12 @@ for (const slug of samples) {
   if ((html.match(/id="seo-jsonld"/g) || []).length !== 1 || !html.includes('<h1>')) {
     console.error(`[prerender-mr] HATA: ${slug} görünür içerik/JSON-LD eksik`); process.exit(1);
   }
+  if (!html.includes('"@type":"FAQPage"') || !html.includes('<h2>Sıkça Sorulan Sorular</h2>')) {
+    console.error(`[prerender-mr] HATA: ${slug} FAQPage/görünür SSS eksik`); process.exit(1);
+  }
+  // Ham metin ≤155; HTML entity kaçışı (&amp; vb.) birkaç karakter ekleyebilir → ≤170 tolerans.
+  const mrDescM = html.match(/<meta name="description" content="([^"]*)"/);
+  if (!mrDescM || mrDescM[1].length > 170) { console.error(`[prerender-mr] HATA: ${slug} meta description uzun/eksik`); process.exit(1); }
 }
 
 console.log(`[prerender-mr] OK — ${bySlug.size} benzersiz detay üretildi; ${source.length - bySlug.size} mükerrer kaynak kayıt ilk-kayıt kuralıyla tekilleştirildi; slash canonical + görünür H1 + DefinedTerm doğrulandı.`);

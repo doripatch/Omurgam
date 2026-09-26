@@ -6,6 +6,28 @@
 const splitItems = (v) => String(v ?? '').split('·').map((x) => x.trim()).filter(Boolean);
 const clean = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
 
+// Genel: ≤max krk, kelime ORTASINDA kesmez; kırpıldıysa '…' ile biter.
+export function smartTruncate(text, max = 155) {
+  const s = clean(text);
+  if (s.length <= max) return s;
+  const cut = s.slice(0, max - 1);
+  const sp = cut.lastIndexOf(' ');
+  return (sp > Math.floor(max / 2) ? cut.slice(0, sp) : cut).replace(/[.,;:!?\-–—\s]+$/, '') + '…';
+}
+
+// Genel FAQPage şeması ([{q,a}] -> JSON-LD). Boşsa null.
+export function faqPageJsonLd(faq) {
+  if (!Array.isArray(faq) || !faq.length) return null;
+  return {
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  };
+}
+
 // Başlık: "Nedir?" (arama niyetiyle eşleşir, Google kalınlaştırır) + iki DOĞRU
 // farklılaştırıcı (her terimde definition=anlamı ve clinicalNote=klinik önemi var).
 export function glossaryTitle(term) {
@@ -14,11 +36,7 @@ export function glossaryTitle(term) {
 
 // Meta description: kaynaktan; ≤155 krk; kelime ORTASINDA kesmez, tam sözcükte biter.
 export function glossaryDescription(term) {
-  const base = clean(`${term.term} nedir? ${term.definition}`);
-  if (base.length <= 155) return base;
-  const cut = base.slice(0, 152);
-  const sp = cut.lastIndexOf(' ');
-  return (sp > 80 ? cut.slice(0, sp) : cut).replace(/[.,;:!?\-–—\s]+$/, '') + '…';
+  return smartTruncate(`${term.term} nedir? ${term.definition}`, 155);
 }
 
 // FAQ: yalnız DOLU alanlardan; tıbbi ifade/soru uydurulmaz. Sayfada da GÖRÜNÜR
@@ -35,14 +53,5 @@ export function glossaryFaq(term) {
 }
 
 export function glossaryFaqJsonLd(term) {
-  const faq = glossaryFaq(term);
-  if (!faq.length) return null;
-  return {
-    '@type': 'FAQPage',
-    mainEntity: faq.map((f) => ({
-      '@type': 'Question',
-      name: f.q,
-      acceptedAnswer: { '@type': 'Answer', text: f.a },
-    })),
-  };
+  return faqPageJsonLd(glossaryFaq(term));
 }
