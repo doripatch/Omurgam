@@ -4,7 +4,7 @@ import { ArrowLeft, BookOpen, CheckCircle2, ExternalLink, Search, Stethoscope, X
 import Seo from '../components/Seo';
 import glossaryData from '../data/spineGlossary.json';
 import crossLinks from '../data/crossLinks.json';
-import { glossaryTitle, glossaryDescription, glossaryFaq, glossaryFaqJsonLd } from '../lib/glossarySeo.mjs';
+import { glossaryTitleBase, glossaryDescription, glossaryFaq, glossaryFaqJsonLd } from '../lib/glossarySeo.mjs';
 
 type SpineTerm = (typeof glossaryData.master)[number];
 
@@ -74,7 +74,7 @@ function TermDetail({ term }: { term: SpineTerm }) {
   return (
     <main className="min-h-screen bg-stone-50 dark:bg-slate-950">
       <Seo
-        title={glossaryTitle(term)}
+        title={glossaryTitleBase(term)}
         description={glossaryDescription(term)}
         type="article"
         jsonLd={jsonLd}

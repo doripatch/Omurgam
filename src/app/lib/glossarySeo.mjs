@@ -30,8 +30,12 @@ export function faqPageJsonLd(faq) {
 
 // Başlık: "Nedir?" (arama niyetiyle eşleşir, Google kalınlaştırır) + iki DOĞRU
 // farklılaştırıcı (her terimde definition=anlamı ve clinicalNote=klinik önemi var).
+// React <Seo> " | Omurgam" ekini kendisi ekler; ona glossaryTitleBase verilir.
+export function glossaryTitleBase(term) {
+  return `${term.term} Nedir? Anlamı ve Klinik Önemi`;
+}
 export function glossaryTitle(term) {
-  return `${term.term} Nedir? Anlamı ve Klinik Önemi | Omurgam`;
+  return `${glossaryTitleBase(term)} | Omurgam`;
 }
 
 // Meta description: kaynaktan; ≤155 krk; kelime ORTASINDA kesmez, tam sözcükte biter.
