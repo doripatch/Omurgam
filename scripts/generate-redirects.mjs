@@ -65,4 +65,17 @@ const header = '# Faz 3 — otomatik üretildi (scripts/generate-redirects.mjs).
   + '# Eski /video/<UUID> -> canonical /videolar/<slug>/, gerçek HTTP 301 (force); duplicate kayıtlar canonical hedefe gider.\n';
 const allLines = [...lines, ...videoLines];
 writeFileSync(process.env.REDIRECTS_OUT || join(ROOT, 'public/_redirects'), header + allLines.join('\n') + '\n');
-console.log(`[generate-redirects] OK — public/_redirects: ${allLines.length} adet 301 (${lines.length} blog + ${videoLines.length} video; ${new Set(vidTargets).size} benzersiz video hedef; dup/loop/hedef doğrulandı).`);
+// GEÇİCİ taşınma sitemap'i (2 Eki 2026): eski /blog|/video <UUID> adresleri. GSC'ye ayrıca gönderilir ki Google
+// eski adresleri yeniden tarayıp 301'leri görsün ve yeni adresi standart seçsin ("Kopya, Google farklı standart seçti").
+// robots.txt'ye EKLENMEZ; birkaç hafta sonra GSC'den kaldırılır (dosya kalsa da zararsız).
+{
+  const legacy = [...blog.map((r) => r.oldUrl), ...videoMap.map((r) => r.oldUrl)];
+  if (new Set(legacy).size !== legacy.length || legacy.length !== lines.length + videoLines.length) {
+    console.error(`[generate-redirects] BAŞARISIZ: eski URL sitemap sayısı ${legacy.length} != 301 sayısı ${lines.length + videoLines.length}`);
+    process.exit(1);
+  }
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + legacy.map((u) => `  <url><loc>https://omurgam.com${u}</loc></url>`).join('\n') + '\n</urlset>\n';
+  if (!process.env.REDIRECTS_OUT) writeFileSync(join(ROOT, 'public/legacy-sitemap.xml'), xml);
+}
+console.log(`[generate-redirects] OK — public/_redirects: ${allLines.length} adet 301 (${lines.length} blog + ${videoLines.length} video; ${new Set(vidTargets).size} benzersiz video hedef; dup/loop/hedef doğrulandı) + legacy-sitemap.xml.`);
