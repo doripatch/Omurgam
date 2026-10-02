@@ -81,6 +81,10 @@ const slugify = (s: string) =>
   s.split('').map((c) => TR_MAP[c] ?? c).join('')
     .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/-+/g, '-');
 
+// Omurga Sözlüğü'nde birebir karşılığı olan MR terimleri sözlüğe taşındı (2 Eki 2026; Netlify'da 301).
+const MERGED = crossLinks.mrToGlossary as Record<string, string>;
+const termHref = (slug: string) => (MERGED[slug] ? `/omurga-sozlugu/${MERGED[slug]}/` : `/mr-analiz/${slug}/`);
+
 export default function MRAnalyzer() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -100,6 +104,7 @@ export default function MRAnalyzer() {
 
   // URL'de bir terim slug'ı varsa o terimi seç (derin bağlantı / SEO)
   useEffect(() => {
+    if (routeSlug && MERGED[routeSlug]) { navigate(termHref(routeSlug), { replace: true }); return; }
     if (!routeSlug || allTerms.length === 0) return;
     const found = allTerms.find((t) => slugify(t.term) === routeSlug);
     if (found) {
@@ -112,6 +117,7 @@ export default function MRAnalyzer() {
   const selectTerm = (term: MRTerm) => {
     setSelectedTerm(term);
     const sl = slugify(term.term);
+    if (sl && MERGED[sl]) { navigate(termHref(sl)); return; }
     if (sl && `/mr-analiz/${sl}/` !== location.pathname) {
       navigate(`/mr-analiz/${sl}/`);
     }
@@ -536,7 +542,7 @@ export default function MRAnalyzer() {
                     .map((t) => (
                       <a
                         key={t.id || t.term}
-                        href={`/mr-analiz/${slugify(t.term)}/`}
+                        href={termHref(slugify(t.term))}
                         onClick={(e) => { e.preventDefault(); selectTerm(t); }}
                         className="text-sm text-teal-700 hover:underline"
                       >

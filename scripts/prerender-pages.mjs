@@ -197,12 +197,17 @@ async function main() {
   {
     const mrDir = join(DIST, 'mr-analiz');
     if (!existsSync(mrDir)) die('dist/mr-analiz yok — prerender-mr önce çalışmalı');
-    const terms = readdirSync(mrDir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => {
+    const kept = readdirSync(mrDir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => {
       const html = readFileSync(join(mrDir, e.name, 'index.html'), 'utf8');
       const h1 = (html.match(/<h1>([^<]*)<\/h1>/) || [])[1] || e.name;
-      return { slug: e.name, label: h1.replace(/&amp;/g, '&') };
-    }).sort((a, b) => a.label.localeCompare(b.label, 'tr'));
-    if (terms.length < 250) die(`MR terim sayısı beklenenden az: ${terms.length}`);
+      return { href: `/mr-analiz/${e.name}/`, label: h1.replace(/&amp;/g, '&') };
+    });
+    // Omurga Sözlüğü'ne taşınan terimler (301): indeks doğrudan sözlük sayfasına linkler (yönlendirme zinciri yok).
+    const merged = JSON.parse(readFileSync(join(ROOT, 'src/app/data/crossLinks.json'), 'utf8')).mrToGlossary;
+    const glossByslug = new Map(JSON.parse(readFileSync(join(ROOT, 'src/app/data/spineGlossary.json'), 'utf8')).master.map((g) => [g.slug, g.term]));
+    const moved = Object.values(merged).map((g) => ({ href: `/omurga-sozlugu/${g}/`, label: glossByslug.get(g) || g }));
+    const terms = [...kept, ...moved].sort((a, b) => a.label.localeCompare(b.label, 'tr'));
+    if (kept.length < 150 || moved.length < 100) die(`MR indeks sayısı beklenenden az: ${kept.length} MR + ${moved.length} sözlük`);
     const title = 'MR Raporu Terim Sözlüğü — Bel ve Boyun MR Raporu Nasıl Okunur?';
     const desc = 'MR raporunuzda geçen protrüzyon, ekstrüzyon, bulging, dejenerasyon gibi terimlerin ne anlama geldiğini sade ve bilimsel bir dille öğrenin. 290+ MR terimi, Prof. Dr. Defne Kaya Utlu editörlüğünde.';
     writePage('/mr-analiz', {
@@ -212,7 +217,7 @@ async function main() {
         breadcrumb([['Ana Sayfa', `${ORIGIN}/`], ['MR Raporu Terim Sözlüğü', `${ORIGIN}/mr-analiz`]]),
       ] },
       bodyHtml: `<main>${nav}<h1>MR Raporu Terim Sözlüğü</h1><p>${esc(desc)}</p><ul>`
-        + terms.map((t) => `<li><a href="/mr-analiz/${esc(t.slug)}/">${esc(t.label)}</a></li>`).join('')
+        + terms.map((t) => `<li><a href="${esc(t.href)}">${esc(t.label)}</a></li>`).join('')
         + `</ul>${DISCLAIMER}</main>`,
     });
   }

@@ -67,7 +67,11 @@ if (bySlug.size !== EXPECTED_UNIQUE) {
 }
 
 const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu bilgiler yalnızca bilgilendirme amaçlıdır ve kesin tanı yerine geçmez. MR raporunuzun değerlendirilmesi için hekiminize danışın.</aside>';
+// Omurga Sözlüğü'nde birebir karşılığı olan terimler sözlüğe taşındı (Netlify 301, generate-redirects.mjs) → üretilmez.
+const MERGED = crossLinks.mrToGlossary;
+let mergedSkipped = 0;
 for (const [slug, term] of bySlug) {
+  if (MERGED[slug]) { mergedSkipped++; continue; }
   const canonical = `${ORIGIN}${BASE}/${slug}/`;
   const title = `${term.term} Nedir? — MR Raporu Terimi | Omurgam`;
   // Meta: kelime sınırında biter (eski .slice(0,155) kelime ortasında kesiyordu).
@@ -113,7 +117,7 @@ for (const [slug, term] of bySlug) {
 
 const samples = ['sakralizasyon', 'retrolistezis', 'dural-kese-basisi', 'allogreft', 'dural-kese', 'lateral', 'diskografi', 'marjinal-osteofit'];
 for (const slug of samples) {
-  if (!bySlug.has(slug)) continue;
+  if (!bySlug.has(slug) || MERGED[slug]) continue;
   const html = readFileSync(join(DIST, 'mr-analiz', slug, 'index.html'), 'utf8');
   const canonical = `${ORIGIN}${BASE}/${slug}/`;
   if ((html.match(/rel="canonical"/g) || []).length !== 1 || !html.includes(`rel="canonical" href="${canonical}"`)) {
@@ -130,4 +134,7 @@ for (const slug of samples) {
   if (!mrDescM || mrDescM[1].length > 170) { console.error(`[prerender-mr] HATA: ${slug} meta description uzun/eksik`); process.exit(1); }
 }
 
-console.log(`[prerender-mr] OK — ${bySlug.size} benzersiz detay üretildi; ${source.length - bySlug.size} mükerrer kaynak kayıt ilk-kayıt kuralıyla tekilleştirildi; slash canonical + görünür H1 + DefinedTerm doğrulandı.`);
+for (const slug of Object.keys(MERGED)) {
+  if (existsSync(join(DIST, 'mr-analiz', slug, 'index.html'))) { console.error(`[prerender-mr] HATA: sözlüğe taşınan ${slug} yine üretildi`); process.exit(1); }
+}
+console.log(`[prerender-mr] OK — ${bySlug.size - mergedSkipped} benzersiz detay üretildi (${mergedSkipped} terim Omurga Sözlüğü'ne taşındı, 301); ${source.length - bySlug.size} mükerrer kaynak kayıt ilk-kayıt kuralıyla tekilleştirildi; slash canonical + görünür H1 + DefinedTerm doğrulandı.`);

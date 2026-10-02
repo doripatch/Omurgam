@@ -55,6 +55,18 @@ const vidTargets = videoLines.map((l) => l.split(/\s+/)[1]);
 const vidCanonCount = videoMap.filter((r) => r.id === r.canonicalCandidateId).length;
 if (new Set(vidTargets).size !== vidCanonCount) errors.push(`${vidCanonCount} benzersiz video hedef beklenirken ${new Set(vidTargets).size}`);
 
+// --- MR → OMURGA SÖZLÜĞÜ 301'leri (2 Eki 2026) ---
+// Sözlükte birebir aynı adlı karşılığı olan MR terimleri (crossLinks.mrToGlossary) sözlük sayfasına taşındı.
+// Netlify kural eşleşmesinde sondaki "/" isteğe bağlıdır; tek kural iki biçimi de karşılar.
+const mrMerged = JSON.parse(readFileSync(join(ROOT, 'src/app/data/crossLinks.json'), 'utf8')).mrToGlossary;
+const glossSlugs = new Set(JSON.parse(readFileSync(join(ROOT, 'src/app/data/spineGlossary.json'), 'utf8')).master.map((g) => g.slug));
+const mrLines = [];
+for (const [mrSlug, gSlug] of Object.entries(mrMerged)) {
+  if (!/^[a-z0-9-]+$/.test(mrSlug) || !glossSlugs.has(gSlug)) errors.push(`geçersiz MR→sözlük eşlemesi: ${mrSlug} -> ${gSlug}`);
+  mrLines.push(`/mr-analiz/${mrSlug}  /omurga-sozlugu/${gSlug}/  301!`);
+}
+if (mrLines.length < 100) errors.push(`MR→sözlük 301 beklenenden az: ${mrLines.length}`);
+
 if (errors.length) {
   console.error('[generate-redirects] BAŞARISIZ:\n - ' + errors.join('\n - '));
   process.exit(1);
@@ -62,20 +74,21 @@ if (errors.length) {
 
 const header = '# Faz 3 — otomatik üretildi (scripts/generate-redirects.mjs). Elle düzenleme.\n'
   + '# 183 eski blog UUID URL -> kilitli yeni URL, gerçek HTTP 301 (force).\n'
-  + '# Eski /video/<UUID> -> canonical /videolar/<slug>/, gerçek HTTP 301 (force); duplicate kayıtlar canonical hedefe gider.\n';
-const allLines = [...lines, ...videoLines];
-writeFileSync(process.env.REDIRECTS_OUT || join(ROOT, 'public/_redirects'), header + allLines.join('\n') + '\n');
+  + '# Eski /video/<UUID> -> canonical /videolar/<slug>/, gerçek HTTP 301 (force); duplicate kayıtlar canonical hedefe gider.\n'
+  + '# Sözlükte karşılığı olan /mr-analiz/<slug> -> /omurga-sozlugu/<slug>/, 301 (force).\n';
+const allLines = [...lines, ...videoLines, ...mrLines];
 // GEÇİCİ taşınma sitemap'i (2 Eki 2026): eski /blog|/video <UUID> adresleri. GSC'ye ayrıca gönderilir ki Google
 // eski adresleri yeniden tarayıp 301'leri görsün ve yeni adresi standart seçsin ("Kopya, Google farklı standart seçti").
 // robots.txt'ye EKLENMEZ; birkaç hafta sonra GSC'den kaldırılır (dosya kalsa da zararsız).
 {
-  const legacy = [...blog.map((r) => r.oldUrl), ...videoMap.map((r) => r.oldUrl)];
-  if (new Set(legacy).size !== legacy.length || legacy.length !== lines.length + videoLines.length) {
-    console.error(`[generate-redirects] BAŞARISIZ: eski URL sitemap sayısı ${legacy.length} != 301 sayısı ${lines.length + videoLines.length}`);
+  const legacy = [...blog.map((r) => r.oldUrl), ...videoMap.map((r) => r.oldUrl), ...Object.keys(mrMerged).map((m) => `/mr-analiz/${m}/`)];
+  if (new Set(legacy).size !== legacy.length || legacy.length !== allLines.length) {
+    console.error(`[generate-redirects] BAŞARISIZ: eski URL sitemap sayısı ${legacy.length} != 301 sayısı ${allLines.length}`);
     process.exit(1);
   }
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + legacy.map((u) => `  <url><loc>https://omurgam.com${u}</loc></url>`).join('\n') + '\n</urlset>\n';
   if (!process.env.REDIRECTS_OUT) writeFileSync(join(ROOT, 'public/legacy-sitemap.xml'), xml);
 }
-console.log(`[generate-redirects] OK — public/_redirects: ${allLines.length} adet 301 (${lines.length} blog + ${videoLines.length} video; ${new Set(vidTargets).size} benzersiz video hedef; dup/loop/hedef doğrulandı) + legacy-sitemap.xml.`);
+writeFileSync(process.env.REDIRECTS_OUT || join(ROOT, 'public/_redirects'), header + allLines.join('\n') + '\n');
+console.log(`[generate-redirects] OK — public/_redirects: ${allLines.length} adet 301 (${lines.length} blog + ${videoLines.length} video + ${mrLines.length} MR→sözlük; ${new Set(vidTargets).size} benzersiz video hedef; dup/loop/hedef doğrulandı) + legacy-sitemap.xml.`);

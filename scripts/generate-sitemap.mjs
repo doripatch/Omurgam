@@ -58,6 +58,11 @@ for (const t of terms) {
   const s = slugify(t.term);
   if (s && !mrSeen.has(s)) { mrSeen.add(s); mrSlugs.push(s); }
 }
+// Omurga Sözlüğü'ne taşınan (301) MR terimleri sitemap'te yer almaz.
+const mrMerged = JSON.parse(readFileSync(join(ROOT, 'src/app/data/crossLinks.json'), 'utf8')).mrToGlossary;
+const mrKept = mrSlugs.filter((s) => !mrMerged[s]);
+const MERGED_N = mrSlugs.length - mrKept.length;
+const BASE_N = 501 - MERGED_N; // 501 = 221 statik/politika/sözlük + 280 MR; taşınanlar düşülür
 
 // XML güvenli kaçış (loc slug'ları [a-z0-9-] olsa da güvenlik için)
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]));
@@ -77,14 +82,15 @@ const seen = new Set();
 const add = (loc, cf, pr) => { if (!seen.has(loc)) { seen.add(loc); rows.push({ loc, cf, pr }); } };
 for (const [p, cf, pr] of STATIC) add(ORIGIN + p, cf, pr);
 for (const s of polSlugs) add(`${ORIGIN}/politika/${s}`, 'yearly', '0.3');
-for (const s of mrSlugs) add(`${ORIGIN}/mr-analiz/${s}/`, 'monthly', '0.5');
+for (const s of mrKept) add(`${ORIGIN}/mr-analiz/${s}/`, 'monthly', '0.5');
 for (const t of spineGlossary.master) {
   if (t?.slug) add(`${ORIGIN}/omurga-sozlugu/${t.slug}/`, 'monthly', '0.7');
 }
 
 const errors = [];
 // Mevcut taban tam 501 mi? (/blog çıkarıldı: /omurgam-ne-diyor/ kopyasıydı, netlify.toml'da 301) 4 indeks tam birer kez mi?
-if (rows.length !== 501) errors.push(`ana sitemap tabanı 501 beklenirken ${rows.length}`);
+if (MERGED_N < 100) errors.push(`sözlüğe taşınan MR beklenenden az: ${MERGED_N}`);
+if (rows.length !== BASE_N) errors.push(`ana sitemap tabanı ${BASE_N} beklenirken ${rows.length}`);
 for (const idx of ['/omurgam-ne-diyor', '/saglikli-yasam', '/yatak-yastik-rehberi', '/klinisyenler']) {
   const n = rows.filter((r) => r.loc === ORIGIN + idx + '/').length;
   if (n !== 1) errors.push(`indeks ${idx} tam 1 kez beklenirken ${n}`);
@@ -92,13 +98,13 @@ for (const idx of ['/omurgam-ne-diyor', '/saglikli-yasam', '/yatak-yastik-rehber
 
 // 80 klinisyen yeni URL ekle -> 581
 for (const r of clin) add(`${ORIGIN}${r.newUrl}/`, 'monthly', '0.6');
-if (rows.length !== 581) errors.push(`ana sitemap 581 beklenirken ${rows.length}`);
+if (rows.length !== BASE_N + 80) errors.push(`ana sitemap ${BASE_N + 80} beklenirken ${rows.length}`);
 if (rows.some((r) => /\/blog\/[0-9a-f-]{36}$/.test(r.loc))) errors.push('ana sitemap eski /blog/<UUID> içeriyor');
 
 // Canonical video detay URL'leri (sonda "/": prerender dizin yapısı, Netlify'da ek 301 yok).
 if (videoCanonical.length < 36) errors.push(`en az 36 canonical video beklenirken ${videoCanonical.length}`);
 for (const r of videoCanonical) add(`${ORIGIN}${r.newUrl}/`, 'monthly', '0.7');
-if (rows.length !== 581 + videoCanonical.length) errors.push(`ana sitemap ${581 + videoCanonical.length} (501+80+${videoCanonical.length}) beklenirken ${rows.length}`);
+if (rows.length !== BASE_N + 80 + videoCanonical.length) errors.push(`ana sitemap ${BASE_N + 80 + videoCanonical.length} beklenirken ${rows.length}`);
 if (rows.some((r) => /\/video\/[0-9a-f-]{36}$/.test(r.loc))) errors.push('ana sitemap eski /video/<UUID> içeriyor');
 {
   const vidLocs = rows.filter((r) => r.loc.startsWith(`${ORIGIN}/videolar/`) && r.loc !== `${ORIGIN}/videolar/`).map((r) => r.loc);
@@ -128,4 +134,4 @@ if (errors.length) { console.error('[sitemap] BAŞARISIZ:\n - ' + errors.join('\
 
 writeFileSync(process.env.SITEMAP_OUT || join(ROOT, 'public/sitemap.xml'), buildXml(rows));
 writeFileSync(process.env.BLOG_SITEMAP_OUT || join(ROOT, 'public/blog-sitemap.xml'), buildXml(blogRows));
-console.log(`[sitemap] OK — sitemap.xml ${rows.length} (501 + 80 klinisyen + ${videoCanonical.length} video), blog-sitemap.xml ${blogRows.length} (84/67/32); eski /blog/<UUID> 0, eski /video/<UUID> 0.`);
+console.log(`[sitemap] OK — sitemap.xml ${rows.length} (${BASE_N} [MR ${mrKept.length}; ${MERGED_N} sözlüğe taşındı] + 80 klinisyen + ${videoCanonical.length} video), blog-sitemap.xml ${blogRows.length} (84/67/32); eski /blog/<UUID> 0, eski /video/<UUID> 0.`);

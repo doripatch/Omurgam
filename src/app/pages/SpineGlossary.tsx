@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router';
 import { ArrowLeft, BookOpen, CheckCircle2, ExternalLink, Search, Stethoscope, XCircle } from 'lucide-react';
 import Seo from '../components/Seo';
 import glossaryData from '../data/spineGlossary.json';
-import crossLinks from '../data/crossLinks.json';
 import { glossaryTitleBase, glossaryDescription, glossaryFaq, glossaryFaqJsonLd } from '../lib/glossarySeo.mjs';
 
 type SpineTerm = (typeof glossaryData.master)[number];
@@ -69,7 +68,6 @@ function TermDetail({ term }: { term: SpineTerm }) {
     ],
   }), [aliases, canonicalUrl, term]);
   const faq = glossaryFaq(term);
-  const mrSlug = (crossLinks.glossaryToMr as Record<string, string>)[term.slug];
 
   return (
     <main className="min-h-screen bg-stone-50 dark:bg-slate-950">
@@ -131,13 +129,6 @@ function TermDetail({ term }: { term: SpineTerm }) {
               })}
             </div>
           </section>
-        )}
-
-        {mrSlug && (
-          <Link to={`/mr-analiz/${mrSlug}/`} className="block rounded-3xl border border-teal-200 bg-teal-50 p-6 transition hover:border-teal-300 hover:bg-teal-100 dark:border-teal-900/50 dark:bg-teal-950/20 md:p-8">
-            <h2 className="mb-1 text-lg font-bold text-teal-900 dark:text-teal-200">MR raporunda mı gördünüz?</h2>
-            <p className="text-teal-800 dark:text-teal-300">{term.term} teriminin MR raporundaki karşılığı ve açıklaması →</p>
-          </Link>
         )}
 
         {faq.length > 0 && (

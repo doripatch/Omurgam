@@ -18,7 +18,6 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = process.env.PRERENDER_DIST || join(ROOT, 'dist');
 const ORIGIN = 'https://omurgam.com';
 const BASE = '/omurga-sozlugu';
-const BASE_MR = '/mr-analiz';
 
 const templatePath = join(DIST, 'index.html');
 if (!existsSync(templatePath)) {
@@ -28,7 +27,6 @@ if (!existsSync(templatePath)) {
 const template = readFileSync(templatePath, 'utf8');
 const data = JSON.parse(readFileSync(join(ROOT, 'src/app/data/spineGlossary.json'), 'utf8'));
 // Sözlük → MR çapraz link eşlemesi (aynı terim MR bölümünde de varsa).
-const crossLinks = JSON.parse(readFileSync(join(ROOT, 'src/app/data/crossLinks.json'), 'utf8'));
 
 // --- yardımcılar ---
 const esc = (s) => String(s ?? '')
@@ -186,9 +184,6 @@ for (const term of master) {
     `<section><h2>Sık karıştırılan</h2><p>${esc(String(wrong || '').replace(/^❌\s*/, ''))}</p>` +
     `<h2>Doğrusu</h2><p>${esc(String(right || '').replace(/^✅\s*/, ''))}</p></section>` +
     (related.length ? `<section><h2>İlgili terimler</h2><div>${relatedHtml}</div></section>` : '') +
-    (crossLinks.glossaryToMr[term.slug]
-      ? `<section><h2>MR raporunda mı gördünüz?</h2><p><a href="${BASE_MR}/${esc(crossLinks.glossaryToMr[term.slug])}/">${esc(term.term)} teriminin MR raporundaki karşılığı ve açıklaması →</a></p></section>`
-      : '') +
     (faq.length ? `<section><h2>Sıkça Sorulan Sorular</h2>${faq.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}</section>` : '') +
     DISCLAIMER +
     `<p>Editoryal kaynak: <a href="${esc(term.sourceUrl)}" target="_blank" rel="noopener noreferrer nofollow">Kaynağı görüntüle</a></p>` +
