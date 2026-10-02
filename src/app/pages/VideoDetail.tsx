@@ -50,8 +50,20 @@ const getYouTubeVideoId = (url: string): string | null => {
   return null;
 };
 
-export default function VideoDetail() {
-  const { id } = useParams();
+// Not: idOverride/canonicalUrl/relatedUrl verilmediğinde davranış ESKİYLE BİREBİR aynıdır
+// (eski /video/:id route'u bu bileşeni propsuz kullanır). /videolar/:slug ise slug'ı
+// canonical UUID'ye çözüp idOverride ile buraya verir; sayaç/favori/yorum/like canonical UUID'ye işler.
+export default function VideoDetail({
+  idOverride,
+  canonicalUrl,
+  relatedUrl,
+}: {
+  idOverride?: string;
+  canonicalUrl?: string;
+  relatedUrl?: (v: Video) => string;
+} = {}) {
+  const { id: paramId } = useParams();
+  const id = idOverride ?? paramId;
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
 
@@ -228,6 +240,7 @@ export default function VideoDetail() {
           ? video.description.trim().slice(0, 155)
           : `Prof. Dr. Defne Kaya Utlu ile omurga sağlığı videosu: ${video.title}.`}
         image={video.thumbnailUrl}
+        canonical={canonicalUrl}
       />
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
@@ -445,7 +458,7 @@ export default function VideoDetail() {
                     return (
                       <Link
                         key={relVideo.id}
-                        to={`/video/${relVideo.id}`}
+                        to={relatedUrl ? relatedUrl(relVideo) : `/video/${relVideo.id}`}
                         className="group block"
                       >
                         <div className="relative aspect-video rounded-xl overflow-hidden mb-2">

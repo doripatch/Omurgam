@@ -4,6 +4,7 @@ import Root from "./Root";
 import Home from "./pages/Home";
 import Videos from "./pages/Videos";
 import VideoDetail from "./pages/VideoDetail";
+import MigratedVideoDetail from "./pages/MigratedVideoDetail";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import MigratedBlogPost from "./pages/MigratedBlogPost";
@@ -54,6 +55,9 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: Home },
       { path: "videolar", Component: Videos },
+      // Yeni okunabilir video detay URL'si (slug -> canonical UUID merkezi harita ile çözülür).
+      { path: "videolar/:slug", Component: MigratedVideoDetail },
+      // Eski route: 301 yayına alınana kadar kodda korunur (davranış değişmedi).
       { path: "video/:id", Component: VideoDetail },
       { path: "blog", Component: Blog },
       { path: "saglikli-yasam", Component: Blog },

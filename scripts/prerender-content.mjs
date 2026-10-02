@@ -27,8 +27,14 @@ const templatePath = join(DIST, 'index.html');
 if (!existsSync(templatePath)) die('dist/index.html yok — postbuild (vite build sonrası) çalışmalı');
 const template = readFileSync(templatePath, 'utf8');
 const manifest = JSON.parse(readFileSync(join(ROOT, 'src/app/data/urlMigrationMap.json'), 'utf8'));
+const videoMap = JSON.parse(readFileSync(join(ROOT, 'src/app/data/videoUrlMap.json'), 'utf8'));
 // Blog → Sözlük iç linkleme için sözlük terim listesi (yazıda geçen terimleri yakalar).
 const glossaryMaster = JSON.parse(readFileSync(join(ROOT, 'src/app/data/spineGlossary.json'), 'utf8')).master;
+
+// Video indeks meta (blog FAM'dan ayrı; video ailesi tek).
+const VIDEO_BASE = '/videolar';
+const VIDEO_NAME = 'Omurga Sağlığı Videoları';
+const VIDEO_DESC = 'Prof. Dr. Defne Kaya Utlu ile omurga sağlığı üzerine bilimsel bilgilendirme videoları.';
 
 const FAM = {
   kaleminden: { base: '/omurgam-ne-diyor', name: 'Omurga Sağlığı Yazıları', title: 'Omurga Sağlığı Yazıları', desc: 'Omurga sağlığına dair bilimsel makaleler ve değerlendirmeler.' },
@@ -94,16 +100,18 @@ const breadcrumb = (fam, title, canonical) => ({
 const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme amaçlıdır; tanı, muayene veya tedavi önerisi yerine geçmez.</aside>';
 
 (async () => {
-  let blogData, clinData;
+  let blogData, clinData, videoData;
   try {
-    [blogData, clinData] = await Promise.all([fetchJson('/blog'), fetchJson('/clinical-notes')]);
+    [blogData, clinData, videoData] = await Promise.all([fetchJson('/blog'), fetchJson('/clinical-notes'), fetchJson('/videos')]);
   } catch (e) {
     die(`canlı API erişilemedi: ${e && e.message ? e.message : e}`);
   }
   const posts = (blogData.posts || []).filter((p) => p.published !== false);
   const notes = (clinData.notes || []).filter((n) => n.published !== false);
+  const videos = (videoData.videos || []).filter((v) => v.published !== false);
   const postById = new Map(posts.map((p) => [p.id, p]));
   const noteById = new Map(notes.map((n) => [n.id, n]));
+  const videoById = new Map(videos.map((v) => [v.id, v]));
 
   const blogRec = manifest.filter((r) => r.oldUrl);
   const clinRec = manifest.filter((r) => r.contentFamily === 'klinisyenler');
@@ -203,6 +211,74 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
   writeIndex('yatak-yastik', families['yatak-yastik']);
   writeIndex('klinisyenler', clinList);
 
+  // --- VIDEO detay (tüm canonical'lar) + /videolar indeks ---
+  // Metadata kısıtı: 42 videoda açıklama, 43'te süre yok. Tıbbi açıklama/süre/uploadDate UYDURULMAZ.
+  // VideoObject KASITLI eklenmez (güvenilir süre/yükleme tarihi yok). Article yalnız doğrulanabilir
+  // sayfa alanlarıyla (site createdAt/updatedAt) + Breadcrumb. Thumbnail ve embed bilgisi güvenilir.
+  const videoCanon = videoMap.filter((r) => r.id === r.canonicalCandidateId);
+  if (videoCanon.length < 36) die(`video canonical en az 36 olmalı: ${videoCanon.length}`);
+  for (const r of videoCanon) if (!videoById.has(r.id)) die(`video canonical canlıda yok: ${r.id}`);
+  const videoBreadcrumb = (title, canonical) => ({
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: `${ORIGIN}/` },
+      { '@type': 'ListItem', position: 2, name: VIDEO_NAME, item: `${ORIGIN}${VIDEO_BASE}` },
+      { '@type': 'ListItem', position: 3, name: title, item: canonical },
+    ],
+  });
+  const videoList = [];
+  for (const r of videoCanon) {
+    const v = videoById.get(r.id);
+    const canonical = `${ORIGIN}${r.newUrl}/`;
+    const hasDesc = v.description && String(v.description).trim();
+    const description = hasDesc ? plainSummary(v.description) : `Prof. Dr. Defne Kaya Utlu ile omurga sağlığı videosu: ${v.title}.`;
+    const thumb = v.thumbnailUrl || `https://img.youtube.com/vi/${r.youtubeId}/hqdefault.jpg`;
+    const watchUrl = `https://youtu.be/${r.youtubeId}`;
+    const related = videoCanon
+      .filter((x) => x.id !== r.id && (videoById.get(x.id)?.category || '') === (v.category || ''))
+      .slice(0, 5);
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        { '@type': 'Article', headline: v.title, description: description || undefined, articleSection: v.category || undefined,
+          inLanguage: 'tr-TR', datePublished: v.createdAt || undefined, dateModified: v.updatedAt || v.createdAt || undefined,
+          image: thumb, mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+          author: { '@id': `${ORIGIN}/#defne-kaya-utlu` }, publisher: { '@id': `${ORIGIN}/#org` } },
+        videoBreadcrumb(v.title, canonical),
+      ],
+    };
+    const relHtml = related.length
+      ? `<nav aria-label="İlgili videolar"><h2>İlgili Videolar</h2><ul>`
+        + related.map((x) => `<li><a href="${x.newUrl}/">${esc(videoById.get(x.id).title)}</a></li>`).join('')
+        + `</ul></nav>`
+      : '';
+    const body = `<main><nav><a href="${VIDEO_BASE}">← ${esc(VIDEO_NAME)}</a></nav>`
+      + `<p>${esc(v.category || '')}</p><h1>${esc(v.title)}</h1>`
+      + `<img src="${esc(thumb)}" alt="${esc(v.title)}" width="480" height="360" />`
+      + (hasDesc ? `<p>${esc(description)}</p>` : '')
+      + `<p><a href="${esc(watchUrl)}" rel="noopener">YouTube'da izle</a></p>`
+      + relHtml + `${DISCLAIMER}</main>`;
+    write(r.newUrl, renderPage({ title: `${v.title} | Omurgam`, description, canonical, type: 'article', jsonLd, bodyHtml: body }));
+    videoList.push({ url: `${r.newUrl}/`, title: v.title, category: v.category || '' });
+  }
+  {
+    const canonical = `${ORIGIN}${VIDEO_BASE}`;
+    const links = videoList.map((it) => `<li><a href="${it.url}">${esc(it.title)}</a></li>`).join('\n');
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        { '@type': 'CollectionPage', name: VIDEO_NAME, description: VIDEO_DESC, inLanguage: 'tr-TR', url: canonical },
+        { '@type': 'BreadcrumbList', itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: `${ORIGIN}/` },
+          { '@type': 'ListItem', position: 2, name: VIDEO_NAME, item: canonical } ] },
+        { '@type': 'ItemList', numberOfItems: videoList.length,
+          itemListElement: videoList.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.title, url: `${ORIGIN}${it.url}` })) },
+      ],
+    };
+    const body = `<main><h1>${esc(VIDEO_NAME)}</h1><p>${esc(VIDEO_DESC)}</p><ul>\n${links}\n</ul></main>`;
+    write(VIDEO_BASE, renderPage({ title: `${VIDEO_NAME} | Omurgam`, description: VIDEO_DESC, canonical, type: 'website', jsonLd, bodyHtml: body }));
+  }
+
   // --- ÜRETİM-GÜVENLİ DOĞRULAMALAR ---
   const errs = [];
   const detailTotal = blogRec.length + clinRec.length;
@@ -234,7 +310,29 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
     if (c !== n) errs.push(`indeks ${fam}: ${n} link beklenirken ${c}`);
     if ((html.match(/id="seo-jsonld"/g) || []).length !== 1) errs.push(`indeks ${fam}: tam 1 seo-jsonld değil`);
   }
+  // video detay + /videolar indeks doğrulaması
+  if (videoList.length !== videoCanon.length) errs.push(`video ${videoCanon.length} değil: ${videoList.length}`);
+  {
+    const rec = videoCanon[0], v = videoById.get(rec.id);
+    const html = readFileSync(join(DIST, rec.newUrl, 'index.html'), 'utf8');
+    if ((html.match(/rel="canonical"/g) || []).length !== 1) errs.push('video: tam 1 canonical değil');
+    if ((html.match(/id="seo-jsonld"/g) || []).length !== 1) errs.push('video: tam 1 seo-jsonld değil');
+    if (!html.includes(`rel="canonical" href="${ORIGIN}${rec.newUrl}/"`)) errs.push('video: self-canonical yanlış');
+    if (!html.includes(`<h1>${esc(v.title)}</h1>`)) errs.push('video: H1 yok');
+    if (!html.includes('<img')) errs.push('video: thumbnail <img> yok');
+    if (!html.includes('"@type":"Article"')) errs.push('video: Article JSON-LD yok');
+    if (!html.includes('"@type":"BreadcrumbList"')) errs.push('video: Breadcrumb yok');
+    if (html.includes('"@type":"VideoObject"')) errs.push('video: beklenmeyen VideoObject (sahte metadata riski)');
+    if (/\/video\/[0-9a-f-]{36}/.test(html)) errs.push('video: eski /video/<UUID> izi var');
+  }
+  {
+    const html = readFileSync(join(DIST, VIDEO_BASE, 'index.html'), 'utf8');
+    const c = (html.match(new RegExp(`<li><a href="${VIDEO_BASE}/`, 'g')) || []).length;
+    if (c !== videoCanon.length) errs.push(`videolar indeks ${videoCanon.length} link değil: ${c}`);
+    if ((html.match(/id="seo-jsonld"/g) || []).length !== 1) errs.push('videolar indeks: tam 1 seo-jsonld değil');
+    if (/\/video\/[0-9a-f-]{36}/.test(html)) errs.push('videolar indeks: eski /video/<UUID> izi var');
+  }
   if (errs.length) die('doğrulama:\n - ' + errs.join('\n - '));
 
-  console.log(`[prerender-content] OK — 263 blog/klinisyen detay (84/67/32/80) + 4 indeks; canlı 183+80 eşleşti; tam 1 canonical & seo-jsonld; eski /blog/<UUID> izi yok.`);
+  console.log(`[prerender-content] OK — 263 blog/klinisyen detay (84/67/32/80) + 4 indeks + ${videoCanon.length} video detay + /videolar indeks; canlı 183+80+${videoCanon.length} eşleşti; tam 1 canonical & seo-jsonld; VideoObject yok; eski /blog|/video <UUID> izi yok.`);
 })();

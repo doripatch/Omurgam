@@ -68,6 +68,10 @@ const manifest = JSON.parse(readFileSync(join(ROOT, 'src/app/data/urlMigrationMa
 const clin = manifest.filter((r) => r.contentFamily === 'klinisyenler');
 const blogRec = manifest.filter((r) => r.oldUrl); // 183 blog
 
+// (6) Video migrasyonu — videoUrlMap.json (append-only); YALNIZ canonical kayıtlar (duplicate/eski /video/<UUID> girmez).
+const videoMap = JSON.parse(readFileSync(join(ROOT, 'src/app/data/videoUrlMap.json'), 'utf8'));
+const videoCanonical = videoMap.filter((r) => r.id === r.canonicalCandidateId);
+
 // URL listesi (sıra: static -> politika -> MR -> glossary). Loc bazında tekilleştirilir.
 const rows = [];
 const seen = new Set();
@@ -92,6 +96,16 @@ for (const r of clin) add(`${ORIGIN}${r.newUrl}/`, 'monthly', '0.6');
 if (rows.length !== 582) errors.push(`ana sitemap 582 beklenirken ${rows.length}`);
 if (rows.some((r) => /\/blog\/[0-9a-f-]{36}$/.test(r.loc))) errors.push('ana sitemap eski /blog/<UUID> içeriyor');
 
+// Canonical video detay URL'leri (sonda "/": prerender dizin yapısı, Netlify'da ek 301 yok).
+if (videoCanonical.length < 36) errors.push(`en az 36 canonical video beklenirken ${videoCanonical.length}`);
+for (const r of videoCanonical) add(`${ORIGIN}${r.newUrl}/`, 'monthly', '0.7');
+if (rows.length !== 582 + videoCanonical.length) errors.push(`ana sitemap ${582 + videoCanonical.length} (502+80+${videoCanonical.length}) beklenirken ${rows.length}`);
+if (rows.some((r) => /\/video\/[0-9a-f-]{36}$/.test(r.loc))) errors.push('ana sitemap eski /video/<UUID> içeriyor');
+{
+  const vidLocs = rows.filter((r) => r.loc.startsWith(`${ORIGIN}/videolar/`)).map((r) => r.loc);
+  if (new Set(vidLocs).size !== videoCanonical.length) errors.push(`sitemap benzersiz canonical video ${videoCanonical.length} değil: ${new Set(vidLocs).size}`);
+}
+
 const buildXml = (list) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`
   + list.map((u) => `  <url><loc>${esc(u.loc)}</loc><changefreq>${u.cf}</changefreq><priority>${u.pr}</priority></url>`).join('\n')
   + `\n</urlset>\n`;
@@ -115,4 +129,4 @@ if (errors.length) { console.error('[sitemap] BAŞARISIZ:\n - ' + errors.join('\
 
 writeFileSync(process.env.SITEMAP_OUT || join(ROOT, 'public/sitemap.xml'), buildXml(rows));
 writeFileSync(process.env.BLOG_SITEMAP_OUT || join(ROOT, 'public/blog-sitemap.xml'), buildXml(blogRows));
-console.log(`[sitemap] OK — sitemap.xml ${rows.length} (502 + 80 klinisyen), blog-sitemap.xml ${blogRows.length} (84/67/32); eski /blog/<UUID> 0.`);
+console.log(`[sitemap] OK — sitemap.xml ${rows.length} (502 + 80 klinisyen + ${videoCanonical.length} video), blog-sitemap.xml ${blogRows.length} (84/67/32); eski /blog/<UUID> 0, eski /video/<UUID> 0.`);

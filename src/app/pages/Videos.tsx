@@ -7,6 +7,7 @@ import { useStore } from '../store/useStore';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 import { videosAPI } from '../lib/api';
+import { dedupeToCanonical, videoHref } from '../lib/videoMigration';
 import Seo from '../components/Seo';
 
 interface Video {
@@ -43,7 +44,9 @@ export default function Videos() {
       const data = await videosAPI.getAll();
       // Only show published videos
       const publishedVideos = (data.videos || []).filter((v: Video) => v.published);
-      setVideos(publishedVideos);
+      // 43 kayıt DB'de KALIR; UI'da canonical harita ile 36 benzersiz videoya indirilir
+      // (duplicate kayıtlar yalnız GÖSTERİMDE gizlenir; silme/birleştirme YOK).
+      setVideos(dedupeToCanonical(publishedVideos));
     } catch (error) {
       // Hassas veri basma: yalnız genel bir işaret logla.
       console.error('Load videos error');
@@ -211,7 +214,7 @@ export default function Videos() {
             className="mb-10"
           >
             <h2 className="text-sm font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-3">Öne Çıkan Video</h2>
-            <Link to={`/video/${featured.id}`} className="group block relative rounded-3xl overflow-hidden">
+            <Link to={videoHref(featured.id)} className="group block relative rounded-3xl overflow-hidden">
               <div className="aspect-video md:aspect-[21/9] overflow-hidden">
                 <img
                   src={featured.thumbnailUrl || featured.thumbnail || 'https://via.placeholder.com/1200'}
@@ -250,7 +253,7 @@ export default function Videos() {
               className="group bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border-2 border-stone-200 dark:border-slate-700 hover:border-amber-600 transition-all duration-300 hover:scale-[1.02]"
             >
               {/* Thumbnail */}
-              <Link to={`/video/${video.id}`}>
+              <Link to={videoHref(video.id)}>
                 <div className="relative aspect-video overflow-hidden cursor-pointer">
                   <img
                     src={video.thumbnailUrl || video.thumbnail || 'https://via.placeholder.com/600'}
@@ -287,7 +290,7 @@ export default function Videos() {
 
               {/* Content */}
               <div className="p-6">
-                <Link to={`/video/${video.id}`}>
+                <Link to={videoHref(video.id)}>
                   <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2 group-hover:text-amber-600 transition-colors cursor-pointer">
                     {video.title}
                   </h3>
@@ -300,7 +303,7 @@ export default function Videos() {
 
                 {/* Action buttons */}
                 <div className="flex gap-2">
-                  <Link to={`/video/${video.id}`} className="flex-1">
+                  <Link to={videoHref(video.id)} className="flex-1">
                     <button className="w-full px-4 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-amber-500/50 transition-all hover:scale-105">
                       İzle
                     </button>
