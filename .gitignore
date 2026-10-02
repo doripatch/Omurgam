@@ -67,3 +67,6 @@ omurgam legal/
 
 *.mp4
 *.mov
+
+# Cowork görev arşivi (konuşma kayıtları, yerel)
+Cowork task */

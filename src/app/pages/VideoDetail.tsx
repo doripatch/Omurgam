@@ -268,7 +268,7 @@ export default function VideoDetail() {
                       </p>
                       <div className="flex flex-wrap gap-2 justify-center">
                         <button
-                          onClick={() => setConsent({ analytics: !!getConsent()?.analytics, media: true })}
+                          onClick={() => setConsent({ analytics: !!getConsent()?.analytics, media: true, marketing: !!getConsent()?.marketing })}
                           className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 text-white text-sm font-bold hover:shadow-lg transition-all"
                         >
                           Videoyu Yükle

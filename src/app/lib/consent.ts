@@ -1,10 +1,13 @@
 // Merkezi çerez/izin yönetimi (KVKK/GDPR)
-// Kategoriler: necessary (her zaman açık), analytics, media (gömülü içerik: YouTube)
+// Kategoriler: necessary (her zaman açık), analytics, media (gömülü içerik: YouTube),
+// marketing (reklam ölçümü: Meta Pixel)
 import { grantAnalyticsConsent, revokeAnalyticsConsent } from './analytics';
+import { grantMarketingConsent, revokeMarketingConsent } from './metaPixel';
 
 export interface ConsentState {
   analytics: boolean;
   media: boolean;
+  marketing: boolean;
 }
 
 const KEY = 'omurgam_cookie_consent_v2';
@@ -18,14 +21,25 @@ export function getConsent(): ConsentState | null {
     const v = localStorage.getItem(KEY);
     if (v) {
       const p = JSON.parse(v);
-      return { analytics: !!p.analytics, media: !!p.media };
+      return { analytics: !!p.analytics, media: !!p.media, marketing: p.marketing === true };
     }
-    // Eski anahtardan geçiş (yeniden sormamak için)
+    // Eski anahtardan geçiş (yeniden sormamak için). Pazarlama o zaman sorulmadığı için kapalı.
     const old = localStorage.getItem(OLD_KEY);
-    if (old === 'accepted') return { analytics: true, media: true };
-    if (old === 'rejected') return { analytics: false, media: false };
+    if (old === 'accepted') return { analytics: true, media: true, marketing: false };
+    if (old === 'rejected') return { analytics: false, media: false, marketing: false };
   } catch {}
   return null;
+}
+
+// Pazarlama kategorisi sonradan eklendi: daha önce tercih yapmış ama bu soruyu
+// hiç görmemiş ziyaretçiye banner bir kez daha gösterilir (onay varsayılmaz).
+export function hasMarketingDecision(): boolean {
+  try {
+    const v = localStorage.getItem(KEY);
+    return !!v && typeof JSON.parse(v).marketing === 'boolean';
+  } catch {
+    return false;
+  }
 }
 
 export function setConsent(c: ConsentState) {
@@ -39,6 +53,8 @@ export function setConsent(c: ConsentState) {
 export function applyConsent(c: ConsentState) {
   if (c.analytics) grantAnalyticsConsent();
   else revokeAnalyticsConsent();
+  if (c.marketing) grantMarketingConsent();
+  else revokeMarketingConsent();
 }
 
 export function subscribeConsent(l: Listener): () => void {

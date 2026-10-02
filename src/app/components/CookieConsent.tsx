@@ -5,20 +5,30 @@ import {
   getConsent,
   setConsent,
   applyConsent,
+  hasMarketingDecision,
   registerOpenPreferences,
   type ConsentState,
 } from '../lib/consent';
+import { META_PIXEL_ID } from '../lib/metaPixel';
+
+// Pazarlama kategorisi yalnızca Pixel ID tanımlıyken gösterilir ve sorulur.
+const PIXEL_ENABLED = !!META_PIXEL_ID;
 
 export default function CookieConsent() {
   const [show, setShow] = useState(false);
   const [manage, setManage] = useState(false);
   const [analytics, setAnalytics] = useState(true);
   const [media, setMedia] = useState(true);
+  const [marketing, setMarketing] = useState(false);
 
   useEffect(() => {
     const existing = getConsent();
     if (existing) {
       applyConsent(existing);
+      setAnalytics(existing.analytics);
+      setMedia(existing.media);
+      // Pazarlama kategorisi yeni: bu soruyu görmemiş ziyaretçiye bir kez sor
+      if (PIXEL_ENABLED && !hasMarketingDecision()) setShow(true);
     } else {
       setShow(true);
     }
@@ -27,6 +37,7 @@ export default function CookieConsent() {
       const cur = getConsent();
       setAnalytics(cur ? cur.analytics : true);
       setMedia(cur ? cur.media : true);
+      setMarketing(cur ? cur.marketing : false);
       setManage(true);
       setShow(true);
     });
@@ -38,9 +49,9 @@ export default function CookieConsent() {
     setManage(false);
   };
 
-  const acceptAll = () => persist({ analytics: true, media: true });
-  const rejectAll = () => persist({ analytics: false, media: false });
-  const saveChoices = () => persist({ analytics, media });
+  const acceptAll = () => persist({ analytics: true, media: true, marketing: PIXEL_ENABLED });
+  const rejectAll = () => persist({ analytics: false, media: false, marketing: false });
+  const saveChoices = () => persist({ analytics, media, marketing: PIXEL_ENABLED && marketing });
 
   if (!show) return null;
 
@@ -53,8 +64,8 @@ export default function CookieConsent() {
               <Cookie className="w-5 h-5 text-amber-600 dark:text-amber-400" />
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Bu sitede; zorunlu çerezlerin yanı sıra, izninize bağlı olarak ziyaret istatistikleri (Google Analytics)
-              ve gömülü içerikler (YouTube) için çerezler kullanıyoruz. Tercihinizi seçebilirsiniz. Detaylar için{' '}
+              Bu sitede; zorunlu çerezlerin yanı sıra, izninize bağlı olarak ziyaret istatistikleri (Google Analytics),
+              gömülü içerikler (YouTube){PIXEL_ENABLED ? ' ve reklamlarımızın ölçümü (Meta Pixel)' : ''} için çerezler kullanıyoruz. Tercihinizi seçebilirsiniz. Detaylar için{' '}
               <Link to="/gizlilik" className="text-amber-700 dark:text-amber-400 font-semibold hover:underline">
                 Gizlilik &amp; Çerez Politikası
               </Link>
@@ -105,6 +116,14 @@ export default function CookieConsent() {
               checked={media}
               onChange={setMedia}
             />
+            {PIXEL_ENABLED && (
+              <CategoryRow
+                title="Pazarlama (Meta Pixel)"
+                desc="Instagram/Facebook reklamlarımızın siteye kaç ziyaretçi getirdiğini ölçmemize yardımcı olur."
+                checked={marketing}
+                onChange={setMarketing}
+              />
+            )}
             <div className="flex flex-wrap gap-2 justify-end pt-2">
               <button
                 onClick={rejectAll}

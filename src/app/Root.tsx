@@ -6,6 +6,7 @@ import FloatingActionButton from './components/FloatingActionButton';
 import GlobalSearch from './components/GlobalSearch';
 import CookieConsent from './components/CookieConsent';
 import { trackPageview } from './lib/analytics';
+import { trackMetaPageview } from './lib/metaPixel';
 import { newsletterAPI } from './lib/api';
 import { openCookiePreferences } from './lib/consent';
 import { POLICIES } from './lib/policies';
@@ -76,9 +77,10 @@ export default function Root() {
     fetchSettings();
   }, [fetchSettings]);
 
-  // Sayfa geçişlerini GA'ya bildir (yalnızca çerez onayı verildiyse çalışır)
+  // Sayfa geçişlerini GA'ya ve Meta Pixel'e bildir (yalnızca ilgili çerez onayı verildiyse çalışır)
   useEffect(() => {
     trackPageview(location.pathname + location.search, location.key);
+    trackMetaPageview(location.key);
   }, [location.pathname, location.search]);
 
   // Giriş yapan kullanıcının bildirimlerini yükle
