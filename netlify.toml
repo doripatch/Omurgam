@@ -31,8 +31,10 @@ force = true
   status = 200
 [[redirects]]
   from = "/blog"
-  to = "/index.html"
-  status = 200
+  to = "/omurgam-ne-diyor/"
+  status = 301
+  force = true
+  # /blog, /omurgam-ne-diyor ile aynı listeyi gösteren eski takma ad (kopya içerik) -> kalıcı yönlendirme
 [[redirects]]
   from = "/saglikli-yasam"
   to = "/index.html"
@@ -55,19 +57,19 @@ force = true
   status = 200
 [[redirects]]
   from = "/soru-sor"
-  to = "/index.html"
+  to = "/soru-sor.html"
   status = 200
 [[redirects]]
   from = "/forum"
-  to = "/index.html"
+  to = "/forum.html"
   status = 200
 [[redirects]]
   from = "/mr-analiz"
-  to = "/index.html"
+  to = "/mr-analiz.html"
   status = 200
 [[redirects]]
   from = "/saglik-sozlugu"
-  to = "/index.html"
+  to = "/saglik-sozlugu.html"
   status = 200
 [[redirects]]
   from = "/omurga-sozlugu"
@@ -75,51 +77,51 @@ force = true
   status = 200
 [[redirects]]
   from = "/gunun-terimi"
-  to = "/index.html"
+  to = "/gunun-terimi.html"
   status = 200
 [[redirects]]
   from = "/mit-avi"
-  to = "/index.html"
+  to = "/mit-avi.html"
   status = 200
 [[redirects]]
   from = "/hakkimizda"
-  to = "/index.html"
+  to = "/hakkimizda.html"
   status = 200
 [[redirects]]
   from = "/iletisim"
-  to = "/index.html"
+  to = "/iletisim.html"
   status = 200
 [[redirects]]
   from = "/randevu"
-  to = "/index.html"
+  to = "/randevu.html"
   status = 200
 [[redirects]]
   from = "/gizlilik"
-  to = "/index.html"
+  to = "/gizlilik.html"
   status = 200
 [[redirects]]
   from = "/kullanim-kosullari"
-  to = "/index.html"
+  to = "/kullanim-kosullari.html"
   status = 200
 [[redirects]]
   from = "/basin"
-  to = "/index.html"
+  to = "/basin.html"
   status = 200
 [[redirects]]
   from = "/bel-fitigi"
-  to = "/index.html"
+  to = "/bel-fitigi.html"
   status = 200
 [[redirects]]
   from = "/boyun-fitigi"
-  to = "/index.html"
+  to = "/boyun-fitigi.html"
   status = 200
 [[redirects]]
   from = "/skolyoz"
-  to = "/index.html"
+  to = "/skolyoz.html"
   status = 200
 [[redirects]]
   from = "/sorular"
-  to = "/index.html"
+  to = "/sorular.html"
   status = 200
 [[redirects]]
   from = "/giris"
@@ -158,6 +160,47 @@ force = true
 [[redirects]]
   from = "/omurga-sozlugu/*"
   to = "/index.html"
+  status = 200
+# Prerender edilmiş politika sayfaları (scripts/prerender-pages.mjs) — joker kuraldan ÖNCE.
+[[redirects]]
+  from = "/politika/cerez-politikasi"
+  to = "/politika/cerez-politikasi.html"
+  status = 200
+[[redirects]]
+  from = "/politika/telif-haklari"
+  to = "/politika/telif-haklari.html"
+  status = 200
+[[redirects]]
+  from = "/politika/editoryal-ilkeler"
+  to = "/politika/editoryal-ilkeler.html"
+  status = 200
+[[redirects]]
+  from = "/politika/bilimsel-kaynak-guncelleme"
+  to = "/politika/bilimsel-kaynak-guncelleme.html"
+  status = 200
+[[redirects]]
+  from = "/politika/reklam-editoryal-bagimsizlik"
+  to = "/politika/reklam-editoryal-bagimsizlik.html"
+  status = 200
+[[redirects]]
+  from = "/politika/yapay-zeka-icerik"
+  to = "/politika/yapay-zeka-icerik.html"
+  status = 200
+[[redirects]]
+  from = "/politika/kaynak-atif"
+  to = "/politika/kaynak-atif.html"
+  status = 200
+[[redirects]]
+  from = "/politika/duzeltme-geri-bildirim"
+  to = "/politika/duzeltme-geri-bildirim.html"
+  status = 200
+[[redirects]]
+  from = "/politika/erisilebilirlik"
+  to = "/politika/erisilebilirlik.html"
+  status = 200
+[[redirects]]
+  from = "/politika/icerik-kaldirma-ihlal"
+  to = "/politika/icerik-kaldirma-ihlal.html"
   status = 200
 [[redirects]]
   from = "/politika/*"

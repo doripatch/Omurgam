@@ -112,7 +112,7 @@ const indexJsonLd = {
   '@id': `${ORIGIN}${BASE}#termset`,
   name: 'Omurgam Omurga Sözlüğü',
   description: 'Omurga, disk, sinir, skolyoz, görüntüleme ve tedavi terimlerinin sade Türkçe açıklamaları.',
-  url: `${ORIGIN}${BASE}`,
+  url: `${ORIGIN}${BASE}/`,
 };
 const indexLinks = master
   .map((t) => `<li><a href="${BASE}/${esc(t.slug)}/">${esc(t.term)}</a> — <span>${esc(t.category)}</span></li>`)
@@ -125,7 +125,7 @@ const indexBody =
 write('omurga-sozlugu', renderPage({
   title: 'Omurga Sözlüğü — Omurga ve MR Terimleri | Omurgam',
   description: 'Omurga, disk, sinir, skolyoz, MR bulguları ve tedavi terimlerini hasta dilinde açıklayan 188 maddelik Omurgam Omurga Sözlüğü.',
-  canonical: `${ORIGIN}${BASE}`,
+  canonical: `${ORIGIN}${BASE}/`,
   type: 'website',
   jsonLd: indexJsonLd,
   bodyHtml: indexBody,
@@ -155,7 +155,7 @@ for (const term of master) {
         '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: ORIGIN },
-          { '@type': 'ListItem', position: 2, name: 'Omurga Sözlüğü', item: `${ORIGIN}${BASE}` },
+          { '@type': 'ListItem', position: 2, name: 'Omurga Sözlüğü', item: `${ORIGIN}${BASE}/` },
           { '@type': 'ListItem', position: 3, name: term.term, item: canonicalUrl },
         ],
       },
@@ -176,7 +176,7 @@ for (const term of master) {
 
   const body =
     `<main>` +
-    `<nav><a href="${BASE}">← Omurga Sözlüğü</a></nav>` +
+    `<nav><a href="${BASE}/">← Omurga Sözlüğü</a></nav>` +
     `<p>${esc(term.category)}</p>` +
     `<h1>${esc(term.term)} nedir?</h1>` +
     (term.english ? `<p>${esc(term.english)}</p>` : '') +

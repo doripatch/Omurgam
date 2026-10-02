@@ -16,7 +16,7 @@ export default function MigratedVideoDetail() {
       <div className="min-h-screen flex flex-col items-center justify-center">
         <Seo title="Video bulunamadı" description="Aradığınız video bulunamadı. Omurgam video arşivine göz atın." />
         <h1 className="text-4xl font-bold text-slate-900 mb-4">Video bulunamadı</h1>
-        <Link to="/videolar" className="text-amber-600 hover:underline">
+        <Link to="/videolar/" className="text-amber-600 hover:underline">
           Video arşivine dön
         </Link>
       </div>

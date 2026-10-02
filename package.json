@@ -6,7 +6,7 @@
   "scripts": {
     "prebuild": "node scripts/generate-cross-links.mjs && node scripts/generate-sitemap.mjs && node scripts/validate-url-map.mjs && node scripts/validate-video-map.mjs && node scripts/generate-redirects.mjs",
     "build": "vite build",
-    "postbuild": "node scripts/prerender-glossary.mjs && node scripts/prerender-mr.mjs && node scripts/prerender-content.mjs",
+    "postbuild": "node scripts/prerender-glossary.mjs && node scripts/prerender-mr.mjs && node scripts/prerender-content.mjs && node scripts/prerender-pages.mjs",
     "dev": "vite"
   },
   "dependencies": {

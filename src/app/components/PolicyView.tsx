@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { FileText, ArrowLeft } from 'lucide-react';
 import { POLICY_CONTENT } from '../lib/policyContent';
+import { policyDescription } from '../lib/policyMeta';
 import Seo from './Seo';
 
 const META_RE = /^(Belge No|Yürürlük Tarihi|Son Güncelleme|Versiyon)\s*:/;
@@ -46,7 +47,7 @@ export default function PolicyView({ slug, title }: { slug: string; title: strin
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-16 px-4">
-      <Seo title={title} description={`Omurgam — ${title}`} />
+      <Seo title={title} description={policyDescription(slug, title)} />
       <div className="max-w-3xl mx-auto">
         <Link
           to="/"

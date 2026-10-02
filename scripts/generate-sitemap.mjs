@@ -15,18 +15,18 @@ const ORIGIN = 'https://omurgam.com';
 // (1) Küratörlü, indexlenebilir static route'lar — routes.ts'ten elle seçildi (private route yok)
 const STATIC = [
   ['/', 'daily', '1.0'],
-  ['/videolar', 'weekly', '0.9'],
-  ['/omurgam-ne-diyor', 'daily', '0.9'],
-  ['/yatak-yastik-rehberi', 'weekly', '0.8'],
-  ['/saglikli-yasam', 'weekly', '0.8'],
-  ['/klinisyenler', 'weekly', '0.8'],
+  ['/videolar/', 'weekly', '0.9'],
+  ['/omurgam-ne-diyor/', 'daily', '0.9'],
+  ['/yatak-yastik-rehberi/', 'weekly', '0.8'],
+  ['/saglikli-yasam/', 'weekly', '0.8'],
+  ['/klinisyenler/', 'weekly', '0.8'],
   ['/forum', 'daily', '0.8'],
   ['/mr-analiz', 'monthly', '0.8'],
   ['/bel-fitigi', 'monthly', '0.9'],
   ['/boyun-fitigi', 'monthly', '0.9'],
   ['/skolyoz', 'monthly', '0.9'],
   ['/saglik-sozlugu', 'weekly', '0.8'],
-  ['/omurga-sozlugu', 'weekly', '0.9'],
+  ['/omurga-sozlugu/', 'weekly', '0.9'],
   ['/gunun-terimi', 'daily', '0.7'],
   ['/mit-avi', 'daily', '0.7'],
   ['/soru-sor', 'monthly', '0.6'],
@@ -35,7 +35,6 @@ const STATIC = [
   ['/randevu', 'monthly', '0.8'],
   ['/iletisim', 'yearly', '0.5'],
   ['/basin', 'monthly', '0.5'],
-  ['/blog', 'weekly', '0.6'],
   ['/gizlilik', 'yearly', '0.3'],
   ['/kullanim-kosullari', 'yearly', '0.3'],
 ];
@@ -84,25 +83,25 @@ for (const t of spineGlossary.master) {
 }
 
 const errors = [];
-// Mevcut taban tam 502 mi? 4 indeks tam birer kez mi?
-if (rows.length !== 502) errors.push(`ana sitemap tabanı 502 beklenirken ${rows.length}`);
+// Mevcut taban tam 501 mi? (/blog çıkarıldı: /omurgam-ne-diyor/ kopyasıydı, netlify.toml'da 301) 4 indeks tam birer kez mi?
+if (rows.length !== 501) errors.push(`ana sitemap tabanı 501 beklenirken ${rows.length}`);
 for (const idx of ['/omurgam-ne-diyor', '/saglikli-yasam', '/yatak-yastik-rehberi', '/klinisyenler']) {
-  const n = rows.filter((r) => r.loc === ORIGIN + idx).length;
+  const n = rows.filter((r) => r.loc === ORIGIN + idx + '/').length;
   if (n !== 1) errors.push(`indeks ${idx} tam 1 kez beklenirken ${n}`);
 }
 
-// 80 klinisyen yeni URL ekle -> 582
+// 80 klinisyen yeni URL ekle -> 581
 for (const r of clin) add(`${ORIGIN}${r.newUrl}/`, 'monthly', '0.6');
-if (rows.length !== 582) errors.push(`ana sitemap 582 beklenirken ${rows.length}`);
+if (rows.length !== 581) errors.push(`ana sitemap 581 beklenirken ${rows.length}`);
 if (rows.some((r) => /\/blog\/[0-9a-f-]{36}$/.test(r.loc))) errors.push('ana sitemap eski /blog/<UUID> içeriyor');
 
 // Canonical video detay URL'leri (sonda "/": prerender dizin yapısı, Netlify'da ek 301 yok).
 if (videoCanonical.length < 36) errors.push(`en az 36 canonical video beklenirken ${videoCanonical.length}`);
 for (const r of videoCanonical) add(`${ORIGIN}${r.newUrl}/`, 'monthly', '0.7');
-if (rows.length !== 582 + videoCanonical.length) errors.push(`ana sitemap ${582 + videoCanonical.length} (502+80+${videoCanonical.length}) beklenirken ${rows.length}`);
+if (rows.length !== 581 + videoCanonical.length) errors.push(`ana sitemap ${581 + videoCanonical.length} (501+80+${videoCanonical.length}) beklenirken ${rows.length}`);
 if (rows.some((r) => /\/video\/[0-9a-f-]{36}$/.test(r.loc))) errors.push('ana sitemap eski /video/<UUID> içeriyor');
 {
-  const vidLocs = rows.filter((r) => r.loc.startsWith(`${ORIGIN}/videolar/`)).map((r) => r.loc);
+  const vidLocs = rows.filter((r) => r.loc.startsWith(`${ORIGIN}/videolar/`) && r.loc !== `${ORIGIN}/videolar/`).map((r) => r.loc);
   if (new Set(vidLocs).size !== videoCanonical.length) errors.push(`sitemap benzersiz canonical video ${videoCanonical.length} değil: ${new Set(vidLocs).size}`);
 }
 
@@ -129,4 +128,4 @@ if (errors.length) { console.error('[sitemap] BAŞARISIZ:\n - ' + errors.join('\
 
 writeFileSync(process.env.SITEMAP_OUT || join(ROOT, 'public/sitemap.xml'), buildXml(rows));
 writeFileSync(process.env.BLOG_SITEMAP_OUT || join(ROOT, 'public/blog-sitemap.xml'), buildXml(blogRows));
-console.log(`[sitemap] OK — sitemap.xml ${rows.length} (502 + 80 klinisyen + ${videoCanonical.length} video), blog-sitemap.xml ${blogRows.length} (84/67/32); eski /blog/<UUID> 0, eski /video/<UUID> 0.`);
+console.log(`[sitemap] OK — sitemap.xml ${rows.length} (501 + 80 klinisyen + ${videoCanonical.length} video), blog-sitemap.xml ${blogRows.length} (84/67/32); eski /blog/<UUID> 0, eski /video/<UUID> 0.`);

@@ -42,7 +42,7 @@ function NotFound() {
         <Seo title="İçerik bulunamadı" description="Aradığınız klinisyen notu taşınmış veya adres yanlış yazılmış olabilir." />
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">İçerik bulunamadı</h1>
         <p className="text-slate-600 dark:text-slate-300 mb-7">Aradığınız klinisyen notu taşınmış veya adres yanlış yazılmış olabilir.</p>
-        <Link to="/klinisyenler" className="inline-flex rounded-full bg-amber-700 px-5 py-3 font-semibold text-white">Klinisyenlere Notlar'a dön</Link>
+        <Link to="/klinisyenler/" className="inline-flex rounded-full bg-amber-700 px-5 py-3 font-semibold text-white">Klinisyenlere Notlar'a dön</Link>
       </div>
     </div>
   );
@@ -120,7 +120,7 @@ export default function ClinicianNote() {
         jsonLd={jsonLd}
       />
       <div className="max-w-3xl mx-auto">
-        <Link to="/klinisyenler" className="inline-flex items-center gap-2 text-teal-700 hover:text-teal-800 dark:text-teal-300 mb-8">
+        <Link to="/klinisyenler/" className="inline-flex items-center gap-2 text-teal-700 hover:text-teal-800 dark:text-teal-300 mb-8">
           <ArrowLeft className="w-4 h-4" /> {meta.name}
         </Link>
 

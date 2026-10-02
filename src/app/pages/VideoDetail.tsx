@@ -223,7 +223,7 @@ export default function VideoDetail({
       <div className="min-h-screen flex flex-col items-center justify-center">
         <Seo title="Video bulunamadı" description="Aradığınız video bulunamadı. Omurgam video arşivine göz atın." />
         <h1 className="text-4xl font-bold text-slate-900 mb-4">Video bulunamadı</h1>
-        <Link to="/videolar" className="text-amber-600 hover:underline">
+        <Link to="/videolar/" className="text-amber-600 hover:underline">
           Video arşivine dön
         </Link>
       </div>
@@ -245,7 +245,7 @@ export default function VideoDetail({
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <Link
-          to="/videolar"
+          to="/videolar/"
           className="inline-flex items-center gap-2 text-amber-700 hover:text-amber-800 mb-6 group"
         >
           <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />

@@ -51,7 +51,7 @@ export interface Pillar {
 
 const RELATED_COMMON: PillarLink[] = [
   { to: '/mr-analiz', label: 'MR Raporu Terim Sözlüğü' },
-  { to: '/videolar', label: 'Omurga Sağlığı Videoları' },
+  { to: '/videolar/', label: 'Omurga Sağlığı Videoları' },
   { to: '/forum', label: 'Sizden Gelenler — Soru & Cevap' },
   { to: '/soru-sor', label: 'Uzmana Soru Sor' },
 ];

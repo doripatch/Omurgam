@@ -93,7 +93,7 @@ const breadcrumb = (fam, title, canonical) => ({
   '@type': 'BreadcrumbList',
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: `${ORIGIN}/` },
-    { '@type': 'ListItem', position: 2, name: FAM[fam].name, item: `${ORIGIN}${FAM[fam].base}` },
+    { '@type': 'ListItem', position: 2, name: FAM[fam].name, item: `${ORIGIN}${FAM[fam].base}/` },
     { '@type': 'ListItem', position: 3, name: title, item: canonical },
   ],
 });
@@ -154,7 +154,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
     const pillarHtml = pillar
       ? `<p><a href="${pillar.url}">Kapsamlı rehber: ${esc(pillar.name)} →</a></p>`
       : '';
-    const body = `<main><nav><a href="${FAM[r.contentFamily].base}">← ${esc(FAM[r.contentFamily].name)}</a></nav>`
+    const body = `<main><nav><a href="${FAM[r.contentFamily].base}/">← ${esc(FAM[r.contentFamily].name)}</a></nav>`
       + `<p>${esc(p.category || '')}</p><h1>${esc(p.title)}</h1>`
       + (description ? `<p>${esc(description)}</p>` : '')
       + `<article>${(r.contentFamily === 'kaleminden' || r.contentFamily === 'saglikli-yasam')
@@ -180,7 +180,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
         breadcrumb('klinisyenler', n.title, canonical),
       ],
     };
-    const body = `<main><nav><a href="/klinisyenler">← Klinisyenlere Notlar</a></nav>`
+    const body = `<main><nav><a href="/klinisyenler/">← Klinisyenlere Notlar</a></nav>`
       + `<p>${esc(n.category || 'Klinik Değerlendirme')}</p><h1>${esc(n.title)}</h1>`
       + `<article>${noteBlocksToHtml(parseNote(n.content))}</article>${DISCLAIMER}</main>`;
     write(r.newUrl, renderPage({ title: `${n.title} | Omurgam`, description, canonical, type: 'article', jsonLd, bodyHtml: body }));
@@ -190,7 +190,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
   // --- İNDEKS sayfaları (4) ---
   function writeIndex(fam, items) {
     const m = FAM[fam];
-    const canonical = `${ORIGIN}${m.base}`;
+    const canonical = `${ORIGIN}${m.base}/`;
     const links = items.map((it) => `<li><a href="${it.url}">${esc(it.title)}</a></li>`).join('\n');
     const jsonLd = {
       '@context': 'https://schema.org',
@@ -222,7 +222,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: `${ORIGIN}/` },
-      { '@type': 'ListItem', position: 2, name: VIDEO_NAME, item: `${ORIGIN}${VIDEO_BASE}` },
+      { '@type': 'ListItem', position: 2, name: VIDEO_NAME, item: `${ORIGIN}${VIDEO_BASE}/` },
       { '@type': 'ListItem', position: 3, name: title, item: canonical },
     ],
   });
@@ -252,7 +252,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
         + related.map((x) => `<li><a href="${x.newUrl}/">${esc(videoById.get(x.id).title)}</a></li>`).join('')
         + `</ul></nav>`
       : '';
-    const body = `<main><nav><a href="${VIDEO_BASE}">← ${esc(VIDEO_NAME)}</a></nav>`
+    const body = `<main><nav><a href="${VIDEO_BASE}/">← ${esc(VIDEO_NAME)}</a></nav>`
       + `<p>${esc(v.category || '')}</p><h1>${esc(v.title)}</h1>`
       + `<img src="${esc(thumb)}" alt="${esc(v.title)}" width="480" height="360" />`
       + (hasDesc ? `<p>${esc(description)}</p>` : '')
@@ -262,7 +262,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
     videoList.push({ url: `${r.newUrl}/`, title: v.title, category: v.category || '' });
   }
   {
-    const canonical = `${ORIGIN}${VIDEO_BASE}`;
+    const canonical = `${ORIGIN}${VIDEO_BASE}/`;
     const links = videoList.map((it) => `<li><a href="${it.url}">${esc(it.title)}</a></li>`).join('\n');
     const jsonLd = {
       '@context': 'https://schema.org',

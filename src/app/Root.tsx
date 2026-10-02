@@ -29,11 +29,11 @@ export default function Root() {
   type NavChild = { to: string; label: string };
   type NavItem = { to?: string; label: string; children?: NavChild[] };
   const navItems: NavItem[] = [
-    { to: '/videolar', label: 'Omurga Sağlığı Videoları' },
-    { to: '/omurgam-ne-diyor', label: 'Omurga Sağlığı Yazıları' },
-    { to: '/yatak-yastik-rehberi', label: 'Yatak & Yastık Rehberi' },
-    { to: '/klinisyenler', label: 'Klinisyenlere Notlar' },
-    { to: '/omurga-sozlugu', label: 'Omurga Sözlüğü' },
+    { to: '/videolar/', label: 'Omurga Sağlığı Videoları' },
+    { to: '/omurgam-ne-diyor/', label: 'Omurga Sağlığı Yazıları' },
+    { to: '/yatak-yastik-rehberi/', label: 'Yatak & Yastık Rehberi' },
+    { to: '/klinisyenler/', label: 'Klinisyenlere Notlar' },
+    { to: '/omurga-sozlugu/', label: 'Omurga Sözlüğü' },
     {
       label: 'Konular',
       children: [
@@ -44,7 +44,7 @@ export default function Root() {
     },
   ];
   const isChildActive = (children?: NavChild[]) =>
-    !!children && children.some((ch) => location.pathname === ch.to);
+    !!children && children.some((ch) => isActive(ch.to));
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,8 +88,10 @@ export default function Root() {
     if (isAuthenticated && !notifLoaded) loadNotifs();
   }, [isAuthenticated, notifLoaded, loadNotifs]);
 
+  // İndeks sayfaları "/" sonekli (prerender dizin yapısı); karşılaştırmada sondaki "/" yok sayılır.
   const isActive = (path: string) => {
-    return location.pathname === path;
+    const strip = (p: string) => (p.length > 1 ? p.replace(/\/+$/, '') : p);
+    return strip(location.pathname) === strip(path);
   };
 
   const handleSignout = async () => {
@@ -467,13 +469,13 @@ export default function Root() {
             <div>
               <h4 className="font-semibold mb-4">{settings?.footer?.quickLinksTitle || 'Hızlı Erişim'}</h4>
               <ul className="space-y-2 text-sm text-slate-300">
-                <li><Link to="/videolar" className="hover:text-amber-300 transition-colors">Omurga Sağlığı Videoları</Link></li>
+                <li><Link to="/videolar/" className="hover:text-amber-300 transition-colors">Omurga Sağlığı Videoları</Link></li>
                 <li><Link to="/forum" className="hover:text-amber-300 transition-colors">Sizden Gelenler</Link></li>
-                <li><Link to="/omurgam-ne-diyor" className="hover:text-amber-300 transition-colors">Omurga Sağlığı Yazıları</Link></li>
-                <li><Link to="/yatak-yastik-rehberi" className="hover:text-amber-300 transition-colors">Yatak & Yastık Rehberi</Link></li>
-                <li><Link to="/saglikli-yasam" className="hover:text-amber-300 transition-colors">Sağlıklı Yaşam</Link></li>
-                <li><Link to="/klinisyenler" className="hover:text-amber-300 transition-colors">Klinisyenler Buraya</Link></li>
-                <li><Link to="/omurga-sozlugu" className="hover:text-amber-300 transition-colors">Omurga Sözlüğü</Link></li>
+                <li><Link to="/omurgam-ne-diyor/" className="hover:text-amber-300 transition-colors">Omurga Sağlığı Yazıları</Link></li>
+                <li><Link to="/yatak-yastik-rehberi/" className="hover:text-amber-300 transition-colors">Yatak & Yastık Rehberi</Link></li>
+                <li><Link to="/saglikli-yasam/" className="hover:text-amber-300 transition-colors">Sağlıklı Yaşam</Link></li>
+                <li><Link to="/klinisyenler/" className="hover:text-amber-300 transition-colors">Klinisyenler Buraya</Link></li>
+                <li><Link to="/omurga-sozlugu/" className="hover:text-amber-300 transition-colors">Omurga Sözlüğü</Link></li>
                 <li><Link to="/mr-analiz" className="hover:text-amber-300 transition-colors">MR Terim Sözlüğü</Link></li>
                 <li><Link to="/saglik-sozlugu" className="hover:text-amber-300 transition-colors">Sağlık Sözlüğü</Link></li>
                 <li><a href="https://www.doktortakvimi.com/z/ELoZmY" target="_blank" rel="noopener noreferrer" className="hover:text-amber-300 transition-colors">Randevu Al</a></li>

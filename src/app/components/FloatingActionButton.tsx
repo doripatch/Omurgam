@@ -10,7 +10,7 @@ export default function FloatingActionButton() {
     {
       icon: Play,
       label: 'Omurga Sağlığı Videoları',
-      href: '/videolar',
+      href: '/videolar/',
       color: 'from-amber-600 to-orange-600'
     },
     {
