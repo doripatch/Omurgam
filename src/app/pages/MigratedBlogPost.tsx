@@ -16,6 +16,7 @@ import EditorialText from '../components/EditorialText';
 import { ORIGIN, BASE_TO_FAMILY, FAMILY_META, idByBaseSlug, recordById } from '../lib/urlMigration';
 import glossaryData from '../data/spineGlossary.json';
 import { findGlossaryMentions, findPillar } from '../lib/glossaryLinks.mjs';
+import { blogDescription } from '../lib/blogSeo.mjs';
 
 interface BlogPostData {
   id: string;
@@ -91,7 +92,7 @@ export default function MigratedBlogPost() {
       {
         '@type': 'Article',
         headline: post.title,
-        description: post.excerpt || undefined,
+        description: blogDescription(post.excerpt, post.content) || undefined,
         articleSection: post.category,
         inLanguage: 'tr-TR',
         datePublished: post.createdAt || post.created_at,
@@ -116,7 +117,7 @@ export default function MigratedBlogPost() {
     <div className="w-full min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 py-12 px-4">
       <Seo
         title={post?.title || meta.name}
-        description={post?.excerpt || (post?.content ? post.content.slice(0, 155) : meta.name)}
+        description={post ? blogDescription(post.excerpt, post.content) : meta.name}
         image={post?.imageUrl}
         type="article"
         canonical={canonical}

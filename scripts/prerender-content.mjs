@@ -8,6 +8,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseBlog, parseNote, blogBlocksToHtml, noteBlocksToHtml, parseEditorial, editorialBlocksToHtml, escapeHtml } from '../src/app/lib/richBlocks.mjs';
 import { findGlossaryMentions, findPillar } from '../src/app/lib/glossaryLinks.mjs';
+import { blogDescription } from '../src/app/lib/blogSeo.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // DIST varsayılan dist/; test/CI için PRERENDER_DIST ile geçersiz kılınabilir (davranış aynı).
@@ -131,7 +132,9 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
   for (const r of blogRec) {
     const p = postById.get(r.id);
     const canonical = `${ORIGIN}${r.newUrl}/`;
-    const description = (p.excerpt && p.excerpt.trim()) ? p.excerpt.trim() : plainSummary(p.content);
+    // Görünür giriş (lead) eskisi gibi özet; meta açıklama blogSeo ile (React MigratedBlogPost ile aynı).
+    const lead = (p.excerpt && p.excerpt.trim()) ? p.excerpt.trim() : plainSummary(p.content);
+    const description = blogDescription(p.excerpt, p.content);
     const jsonLd = {
       '@context': 'https://schema.org',
       '@graph': [
@@ -156,7 +159,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
       : '';
     const body = `<main><nav><a href="${FAM[r.contentFamily].base}/">← ${esc(FAM[r.contentFamily].name)}</a></nav>`
       + `<p>${esc(p.category || '')}</p><h1>${esc(p.title)}</h1>`
-      + (description ? `<p>${esc(description)}</p>` : '')
+      + (lead ? `<p>${esc(lead)}</p>` : '')
       + `<article>${(r.contentFamily === 'kaleminden' || r.contentFamily === 'saglikli-yasam')
           ? editorialBlocksToHtml(parseEditorial(p.content))
           : blogBlocksToHtml(parseBlog(p.content))}</article>${pillarHtml}${relTermsHtml}${DISCLAIMER}</main>`;
