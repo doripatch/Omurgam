@@ -19,15 +19,20 @@ try {
   const res = await fetch(`https://${projectId}.supabase.co/functions/v1/server/banners`, {
     headers: { Authorization: `Bearer ${anon}` },
   });
-  const url = res.ok ? (((await res.json()).banners || [])[0] || {}).imageUrl : null;
+  const banners = res.ok ? ((await res.json()).banners || []) : [];
+  const url = (banners[0] || {}).imageUrl;
   if (!url || !/^https:\/\//.test(url)) {
     console.warn('[preload-lcp] banner bulunamadı, adım atlandı');
   } else {
     const html = readFileSync(file, 'utf8');
     if (!html.includes('<!-- LCP:')) throw new Error('index.html LCP işareti yok');
-    const tag = `<link rel="preload" as="image" href="${url.replace(/"/g, '&quot;')}" fetchpriority="high" />\n    `;
+    // Banner listesini de göm: Home ilk çizimde API'yi beklemeden banner'ı çizer (LCP "element render delay").
+    const slim = banners.map((b) => ({ id: b.id, imageUrl: b.imageUrl, title: b.title, subtitle: b.subtitle, link: b.link }));
+    const data = JSON.stringify(slim).replace(/</g, '\\u003c');
+    const tag = `<link rel="preload" as="image" href="${url.replace(/"/g, '&quot;')}" fetchpriority="high" />\n    `
+      + `<script>if (location.pathname === '/') window.__omBannersInit = ${data};</script>\n    `;
     writeFileSync(file, html.replace('<!-- LCP:', `${tag}<!-- LCP:`));
-    console.log(`[preload-lcp] OK — ilk banner önceden yükleniyor: ${url.split('/').pop()}`);
+    console.log(`[preload-lcp] OK — ilk banner önceden yükleniyor: ${url.split('/').pop()}; ${slim.length} banner HTML'e gömüldü`);
   }
 } catch (e) {
   console.warn(`[preload-lcp] atlandı: ${e && e.message ? e.message : e}`);

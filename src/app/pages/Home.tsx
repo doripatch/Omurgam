@@ -101,8 +101,14 @@ export default function Home() {
   const [faqs, setFaqs] = useState<any[]>([]);
   const [openFaq, setOpenFaq] = useState<string | null>(null);
   const [myths, setMyths] = useState<any[]>([]);
-  const [banners, setBanners] = useState<any[]>([]);
-  const [bannersLoading, setBannersLoading] = useState(true);
+  // Build sırasında index.html'e gömülen banner listesi (scripts/preload-lcp.mjs): ilk çizimde API beklenmez (LCP).
+  // Güncel liste aşağıda yine API'den alınır; farklıysa güncellenir. Yalnız ilk açılışta kullanılır.
+  const [banners, setBanners] = useState<any[]>(() => {
+    const init = (window as any).__omBannersInit;
+    (window as any).__omBannersInit = undefined;
+    return Array.isArray(init) ? init : [];
+  });
+  const [bannersLoading, setBannersLoading] = useState(() => banners.length === 0);
 
   // Tüm metinler buradan gelir (panelden düzenlenebilir, varsayılanlar her zaman dolu)
   const settings = useSiteSettingsStore((s) => s.settings);
@@ -119,7 +125,10 @@ export default function Home() {
     (window as any).__omBanners = undefined;
     Promise.resolve(early)
       .then((d: any) => (d && Array.isArray(d.banners) ? d : bannersAPI.getAll()))
-      .then((d: any) => setBanners(d.banners || [])).catch(() => {}).finally(() => setBannersLoading(false));
+      .then((d: any) => {
+        const fresh = d.banners || [];
+        setBanners((prev) => (JSON.stringify(prev.map((b: any) => [b.id, b.imageUrl, b.title, b.subtitle, b.link])) === JSON.stringify(fresh.map((b: any) => [b.id, b.imageUrl, b.title, b.subtitle, b.link])) ? prev : fresh));
+      }).catch(() => {}).finally(() => setBannersLoading(false));
   }, []);
 
   const renderBanner = (b: any) => {
