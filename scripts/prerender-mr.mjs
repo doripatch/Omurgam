@@ -31,7 +31,7 @@ const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
 const jsonLdSafe = (obj) => JSON.stringify(obj).replace(/</g, '\\u003c');
 const compact = (s) => String(s || '').replace(/\s+/g, ' ').trim();
 
-function renderPage({ title, description, canonical, jsonLd, bodyHtml }) {
+function renderPage({ title, description, canonical, jsonLd, bodyHtml, noindex = false }) {
   let html = template;
   html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(title)}</title>`);
   html = html.replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${esc(description)}" />`);
@@ -41,7 +41,8 @@ function renderPage({ title, description, canonical, jsonLd, bodyHtml }) {
   html = html.replace(/<meta property="og:type"[^>]*>/, '<meta property="og:type" content="article" />');
   html = html.replace(/<meta name="twitter:title"[^>]*>/, `<meta name="twitter:title" content="${esc(title)}" />`);
   html = html.replace(/<meta name="twitter:description"[^>]*>/, `<meta name="twitter:description" content="${esc(description)}" />`);
-  const inject = `  <link rel="canonical" href="${esc(canonical)}" />\n`
+  const inject = (noindex ? '  <meta name="robots" content="noindex, follow" />\n  ' : '')
+    + `  <link rel="canonical" href="${esc(canonical)}" />\n`
     + `    <script type="application/ld+json" id="seo-jsonld">${jsonLdSafe(jsonLd)}</script>\n  `;
   html = html.replace('</head>', `${inject}</head>`);
   return html.replace('<div id="root"></div>', `<div id="root">${bodyHtml}</div>`);
@@ -67,6 +68,9 @@ if (bySlug.size !== EXPECTED_UNIQUE) {
 }
 
 const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu bilgiler yalnızca bilgilendirme amaçlıdır ve kesin tanı yerine geçmez. MR raporunuzun değerlendirilmesi için hekiminize danışın.</aside>';
+// Çok kısa ve Google'da görünürlüğü olmayan MR terimleri: sayfa açık, ama noindex (src/app/data/mrNoindex.json).
+const NOINDEX = new Set(JSON.parse(readFileSync(join(ROOT, 'src/app/data/mrNoindex.json'), 'utf8')).slugs);
+let noindexWritten = 0;
 // Omurga Sözlüğü'nde birebir karşılığı olan terimler sözlüğe taşındı (Netlify 301, generate-redirects.mjs) → üretilmez.
 const MERGED = crossLinks.mrToGlossary;
 let mergedSkipped = 0;
@@ -112,7 +116,8 @@ for (const [slug, term] of bySlug) {
     + recommendations + crossHtml + faqHtml + DISCLAIMER + '</main>';
   const dir = join(DIST, 'mr-analiz', slug);
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, 'index.html'), renderPage({ title, description, canonical, jsonLd, bodyHtml: body }));
+  if (NOINDEX.has(slug)) noindexWritten++;
+  writeFileSync(join(dir, 'index.html'), renderPage({ title, description, canonical, jsonLd, bodyHtml: body, noindex: NOINDEX.has(slug) }));
 }
 
 const samples = ['sakralizasyon', 'retrolistezis', 'dural-kese-basisi', 'allogreft', 'dural-kese', 'lateral', 'diskografi', 'marjinal-osteofit'];
@@ -134,7 +139,8 @@ for (const slug of samples) {
   if (!mrDescM || mrDescM[1].length > 170) { console.error(`[prerender-mr] HATA: ${slug} meta description uzun/eksik`); process.exit(1); }
 }
 
+if (noindexWritten !== NOINDEX.size) { console.error(`[prerender-mr] HATA: noindex listesinde ${NOINDEX.size} terim var, ${noindexWritten} üretildi (taşınmış/yanlış slug?)`); process.exit(1); }
 for (const slug of Object.keys(MERGED)) {
   if (existsSync(join(DIST, 'mr-analiz', slug, 'index.html'))) { console.error(`[prerender-mr] HATA: sözlüğe taşınan ${slug} yine üretildi`); process.exit(1); }
 }
-console.log(`[prerender-mr] OK — ${bySlug.size - mergedSkipped} benzersiz detay üretildi (${mergedSkipped} terim Omurga Sözlüğü'ne taşındı, 301); ${source.length - bySlug.size} mükerrer kaynak kayıt ilk-kayıt kuralıyla tekilleştirildi; slash canonical + görünür H1 + DefinedTerm doğrulandı.`);
+console.log(`[prerender-mr] OK — ${bySlug.size - mergedSkipped} benzersiz detay üretildi (${mergedSkipped} terim Omurga Sözlüğü'ne taşındı, 301; ${noindexWritten} noindex); ${source.length - bySlug.size} mükerrer kaynak kayıt ilk-kayıt kuralıyla tekilleştirildi; slash canonical + görünür H1 + DefinedTerm doğrulandı.`);

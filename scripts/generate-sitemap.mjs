@@ -60,9 +60,10 @@ for (const t of terms) {
 }
 // Omurga Sözlüğü'ne taşınan (301) MR terimleri sitemap'te yer almaz.
 const mrMerged = JSON.parse(readFileSync(join(ROOT, 'src/app/data/crossLinks.json'), 'utf8')).mrToGlossary;
-const mrKept = mrSlugs.filter((s) => !mrMerged[s]);
-const MERGED_N = mrSlugs.length - mrKept.length;
-const BASE_N = 501 - MERGED_N; // 501 = 221 statik/politika/sözlük + 280 MR; taşınanlar düşülür
+const mrNoindex = new Set(JSON.parse(readFileSync(join(ROOT, 'src/app/data/mrNoindex.json'), 'utf8')).slugs);
+const mrKept = mrSlugs.filter((s) => !mrMerged[s] && !mrNoindex.has(s)); // noindex terimler sitemap'te olmaz
+const MERGED_N = mrSlugs.filter((s) => mrMerged[s]).length;
+const BASE_N = 501 - MERGED_N - mrNoindex.size; // 501 = 221 statik/politika/sözlük + 280 MR; taşınanlar düşülür
 
 // XML güvenli kaçış (loc slug'ları [a-z0-9-] olsa da güvenlik için)
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]));
@@ -134,4 +135,4 @@ if (errors.length) { console.error('[sitemap] BAŞARISIZ:\n - ' + errors.join('\
 
 writeFileSync(process.env.SITEMAP_OUT || join(ROOT, 'public/sitemap.xml'), buildXml(rows));
 writeFileSync(process.env.BLOG_SITEMAP_OUT || join(ROOT, 'public/blog-sitemap.xml'), buildXml(blogRows));
-console.log(`[sitemap] OK — sitemap.xml ${rows.length} (${BASE_N} [MR ${mrKept.length}; ${MERGED_N} sözlüğe taşındı] + 80 klinisyen + ${videoCanonical.length} video), blog-sitemap.xml ${blogRows.length} (84/67/32); eski /blog/<UUID> 0, eski /video/<UUID> 0.`);
+console.log(`[sitemap] OK — sitemap.xml ${rows.length} (${BASE_N} [MR ${mrKept.length}; ${MERGED_N} sözlüğe taşındı; ${mrNoindex.size} noindex] + 80 klinisyen + ${videoCanonical.length} video), blog-sitemap.xml ${blogRows.length} (84/67/32); eski /blog/<UUID> 0, eski /video/<UUID> 0.`);
