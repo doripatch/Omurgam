@@ -116,6 +116,12 @@ if (!html.includes('<div id="root"></div>')) die('index.html boş #root içermiy
 const json = JSON.stringify(data).replace(/</g, '\\u003c');
 html = html.replace('</head>', `  <script>window.__omHome = ${json};</script>\n  </head>`);
 html = html.replace('<div id="root"></div>', `<div id="root">${shell}</div>`);
+// Ana JS'i ilk çizimden SONRA iste: içerik zaten HTML'de; aksi halde (hızlı ağda) JS ilk çizimden önce başladığı için
+// Lighthouse onu ilk görüntünün bağımlısı sayıp FCP/LCP'yi JS indirmesine bağlıyor. Gizli sekmede rAF çalışmaz → 1,5 sn yedek.
+const mod = html.match(/<script type="module" crossorigin src="(\/assets\/[^"]+\.js)"><\/script>/);
+if (!mod) die('ana modül script etiketi bulunamadı');
+if (/rel="modulepreload"/.test(html)) die('modulepreload var; JS yine ilk çizimden önce başlar');
+html = html.replace(mod[0], `<script>(function(){var d=0;function go(){if(d)return;d=1;var s=document.createElement('script');s.type='module';s.crossOrigin='';s.src='${mod[1]}';document.head.appendChild(s);}requestAnimationFrame(function(){requestAnimationFrame(function(){setTimeout(go,0);});});setTimeout(go,1500);})();</script>`);
 writeFileSync(file, html);
 writeFileSync(join(DIST, 'home-data.json'), JSON.stringify(data));
 
