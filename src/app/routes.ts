@@ -1,35 +1,12 @@
 import { createBrowserRouter } from "react-router";
-import { lazy } from "react";
+import { lazy, type ComponentType } from "react";
 import Root from "./Root";
 import Home from "./pages/Home";
-import Videos from "./pages/Videos";
-import VideoDetail from "./pages/VideoDetail";
-import MigratedVideoDetail from "./pages/MigratedVideoDetail";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import MigratedBlogPost from "./pages/MigratedBlogPost";
-import ClinicianNote from "./pages/ClinicianNote";
-import AskQuestion from "./pages/AskQuestion";
-import QuestionDetail from "./pages/QuestionDetail";
-import Forum from "./pages/Forum";
-import Clinicians from "./pages/Clinicians";
-import MRAnalyzer from "./pages/MRAnalyzer";
-import MedicalGlossary from "./pages/MedicalGlossary";
-import SpineGlossary from "./pages/SpineGlossary";
-import WordGame from "./pages/WordGame";
-import MythGame from "./pages/MythGame";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Profile from "./pages/Profile";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Appointment from "./pages/Appointment";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import PolicyPage from "./pages/PolicyPage";
-import Press from "./pages/Press";
-import Pillar from "./pages/Pillar";
-import FAQ from "./pages/FAQ";
+// Public sayfalar route-bazlı ayrı paketlerde (ana paket küçülür → anasayfa LCP/FCP). Anasayfa ve NotFound ana pakette.
+// İlk açılışta main.tsx, router bu paketi yükleyene kadar render'ı bekletir; prerender edilmiş HTML bu sırada ekranda kalır.
+const page = (load: () => Promise<{ default: ComponentType }>) => ({
+  lazy: () => load().then((m) => ({ Component: m.default })),
+});
 // Admin route'ları lazy — normal (public) ziyaretçinin ana bundle'ından çıkarılır.
 // SEO'suz (robots'ta disallow) olduğundan güvenli; Root'taki Suspense fallback ile sarılır.
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
@@ -54,47 +31,47 @@ export const router = createBrowserRouter([
     Component: Root,
     children: [
       { index: true, Component: Home },
-      { path: "videolar", Component: Videos },
+      { path: "videolar", ...page(() => import("./pages/Videos")) },
       // Yeni okunabilir video detay URL'si (slug -> canonical UUID merkezi harita ile çözülür).
-      { path: "videolar/:slug", Component: MigratedVideoDetail },
+      { path: "videolar/:slug", ...page(() => import("./pages/MigratedVideoDetail")) },
       // Eski route: 301 yayına alınana kadar kodda korunur (davranış değişmedi).
-      { path: "video/:id", Component: VideoDetail },
-      { path: "blog", Component: Blog },
-      { path: "saglikli-yasam", Component: Blog },
-      { path: "omurgam-ne-diyor", Component: Blog },
-      { path: "yatak-yastik-rehberi", Component: Blog },
-      { path: "kaleminden", Component: Blog },
-      { path: "blog/:id", Component: BlogPost },
+      { path: "video/:id", ...page(() => import("./pages/VideoDetail")) },
+      { path: "blog", ...page(() => import("./pages/Blog")) },
+      { path: "saglikli-yasam", ...page(() => import("./pages/Blog")) },
+      { path: "omurgam-ne-diyor", ...page(() => import("./pages/Blog")) },
+      { path: "yatak-yastik-rehberi", ...page(() => import("./pages/Blog")) },
+      { path: "kaleminden", ...page(() => import("./pages/Blog")) },
+      { path: "blog/:id", ...page(() => import("./pages/BlogPost")) },
       // Faz 1 — yeni aile detay URL'leri (slug -> UUID merkezi harita üzerinden çözülür).
-      { path: "saglikli-yasam/:slug", Component: MigratedBlogPost },
-      { path: "omurgam-ne-diyor/:slug", Component: MigratedBlogPost },
-      { path: "yatak-yastik-rehberi/:slug", Component: MigratedBlogPost },
-      { path: "klinisyenler", Component: Clinicians },
-      { path: "klinisyenler/:slug", Component: ClinicianNote },
-      { path: "soru-sor", Component: AskQuestion },
-      { path: "soru/:id", Component: QuestionDetail },
-      { path: "forum", Component: Forum },
-      { path: "mr-analiz", Component: MRAnalyzer },
-      { path: "mr-analiz/:slug", Component: MRAnalyzer },
-      { path: "saglik-sozlugu", Component: MedicalGlossary },
-      { path: "omurga-sozlugu", Component: SpineGlossary },
-      { path: "omurga-sozlugu/:slug", Component: SpineGlossary },
-      { path: "gunun-terimi", Component: WordGame },
-      { path: "mit-avi", Component: MythGame },
-      { path: "hakkimizda", Component: About },
-      { path: "iletisim", Component: Contact },
-      { path: "randevu", Component: Appointment },
-      { path: "gizlilik", Component: Privacy },
-      { path: "kullanim-kosullari", Component: Terms },
-      { path: "politika/:slug", Component: PolicyPage },
-      { path: "basin", Component: Press },
-      { path: "bel-fitigi", Component: Pillar },
-      { path: "boyun-fitigi", Component: Pillar },
-      { path: "skolyoz", Component: Pillar },
-      { path: "sorular", Component: FAQ },
-      { path: "giris", Component: Login },
-      { path: "kayit", Component: Register },
-      { path: "profil", Component: Profile },
+      { path: "saglikli-yasam/:slug", ...page(() => import("./pages/MigratedBlogPost")) },
+      { path: "omurgam-ne-diyor/:slug", ...page(() => import("./pages/MigratedBlogPost")) },
+      { path: "yatak-yastik-rehberi/:slug", ...page(() => import("./pages/MigratedBlogPost")) },
+      { path: "klinisyenler", ...page(() => import("./pages/Clinicians")) },
+      { path: "klinisyenler/:slug", ...page(() => import("./pages/ClinicianNote")) },
+      { path: "soru-sor", ...page(() => import("./pages/AskQuestion")) },
+      { path: "soru/:id", ...page(() => import("./pages/QuestionDetail")) },
+      { path: "forum", ...page(() => import("./pages/Forum")) },
+      { path: "mr-analiz", ...page(() => import("./pages/MRAnalyzer")) },
+      { path: "mr-analiz/:slug", ...page(() => import("./pages/MRAnalyzer")) },
+      { path: "saglik-sozlugu", ...page(() => import("./pages/MedicalGlossary")) },
+      { path: "omurga-sozlugu", ...page(() => import("./pages/SpineGlossary")) },
+      { path: "omurga-sozlugu/:slug", ...page(() => import("./pages/SpineGlossary")) },
+      { path: "gunun-terimi", ...page(() => import("./pages/WordGame")) },
+      { path: "mit-avi", ...page(() => import("./pages/MythGame")) },
+      { path: "hakkimizda", ...page(() => import("./pages/About")) },
+      { path: "iletisim", ...page(() => import("./pages/Contact")) },
+      { path: "randevu", ...page(() => import("./pages/Appointment")) },
+      { path: "gizlilik", ...page(() => import("./pages/Privacy")) },
+      { path: "kullanim-kosullari", ...page(() => import("./pages/Terms")) },
+      { path: "politika/:slug", ...page(() => import("./pages/PolicyPage")) },
+      { path: "basin", ...page(() => import("./pages/Press")) },
+      { path: "bel-fitigi", ...page(() => import("./pages/Pillar")) },
+      { path: "boyun-fitigi", ...page(() => import("./pages/Pillar")) },
+      { path: "skolyoz", ...page(() => import("./pages/Pillar")) },
+      { path: "sorular", ...page(() => import("./pages/FAQ")) },
+      { path: "giris", ...page(() => import("./pages/Login")) },
+      { path: "kayit", ...page(() => import("./pages/Register")) },
+      { path: "profil", ...page(() => import("./pages/Profile")) },
       { path: "admin", Component: AdminDashboard },
       { path: "admin/videolar", Component: AdminVideos },
       { path: "admin/sorular", Component: AdminQuestions },
