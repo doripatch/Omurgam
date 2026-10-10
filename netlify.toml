@@ -27,7 +27,7 @@ force = true
   status = 200
 [[redirects]]
   from = "/videolar"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/blog"
@@ -37,23 +37,23 @@ force = true
   # /blog, /omurgam-ne-diyor ile aynı listeyi gösteren eski takma ad (kopya içerik) -> kalıcı yönlendirme
 [[redirects]]
   from = "/saglikli-yasam"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/omurgam-ne-diyor"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/yatak-yastik-rehberi"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/kaleminden"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/klinisyenler"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/soru-sor"
@@ -73,7 +73,7 @@ force = true
   status = 200
 [[redirects]]
   from = "/omurga-sozlugu"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/gunun-terimi"
@@ -125,41 +125,41 @@ force = true
   status = 200
 [[redirects]]
   from = "/giris"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/kayit"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/profil"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/admin"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 
 # --- Dinamik route'lar (prefix) ---
 [[redirects]]
   from = "/blog/*"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/video/*"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/soru/*"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/mr-analiz/*"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/omurga-sozlugu/*"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 # Prerender edilmiş politika sayfaları (scripts/prerender-pages.mjs) — joker kuraldan ÖNCE.
 [[redirects]]
@@ -204,17 +204,17 @@ force = true
   status = 200
 [[redirects]]
   from = "/politika/*"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 [[redirects]]
   from = "/admin/*"
-  to = "/index.html"
+  to = "/spa.html"
   status = 200
 
 # --- Bilinmeyen URL -> gerçek HTTP 404 (SPA kabuğu 404 statüsüyle servis edilir) ---
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/spa.html"
   status = 404
 
 # Headers for security and performance
@@ -225,6 +225,12 @@ force = true
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# SPA kabuğu doğrudan adresiyle dizine girmesin
+[[headers]]
+  for = "/spa.html"
+  [headers.values]
+    X-Robots-Tag = "noindex"
 
 [[headers]]
   for = "/assets/*"
