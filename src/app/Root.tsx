@@ -444,7 +444,7 @@ export default function Root() {
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg overflow-hidden p-1">
-                  <img src="/assets/logo.png" alt="Omurgam" className="w-full h-full object-contain" />
+                  <img src="/assets/logo-footer.webp" alt="Omurgam" width={160} height={160} loading="lazy" decoding="async" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">{settings?.siteName || 'Omurgam'}</h3>
