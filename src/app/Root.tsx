@@ -599,7 +599,7 @@ export default function Root() {
                 href="https://www.dkuakademi.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-amber-200 hover:underline font-medium"
+                className="text-amber-200 hover:underline font-medium bg-slate-900/90 rounded px-1"
               >
                 DKU Akademi
               </a>{' '}
