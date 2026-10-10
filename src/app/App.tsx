@@ -3,7 +3,6 @@ import { RouterProvider } from 'react-router';
 import { router } from './routes';
 import { Toaster } from './components/ui/sonner';
 import { useAuthStore } from './store/authStore';
-import 'react-quill/dist/quill.snow.css';
 
 export default function App() {
   const checkSession = useAuthStore((state) => state.checkSession);
