@@ -311,7 +311,7 @@ export default function Home() {
 
       {/* AŞAĞI KAYDIR (banner'ın altında) */}
       <div className="flex justify-center pt-2 pb-10 bg-stone-50 dark:bg-slate-900">
-        <div onClick={scrollDown} className="hidden sm:flex cursor-pointer flex-col items-center gap-2 text-slate-400 hover:text-amber-600 transition-colors">
+        <div onClick={scrollDown} className="hidden sm:flex cursor-pointer flex-col items-center gap-2 text-slate-500 hover:text-amber-600 transition-colors">
           <span className="text-xs uppercase tracking-wider font-semibold">{c.scrollText}</span>
           <motion.div
             animate={{ y: [0, 8, 0] }}
