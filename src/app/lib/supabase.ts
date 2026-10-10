@@ -30,12 +30,5 @@ export const createAuthenticatedClient = (session: Session | null) => {
   return client;
 };
 
-// Database table names (for type safety)
-export const TABLES = {
-  USERS: 'users',
-  VIDEOS: 'videos',
-  BLOG_POSTS: 'blog_posts',
-  QUESTIONS: 'questions',
-  ANSWERS: 'answers',
-  MR_TERMS: 'mr_terms',
-} as const;
+// Database table names (for type safety) — tables.ts'te; geriye uyumluluk için burada da dışa aktarılır.
+export { TABLES } from './tables';

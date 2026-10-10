@@ -1,5 +1,18 @@
 import { projectId, publicAnonKey } from '/utils/supabase/info';
-import { supabase } from './supabase';
+
+// Supabase istemcisi (supabase-js, ~100 KB gzip) ayrı pakette ve yalnız gerektiğinde yüklenir:
+// oturum açmamış ziyaretçinin ilk açılışında hiç indirilmez (mobil FCP/LCP). Oturum izi varsa
+// (kayıtlı oturum veya URL'de giriş/onay token'ı) önceki davranış aynen korunur.
+const AUTH_STORAGE_KEY = `sb-${projectId}-auth-token`;
+const getSupabase = () => import('./supabase').then((m) => m.supabase);
+const mayHaveSession = () => {
+  try {
+    if (localStorage.getItem(AUTH_STORAGE_KEY)) return true;
+  } catch {
+    return true; // depolama okunamıyorsa güvenli taraf: Supabase'i yükle
+  }
+  return /access_token=|refresh_token=|[?&]code=|error_description=/.test(window.location.hash + window.location.search);
+};
 
 // DEVELOPMENT: Use hardcoded project ID
 // PRODUCTION: Will be overridden by environment variables
@@ -13,6 +26,8 @@ export interface ApiResponse<T = any> {
 // Helper to get auth token
 const getAuthToken = async () => {
   try {
+    if (!mayHaveSession()) return null;
+    const supabase = await getSupabase();
     const { data: { session } } = await supabase.auth.getSession();
     
     if (session?.access_token) {
@@ -91,6 +106,7 @@ export const authAPI = {
 
   signin: async (email: string, password: string) => {
     try {
+      const supabase = await getSupabase();
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw new Error(error.message);
       if (!data.session || !data.user) throw new Error('Login failed - no session created');
@@ -109,6 +125,7 @@ export const authAPI = {
 
   signout: async () => {
     try {
+      const supabase = await getSupabase();
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
     } catch (error: any) {
@@ -118,6 +135,8 @@ export const authAPI = {
 
   getSession: async () => {
     try {
+      if (!mayHaveSession()) return null;
+      const supabase = await getSupabase();
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session) return null;
 

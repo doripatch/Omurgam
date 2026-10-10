@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, X, FileText, Video, HelpCircle, Loader2 } from 'lucide-react';
-import { supabase, TABLES } from '../lib/supabase';
+import { TABLES } from '../lib/tables';
 import { Link } from 'react-router';
 
 interface SearchResult {
@@ -46,6 +46,8 @@ export default function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
     const searchResults: SearchResult[] = [];
 
     try {
+      // Supabase istemcisi yalnız arama yapılınca yüklenir (ana paketten çıkarıldı).
+      const { supabase } = await import('../lib/supabase');
       // Blog araması
       const { data: blogData } = await supabase
         .from(TABLES.BLOG_POSTS)

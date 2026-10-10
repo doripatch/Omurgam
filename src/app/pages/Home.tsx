@@ -3,7 +3,7 @@ import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, 
 import { motion } from 'motion/react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useState, useEffect } from 'react';
-import { supabase, TABLES } from '../lib/supabase';
+import { TABLES } from '../lib/tables';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
 import { faqAPI, medicalTermsAPI, bannersAPI } from '../lib/api';
 import Seo from '../components/Seo';
@@ -146,6 +146,8 @@ export default function Home() {
   const loadAnsweredQuestions = async () => {
     try {
       setIsLoadingQuestions(true);
+      // Supabase istemcisi ana paketten çıkarıldı; ilk çizimden sonra arkadan yüklenir.
+      const { supabase } = await import('../lib/supabase');
       const { data, error } = await supabase
         .from(TABLES.QUESTIONS)
         .select(`
