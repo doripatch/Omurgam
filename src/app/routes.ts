@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import { lazy, type ComponentType } from "react";
 import Root from "./Root";
-import Home from "./pages/Home";
+import HomeV2 from "./pages/HomeV2";
 // Public sayfalar route-bazlı ayrı paketlerde (ana paket küçülür → anasayfa LCP/FCP). Anasayfa ve NotFound ana pakette.
 // İlk açılışta main.tsx, router bu paketi yükleyene kadar render'ı bekletir; prerender edilmiş HTML bu sırada ekranda kalır.
 const page = (load: () => Promise<{ default: ComponentType }>) => ({
@@ -30,7 +30,7 @@ export const router = createBrowserRouter([
     path: "/",
     Component: Root,
     children: [
-      { index: true, Component: Home },
+      { index: true, Component: HomeV2 },
       { path: "videolar", ...page(() => import("./pages/Videos")) },
       // Yeni okunabilir video detay URL'si (slug -> canonical UUID merkezi harita ile çözülür).
       { path: "videolar/:slug", ...page(() => import("./pages/MigratedVideoDetail")) },

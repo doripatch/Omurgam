@@ -1,24 +1,45 @@
 import { useState, useEffect } from 'react';
-import { Search, X, FileText, Video, HelpCircle, Loader2 } from 'lucide-react';
-import { TABLES } from '../lib/tables';
+import { Search, X, FileText, Video, HelpCircle, Loader2, BookOpen, ScanLine, Compass } from 'lucide-react';
 import { trackEvent } from '../lib/analytics';
 import { Link } from 'react-router';
 
 interface SearchResult {
   id: string;
-  type: 'blog' | 'video' | 'question' | 'term';
+  type: IndexType;
   title: string;
   description: string;
   url: string;
   category?: string;
 }
 
+// Site içi arama dizini: build'de scripts/build-search-index.mjs üretir (gerçek içerik: sözlük, yazılar, videolar,
+// MR terimleri, rehberler). Pencere ilk açıldığında bir kez indirilir ve bellekte tutulur.
+type IndexType = 'page' | 'term' | 'mr' | 'blog' | 'video' | 'question';
+interface IndexItem { t: IndexType; title: string; desc: string; url: string; cat?: string; k: string; h?: string }
+let indexPromise: Promise<IndexItem[]> | null = null;
+const loadIndex = () => {
+  if (!indexPromise) {
+    indexPromise = fetch('/search-index.json')
+      .then((r) => (r.ok ? r.json() : []))
+      // Aranacak metin: başlık + açıklama + ek anahtar kelimeler (bir kez normalize edilir).
+      .then((items: IndexItem[]) => items.map((it) => ({ ...it, h: `${normalize(`${it.title} ${it.desc}`)} ${it.k}` })))
+      .catch(() => { indexPromise = null; return []; });
+  }
+  return indexPromise;
+};
+// build-search-index.mjs'teki norm() ile AYNI: Türkçe büyük/küçük harf ve şapka/nokta farkları yok sayılır.
+const normalize = (s: string) => String(s ?? '').replace(/İ/g, 'i').replace(/I/g, 'ı').toLocaleLowerCase('tr-TR').replace(/ı/g, 'i')
+  .normalize('NFKD').replace(/\p{M}/gu, '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+const TYPE_WEIGHT: Record<IndexType, number> = { page: 8, term: 6, blog: 4, video: 3, mr: 2, question: 1 };
+
 interface GlobalSearchProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Açılışta kutuya yazılacak terim (ör. anasayfa arama kutusu). */
+  initialQuery?: string;
 }
 
-export default function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
+export default function GlobalSearch({ isOpen, onClose, initialQuery = '' }: GlobalSearchProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -27,8 +48,10 @@ export default function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
     if (!isOpen) {
       setQuery('');
       setResults([]);
+    } else if (initialQuery) {
+      setQuery(initialQuery);
     }
-  }, [isOpen]);
+  }, [isOpen, initialQuery]);
 
   // Arama hedefi: kullanıcı yazmayı bitirince (1,5 sn) tek etkinlik; harf harf değil.
   useEffect(() => {
@@ -52,94 +75,23 @@ export default function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
 
   const performSearch = async (searchQuery: string) => {
     setIsSearching(true);
-    const searchResults: SearchResult[] = [];
-
     try {
-      // Supabase istemcisi yalnız arama yapılınca yüklenir (ana paketten çıkarıldı).
-      const { supabase } = await import('../lib/supabase');
-      // Blog araması
-      const { data: blogData } = await supabase
-        .from(TABLES.BLOG_POSTS)
-        .select('id, title, excerpt, category')
-        .or(`title.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`)
-        .limit(5);
-
-      if (blogData) {
-        blogData.forEach(post => {
-          searchResults.push({
-            id: post.id,
-            type: 'blog',
-            title: post.title,
-            description: post.excerpt,
-            url: `/blog/${post.id}`,
-            category: post.category
-          });
-        });
-      }
-
-      // Video araması
-      const { data: videoData } = await supabase
-        .from(TABLES.VIDEOS)
-        .select('id, title, description, category')
-        .or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`)
-        .limit(5);
-
-      if (videoData) {
-        videoData.forEach(video => {
-          searchResults.push({
-            id: video.id,
-            type: 'video',
-            title: video.title,
-            description: video.description,
-            url: `/videolar`,
-            category: video.category
-          });
-        });
-      }
-
-      // Soru araması
-      const { data: questionData } = await supabase
-        .from(TABLES.QUESTIONS)
-        .select('id, question, excerpt, category')
-        .or(`question.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%`)
-        .eq('is_answered', true)
-        .limit(5);
-
-      if (questionData) {
-        questionData.forEach(q => {
-          searchResults.push({
-            id: q.id,
-            type: 'question',
-            title: q.question,
-            description: q.excerpt,
-            url: `/soru/${q.id}`,
-            category: q.category
-          });
-        });
-      }
-
-      // MR Terim araması
-      const { data: termData } = await supabase
-        .from(TABLES.MR_TERMS)
-        .select('id, term, definition')
-        .or(`term.ilike.%${searchQuery}%,definition.ilike.%${searchQuery}%`)
-        .limit(5);
-
-      if (termData) {
-        termData.forEach(term => {
-          searchResults.push({
-            id: term.id,
-            type: 'term',
-            title: term.term,
-            description: term.definition.substring(0, 100) + '...',
-            url: `/mr-analiz`
-          });
-        });
-      }
-
-      setResults(searchResults);
+      const index = await loadIndex();
+      const tokens = normalize(searchQuery).split(' ').filter(Boolean);
+      if (!tokens.length) { setResults([]); return; }
+      const nq = tokens.join(' ');
+      const scored: { r: SearchResult; score: number }[] = [];
+      index.forEach((it, i) => {
+        if (!tokens.every((tk) => (it.h as string).includes(tk))) return;
+        const nt = normalize(it.title);
+        const score = (nt === nq ? 100 : nt.startsWith(nq) ? 60 : nt.includes(nq) ? 40 : 10) + TYPE_WEIGHT[it.t];
+        scored.push({ score, r: { id: String(i), type: it.t, title: it.title, description: it.desc, url: it.url, category: it.cat } });
+      });
+      scored.sort((x, y) => y.score - x.score);
+      setResults(scored.slice(0, 20).map((x) => x.r));
     } catch (error) {
       console.error('Arama hatası:', error);
+      setResults([]);
     } finally {
       setIsSearching(false);
     }
@@ -154,7 +106,11 @@ export default function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
       case 'question':
         return <HelpCircle className="w-5 h-5 text-green-500" />;
       case 'term':
-        return <FileText className="w-5 h-5 text-purple-500" />;
+        return <BookOpen className="w-5 h-5 text-purple-500" />;
+      case 'mr':
+        return <ScanLine className="w-5 h-5 text-teal-600" />;
+      case 'page':
+        return <Compass className="w-5 h-5 text-amber-600" />;
       default:
         return <Search className="w-5 h-5 text-gray-500" />;
     }
@@ -169,7 +125,11 @@ export default function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
       case 'question':
         return 'Soru';
       case 'term':
-        return 'Terim';
+        return 'Omurga Sözlüğü';
+      case 'mr':
+        return 'MR Terimi';
+      case 'page':
+        return 'Rehber';
       default:
         return '';
     }
@@ -192,7 +152,7 @@ export default function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
           <Search className="w-5 h-5 text-slate-400" />
           <input
             type="text"
-            placeholder="Blog, video, soru veya terim ara..."
+            placeholder="Terim, yazı, video veya konu ara..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus

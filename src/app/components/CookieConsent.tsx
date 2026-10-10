@@ -63,14 +63,20 @@ export default function CookieConsent() {
             <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
               <Cookie className="w-5 h-5 text-amber-600 dark:text-amber-400" />
             </div>
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Bu sitede; zorunlu çerezlerin yanı sıra, izninize bağlı olarak ziyaret istatistikleri (Google Analytics),
-              gömülü içerikler (YouTube){PIXEL_ENABLED ? ' ve reklamlarımızın ölçümü (Meta Pixel)' : ''} için çerezler kullanıyoruz. Tercihinizi seçebilirsiniz. Detaylar için{' '}
-              <Link to="/gizlilik" className="text-amber-700 dark:text-amber-400 font-semibold hover:underline">
-                Gizlilik &amp; Çerez Politikası
-              </Link>
-              .
-            </p>
+            {/* Metin aynı; iki paragraf: anasayfada çerez bildirimi "en büyük öğe" (LCP) sayılıp ölçümü JS'e bağlamasın. */}
+            <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p>
+                Bu sitede; zorunlu çerezlerin yanı sıra, izninize bağlı olarak ziyaret istatistikleri (Google Analytics),
+                gömülü içerikler (YouTube){PIXEL_ENABLED ? ' ve reklamlarımızın ölçümü (Meta Pixel)' : ''} için çerezler kullanıyoruz.
+              </p>
+              <p>
+                Tercihinizi seçebilirsiniz. Detaylar için{' '}
+                <Link to="/gizlilik" className="text-amber-700 dark:text-amber-400 font-semibold hover:underline">
+                  Gizlilik &amp; Çerez Politikası
+                </Link>
+                .
+              </p>
+            </div>
           </div>
           {!manage && (
             <div className="flex flex-wrap gap-2 w-full sm:w-auto flex-shrink-0">
