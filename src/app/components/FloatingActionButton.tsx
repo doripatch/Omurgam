@@ -68,6 +68,8 @@ export default function FloatingActionButton() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? 'Hızlı menüyü kapat' : 'Hızlı menüyü aç'}
+        aria-expanded={isOpen}
         className="w-16 h-16 bg-gradient-to-r from-amber-600 to-orange-600 rounded-full shadow-2xl shadow-amber-500/50 flex items-center justify-center hover:shadow-3xl transition-shadow"
       >
         <motion.div

@@ -66,9 +66,11 @@ function BannerCarousel({ items }: { items: any[] }) {
           <button onClick={() => go(i + 1)} aria-label="Sonraki" className="absolute right-3 top-[calc(50%-1.25rem)] w-10 h-10 rounded-full bg-white/85 hover:bg-white shadow-md flex items-center justify-center text-slate-800">
             <ChevronRight className="w-5 h-5" />
           </button>
-          <div className="flex justify-center gap-2 mt-4">
+          <div className="flex justify-center mt-2">
             {items.map((_, idx) => (
-              <button key={idx} onClick={() => go(idx)} aria-label={`${idx + 1}. banner`} className={`h-2 rounded-full transition-all ${idx === i ? 'w-6 bg-amber-600' : 'w-2 bg-slate-300 dark:bg-slate-600'}`} />
+              <button key={idx} onClick={() => go(idx)} aria-label={`${idx + 1}. banner`} className="p-2">
+                <span className={`block h-2 rounded-full transition-all ${idx === i ? 'w-6 bg-amber-600' : 'w-2 bg-slate-300 dark:bg-slate-600'}`} />
+              </button>
             ))}
           </div>
         </>
@@ -112,7 +114,12 @@ export default function Home() {
     medicalTermsAPI.getAll()
       .then((d) => setMyths((d.terms || []).filter((t: any) => t.mistakeWrong && t.mistakeRight).slice(0, 3)))
       .catch(() => {});
-    bannersAPI.getAll().then((d) => setBanners(d.banners || [])).catch(() => {}).finally(() => setBannersLoading(false));
+    // index.html'deki erken istek (LCP): varsa onu kullan, yoksa normal API çağrısı.
+    const early = (window as any).__omBanners;
+    (window as any).__omBanners = undefined;
+    Promise.resolve(early)
+      .then((d: any) => (d && Array.isArray(d.banners) ? d : bannersAPI.getAll()))
+      .then((d: any) => setBanners(d.banners || [])).catch(() => {}).finally(() => setBannersLoading(false));
   }, []);
 
   const renderBanner = (b: any) => {
@@ -512,7 +519,7 @@ export default function Home() {
               >
                 <div className="absolute inset-0">
                   <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200"
+                    src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&q=70&auto=format"
                     alt="Omurga Sağlığı Videoları"
                     className="w-full h-full object-cover opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700"
                     loading="lazy"
@@ -712,7 +719,7 @@ export default function Home() {
                         <Heart className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h4 className="text-lg font-black text-slate-900 mb-1">{c.whyCardName}</h4>
+                        <h3 className="text-lg font-black text-slate-900 mb-1">{c.whyCardName}</h3>
                         <p className="text-sm text-slate-600">{c.whyCardRole}</p>
                       </div>
                     </div>

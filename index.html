@@ -72,6 +72,26 @@
       ]
     }
     </script>
+    <!-- LCP: anasayfa banner listesini JS paketini beklemeden iste ve ilk banner görselini önceden yükle.
+         Home.tsx bu isteği (window.__omBanners) yeniden kullanır; başka sayfalarda çalışmaz. -->
+    <script>
+      (function () {
+        if (location.pathname !== '/') return;
+        window.__omBanners = fetch('https://nfgtnnypcfcnjnezwhbe.supabase.co/functions/v1/server/banners', {
+          headers: { Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mZ3RubnlwY2ZjbmpuZXp3aGJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MTQ0NTIsImV4cCI6MjA4OTA5MDQ1Mn0.hQoSGM9Dh-CAavLWAfUnXY278egV0siStejIQmdVSPE', 'Content-Type': 'application/json' }
+        }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+          try {
+            var b = d && d.banners && d.banners[0];
+            if (b && b.imageUrl) {
+              var l = document.createElement('link');
+              l.rel = 'preload'; l.as = 'image'; l.href = b.imageUrl; l.setAttribute('fetchpriority', 'high');
+              document.head.appendChild(l);
+            }
+          } catch (e) {}
+          return d;
+        }).catch(function () { return null; });
+      })();
+    </script>
   </head>
 
   <body>

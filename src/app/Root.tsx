@@ -129,7 +129,7 @@ export default function Root() {
           <div className="flex justify-between items-center h-[4.5rem] gap-2">
             {/* Logo */}
             <Link to="/" className="flex items-center group flex-shrink-0">
-              <img src="/assets/logo-full.png" alt="Omurgam" className="h-14 md:h-16 w-auto object-contain group-hover:scale-105 transition-transform" />
+              <img src="/assets/logo-header.webp" alt="Omurgam" width={190} height={192} className="h-14 md:h-16 w-auto object-contain group-hover:scale-105 transition-transform" />
             </Link>
 
             {/* Yüzen hap menü (ortada) */}
@@ -304,6 +304,8 @@ export default function Root() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+              aria-expanded={mobileMenuOpen}
               className="xl:hidden p-2 text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-800 rounded-xl transition-colors"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -597,7 +599,7 @@ export default function Root() {
                 href="https://www.dkuakademi.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-amber-300 hover:underline font-medium"
+                className="text-amber-200 hover:underline font-medium"
               >
                 DKU Akademi
               </a>{' '}

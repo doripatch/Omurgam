@@ -40,7 +40,8 @@ const app = new Hono().basePath("/server");
 app.use('*', logger(console.log));
 app.use('*', cors({
   origin: '*',
-  allowHeaders: ['*'],
+  // Joker '*' Authorization başlığını kapsamıyor (tarayıcı uyarısı / Lighthouse "deprecated API"); başlıklar açıkça listelendi.
+  allowHeaders: ['authorization', 'apikey', 'content-type', 'x-client-info', 'x-user-token', 'accept', 'cache-control', 'x-requested-with'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   exposeHeaders: ['*']
 }));
