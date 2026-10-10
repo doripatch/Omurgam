@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router';
+import { LazyMotion } from 'motion/react';
 import { router } from './routes';
 import { Toaster } from './components/ui/sonner';
 import { useAuthStore } from './store/authStore';
+import { mayHaveSession } from './lib/api';
+
+const loadMotionFeatures = () => import('./lib/motionFeatures').then((m) => m.default);
 
 export default function App() {
   const checkSession = useAuthStore((state) => state.checkSession);
-  const [isInitialized, setIsInitialized] = useState(false);
+  // Oturum izi yoksa (anonim ziyaretçi) yükleme ekranı gösterilmez: sayfa ilk karede çizilir (mobil FCP/LCP) ve
+  // prerender edilmiş içerik döndürücüyle yer değiştirmez. Oturum izi varsa eski davranış: kontrol bitene kadar bekle.
+  const [isInitialized, setIsInitialized] = useState(() => !mayHaveSession());
 
   // Initialize app: check Supabase session
   useEffect(() => {
@@ -49,9 +55,9 @@ export default function App() {
   }
 
   return (
-    <>
+    <LazyMotion features={loadMotionFeatures}>
       <Toaster position="top-center" />
       <RouterProvider router={router} />
-    </>
+    </LazyMotion>
   );
 }

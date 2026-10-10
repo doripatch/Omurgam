@@ -5,7 +5,7 @@ import { projectId, publicAnonKey } from '/utils/supabase/info';
 // (kayıtlı oturum veya URL'de giriş/onay token'ı) önceki davranış aynen korunur.
 const AUTH_STORAGE_KEY = `sb-${projectId}-auth-token`;
 const getSupabase = () => import('./supabase').then((m) => m.supabase);
-const mayHaveSession = () => {
+export const mayHaveSession = () => {
   try {
     if (localStorage.getItem(AUTH_STORAGE_KEY)) return true;
   } catch {

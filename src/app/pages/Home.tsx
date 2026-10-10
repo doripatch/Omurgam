@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { ArrowRight, Play, Search, Heart, Sparkles, Check, Star, MessageCircle, ThumbsUp, Clock, HelpCircle, Plus, Minus, BookOpen, XCircle, CheckCircle2, Instagram, Youtube, Linkedin, Facebook, Twitter, ChevronLeft, ChevronRight, BedDouble } from 'lucide-react';
-import { motion } from 'motion/react';
+import * as m from 'motion/react-m';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useState, useEffect } from 'react';
 import { TABLES } from '../lib/tables';
@@ -223,7 +223,7 @@ export default function Home() {
         </div>
 
         <div className="relative max-w-7xl mx-auto w-full">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -244,7 +244,7 @@ export default function Home() {
               <span className="block text-slate-900 dark:text-white">{c.title}</span>
             </h1>
 
-            <motion.p
+            <m.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.5 }}
@@ -253,9 +253,9 @@ export default function Home() {
               Türkiye'nin{' '}
               <span className="bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">Omurga Sağlığı</span>{' '}
               Platformu
-            </motion.p>
+            </m.p>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
@@ -282,8 +282,8 @@ export default function Home() {
                   <span>{c.ctaGlossary}</span>
                 </div>
               </Link>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         </div>
 
       </section>
@@ -324,13 +324,13 @@ export default function Home() {
       <div className="flex justify-center pt-2 pb-10 bg-stone-50 dark:bg-slate-900">
         <div onClick={scrollDown} className="hidden sm:flex cursor-pointer flex-col items-center gap-2 text-slate-500 hover:text-amber-600 transition-colors">
           <span className="text-xs uppercase tracking-wider font-semibold">{c.scrollText}</span>
-          <motion.div
+          <m.div
             animate={{ y: [0, 8, 0] }}
             transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
             className="w-6 h-10 border-2 border-slate-300 rounded-full flex items-start justify-center p-2"
           >
             <div className="w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
-          </motion.div>
+          </m.div>
         </div>
       </div>
 
@@ -339,7 +339,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {(c.stats || []).map((stat, i) => (
-              <motion.div
+              <m.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -349,7 +349,7 @@ export default function Home() {
               >
                 <div className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-2">{stat.number}</div>
                 <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">{stat.label}</div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </div>
@@ -389,7 +389,7 @@ export default function Home() {
       {/* FORUM / COMMUNITY QUESTIONS */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="max-w-7xl mx-auto">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -412,7 +412,7 @@ export default function Home() {
               <MessageCircle className="w-5 h-5" />
               <span>{c.forumCta}</span>
             </Link>
-          </motion.div>
+          </m.div>
 
           <div className="grid md:grid-cols-2 gap-6">
             {isLoadingQuestions ? (
@@ -421,7 +421,7 @@ export default function Home() {
               </div>
             ) : (
               questions.map((question, index) => (
-                <motion.div
+                <m.div
                   key={question.id}
                   initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -475,12 +475,12 @@ export default function Home() {
                       </div>
                     )}
                   </div>
-                </motion.div>
+                </m.div>
               ))
             )}
           </div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -494,14 +494,14 @@ export default function Home() {
               <span>{c.forumViewAll}</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
       {/* BENTO GRID - Features */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
         <div className="max-w-7xl mx-auto">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -514,10 +514,10 @@ export default function Home() {
             <p className="text-xl text-slate-600 dark:text-slate-400 font-light max-w-2xl">
               {c.featuresDesc}
             </p>
-          </motion.div>
+          </m.div>
 
           <div className="grid grid-cols-1 md:grid-cols-6 gap-6 auto-rows-[280px]">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -554,9 +554,9 @@ export default function Home() {
                   </div>
                 </div>
               </Link>
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -580,9 +580,9 @@ export default function Home() {
                   <p className="text-slate-700 dark:text-slate-300 font-medium">{c.cardGlossaryDesc}</p>
                 </div>
               </Link>
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -606,9 +606,9 @@ export default function Home() {
                   <p className="text-slate-700 dark:text-slate-400 font-medium">{c.cardAskDesc}</p>
                 </div>
               </Link>
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -634,9 +634,9 @@ export default function Home() {
                   </div>
                 </div>
               </Link>
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -661,7 +661,7 @@ export default function Home() {
                   </div>
                 </div>
               </Link>
-            </motion.div>
+            </m.div>
           </div>
         </div>
       </section>
@@ -670,7 +670,7 @@ export default function Home() {
       <section className="py-32 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -690,7 +690,7 @@ export default function Home() {
               </p>
               <div className="space-y-4">
                 {(c.whyItems || []).map((item, i) => (
-                  <motion.div
+                  <m.div
                     key={i}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -702,12 +702,12 @@ export default function Home() {
                       <Check className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-slate-700 dark:text-slate-300 font-medium">{item}</span>
-                  </motion.div>
+                  </m.div>
                 ))}
               </div>
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, x: 40 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -737,7 +737,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           </div>
         </div>
       </section>
@@ -750,7 +750,7 @@ export default function Home() {
         </div>
 
         <div className="relative max-w-4xl mx-auto text-center">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -779,13 +779,13 @@ export default function Home() {
                 {c.ctaSecondary}
               </Link>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
       {/* HAKKIMIZDA (özet) */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -803,12 +803,12 @@ export default function Home() {
           >
             {c.aboutCta} <ArrowRight className="w-5 h-5" />
           </Link>
-        </motion.div>
+        </m.div>
       </section>
 
       {/* SÖZLÜK tanıtımı */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-800">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -835,14 +835,14 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       </section>
 
       {/* DOĞRU BİLİNEN YANLIŞLAR */}
       {myths.length > 0 && (
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-stone-50 dark:bg-slate-900">
           <div className="max-w-5xl mx-auto">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -851,7 +851,7 @@ export default function Home() {
             >
               <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-3">{c.mythsTitle}</h2>
               <p className="text-lg text-slate-600 dark:text-slate-400">{c.mythsDesc}</p>
-            </motion.div>
+            </m.div>
             <div className="grid md:grid-cols-3 gap-5">
               {myths.map((m) => (
                 <div key={m.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6">
@@ -917,7 +917,7 @@ export default function Home() {
       {faqs.length > 0 && (
         <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-800">
           <div className="max-w-3xl mx-auto">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -934,7 +934,7 @@ export default function Home() {
               <p className="text-lg text-slate-600 dark:text-slate-400">
                 {settings.faq?.subtitle || 'Platform ve omurga sağlığı hakkında sık sorulan sorular'}
               </p>
-            </motion.div>
+            </m.div>
 
             <div className="space-y-3">
               {faqs.slice(0, 8).map((f) => {
