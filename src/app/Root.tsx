@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 export default function Root() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchInitial, setSearchInitial] = useState('');
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -104,6 +105,16 @@ export default function Root() {
       toast.error('Çıkış yaparken hata oluştu');
     }
   };
+
+  // Anasayfa arama kutusu / Google site araması (/?q=) arama penceresini terimle açar.
+  useEffect(() => {
+    const open = (e: Event) => {
+      setSearchInitial(((e as CustomEvent).detail?.query as string) || '');
+      setSearchOpen(true);
+    };
+    window.addEventListener('om:open-search', open);
+    return () => window.removeEventListener('om:open-search', open);
+  }, []);
 
   // ESC tuşu ile arama modalını kapat
   useEffect(() => {
@@ -418,7 +429,7 @@ export default function Root() {
       <CookieConsent />
 
       {/* Global Search Modal */}
-      <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      <GlobalSearch isOpen={searchOpen} initialQuery={searchInitial} onClose={() => { setSearchOpen(false); setSearchInitial(''); }} />
 
       {/* Modern Footer */}
       <footer className="relative bg-gradient-to-br from-slate-900 via-amber-950 to-slate-900 text-white pt-16 pb-8 px-4 sm:px-6 lg:px-8 mt-auto overflow-hidden">
@@ -433,7 +444,7 @@ export default function Root() {
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg overflow-hidden p-1">
-                  <img src="/assets/logo.png" alt="Omurgam" className="w-full h-full object-contain" />
+                  <img src="/assets/logo-footer.webp" alt="Omurgam" width={160} height={160} loading="lazy" decoding="async" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">{settings?.siteName || 'Omurgam'}</h3>
