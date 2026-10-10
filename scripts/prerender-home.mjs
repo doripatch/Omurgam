@@ -101,7 +101,7 @@ export const render = (data) => renderToString(<StaticRouter location="/"><HomeV
 
 const data = await buildData();
 const body = await renderHome(data);
-if (!body.includes('Omurganız hakkında')) die('SSR çıktısında H1 yok');
+if (!body.includes('Omurga Sağlığı Platformu')) die('SSR çıktısında H1 yok');
 
 // Root kabuğu: aynı sınıflar (Root.tsx) + yalnız logo içeren üst bar (73px; tam menü React ile gelir, yükseklik aynı).
 const shell = '<div class="min-h-screen flex flex-col bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">'

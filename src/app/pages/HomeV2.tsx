@@ -129,7 +129,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
           </Link>
           <h1 className="mt-6 text-[2.5rem] md:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.1]">
             {/* Tek blok: LCP ölçümünde başlık tek öğe sayılır (iki satır ayrı blok olursa çerez bildirimi LCP olur). */}
-            Omurganız hakkında<br /><span className="text-orange-600">ne merak ediyorsanız</span>
+            Omurgam<br /><span className="text-orange-600">Türkiye&apos;nin Omurga Sağlığı Platformu</span>
           </h1>
           <p className="mt-5 text-lg md:text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
             Bir terim, bir ağrı ya da bir konu: aratın, sade Türkçe ve bilimsel açıklamasını bulun.
