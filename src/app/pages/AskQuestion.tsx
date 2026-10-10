@@ -1,6 +1,7 @@
 import { MessageSquare } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { trackEvent } from '../lib/analytics';
 import { useNavigate } from 'react-router';
 import { questionsAPI } from '../lib/api';
 import { useAuthStore } from '../store/authStore';
@@ -42,6 +43,7 @@ export default function AskQuestion() {
         userEmail: user.email,
       });
 
+      trackEvent('question_submit', { question_category: String(formData.category || 'diger').slice(0, 40) });
       toast.success('Sorunuz başarıyla gönderildi! Admin onayından sonra yayınlanacaktır.');
       setFormData({ category: '', question: '', excerpt: '' });
       

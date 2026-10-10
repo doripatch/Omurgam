@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CalendarCheck, User, Phone, Mail, FileText, Clock, Send, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import { trackEvent } from '../lib/analytics';
 import { appointmentsAPI } from '../lib/api';
 import Seo from '../components/Seo';
 
@@ -28,6 +29,7 @@ export default function Appointment() {
     setIsSubmitting(true);
     try {
       await appointmentsAPI.send(formData);
+      trackEvent('appointment_request');
       toast.success('Talebiniz alındı! En kısa sürede sizinle iletişime geçeceğiz.');
       setFormData({ name: '', phone: '', email: '', subject: '', preferredDate: '', message: '' });
     } catch (error: any) {

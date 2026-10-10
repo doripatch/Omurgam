@@ -1,6 +1,7 @@
 import { Mail, Phone, MapPin, Send, Clock, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { trackEvent } from '../lib/analytics';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
 import { contactAPI } from '../lib/api';
 import Seo from '../components/Seo';
@@ -23,6 +24,7 @@ export default function Contact() {
 
     try {
       await contactAPI.send(formData);
+      trackEvent('contact_submit');
       toast.success(t.successToast);
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error: any) {

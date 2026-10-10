@@ -114,3 +114,15 @@ test('pagehide flushes a pending view once and respects revocation', () => {
   t.handlers.pagehide(); t.flush();
   assert.equal(t.views().length, 1);
 });
+test('goal events: nothing without consent, sent after consent, revoked stops', () => {
+  const t = setup();
+  const goals = () => t.calls.filter(c => c[0] === 'event' && c[1] === 'appointment_request');
+  t.api.trackEvent('appointment_request');
+  assert.equal(goals().length, 0);
+  t.api.grantAnalyticsConsent();
+  t.api.trackEvent('appointment_request');
+  assert.equal(goals().length, 1);
+  t.api.revokeAnalyticsConsent();
+  t.api.trackEvent('appointment_request');
+  assert.equal(goals().length, 1);
+});

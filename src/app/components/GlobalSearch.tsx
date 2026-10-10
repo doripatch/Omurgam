@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, X, FileText, Video, HelpCircle, Loader2 } from 'lucide-react';
 import { TABLES } from '../lib/tables';
+import { trackEvent } from '../lib/analytics';
 import { Link } from 'react-router';
 
 interface SearchResult {
@@ -28,6 +29,14 @@ export default function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
       setResults([]);
     }
   }, [isOpen]);
+
+  // Arama hedefi: kullanıcı yazmayı bitirince (1,5 sn) tek etkinlik; harf harf değil.
+  useEffect(() => {
+    const term = query.trim();
+    if (term.length < 3) return;
+    const t = setTimeout(() => trackEvent('search', { search_term: term.slice(0, 60).toLocaleLowerCase('tr-TR') }), 1500);
+    return () => clearTimeout(t);
+  }, [query]);
 
   useEffect(() => {
     const searchTimeout = setTimeout(() => {

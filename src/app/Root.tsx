@@ -5,7 +5,7 @@ import DarkModeToggle from './components/DarkModeToggle';
 import FloatingActionButton from './components/FloatingActionButton';
 import GlobalSearch from './components/GlobalSearch';
 import CookieConsent from './components/CookieConsent';
-import { trackPageview } from './lib/analytics';
+import { trackPageview, trackEvent } from './lib/analytics';
 import { trackMetaPageview } from './lib/metaPixel';
 import { newsletterAPI } from './lib/api';
 import { openCookiePreferences } from './lib/consent';
@@ -55,6 +55,7 @@ export default function Root() {
     setNewsletterLoading(true);
     try {
       const res: any = await newsletterAPI.subscribe(newsletterEmail.trim());
+      if (!res?.alreadySubscribed) trackEvent('newsletter_signup');
       toast.success(res?.alreadySubscribed ? 'Zaten abonesiniz, teşekkürler!' : 'Bültene abone oldunuz! 🎉');
       setNewsletterEmail('');
     } catch (error: any) {

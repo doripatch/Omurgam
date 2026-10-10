@@ -118,6 +118,14 @@ export function trackPageview(path: string, key: string) {
   schedulePageview();
 }
 
+// Hedef etkinlikleri (GA4 "önemli etkinlik" adayları). Yalnız analitik onayı verilmişse gönderilir.
+// KİŞİSEL VERİ GÖNDERİLMEZ: ad, telefon, e-posta, mesaj metni asla parametre olarak eklenmez.
+export type GoalEvent = 'search' | 'appointment_request' | 'question_submit' | 'newsletter_signup' | 'contact_submit';
+export function trackEvent(name: GoalEvent, params: Record<string, string | number> = {}) {
+  if (typeof window === 'undefined' || !analyticsAllowed || !gaScriptLoaded) return;
+  ensureGtag()('event', name, params);
+}
+
 export function isGALoaded() {
   return gaScriptLoaded;
 }
