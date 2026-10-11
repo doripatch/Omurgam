@@ -58,6 +58,31 @@ async function buildData() {
   const myths = (termsRes.terms || []).filter((t) => t.mistakeWrong && t.mistakeRight).slice(0, 21)
     .map((t) => ({ term: clean(t.term), wrong: cut(t.mistakeWrong, 160), right: cut(t.mistakeRight, 180) }));
 
+  // Omurga haritası: bölge tanımı ve ilgili terimler Omurga Sözlüğü'nden aynen; yazılar blogdan (başlık/kategori eşleşmesi,
+  // okunmaya göre ilk 3). Yazısı az olan bölgelerde (sırt, sakrum, koksiks) liste gösterilmez, sözlük/rehber bağlantısı kalır.
+  const gBySlug = new Map(glossary.map((t) => [t.slug, t]));
+  const normT = (s) => clean(s).toLocaleLowerCase('tr-TR');
+  const gByTerm = new Map(glossary.map((t) => [normT(t.term), t]));
+  const lower = (s) => clean(s).toLocaleLowerCase('tr-TR');
+  const REGIONS = [
+    { key: 'boyun', label: 'Boyun', slug: 'servikal-omurga', cats: ['Boyun Fıtığı', 'Boyun Ağrısı'], rx: /boyun|servikal/, guide: { label: 'Boyun fıtığı rehberi', to: '/boyun-fitigi' } },
+    { key: 'sirt', label: 'Sırt', slug: 'torakal-omurga', cats: [], rx: null, guide: { label: 'Skolyoz rehberi', to: '/skolyoz' } },
+    { key: 'bel', label: 'Bel', slug: 'lomber-omurga', cats: ['Bel Fıtığı', 'Bel Ağrısı'], rx: /(^|\s)bel(\s|$)|lomber|siyatik/, guide: { label: 'Bel fıtığı rehberi', to: '/bel-fitigi' } },
+    { key: 'sakrum', label: 'Sakrum', slug: 'sakrum', cats: [], rx: null, guide: { label: 'Sakralizasyon nedir?', to: '/omurga-sozlugu/sakralizasyon/' } },
+    { key: 'koksiks', label: 'Kuyruk sokumu', slug: 'koksiks', cats: [], rx: null },
+  ];
+  const regions = REGIONS.map((r) => {
+    const g = gBySlug.get(r.slug);
+    if (!g || !g.definition) die(`omurga haritası: sözlükte ${r.slug} yok`);
+    const posts = byViews
+      .filter((p) => r.cats.includes(clean(p.category)) || (r.rx && r.rx.test(lower(p.title))))
+      .slice(0, 3)
+      .map((p) => ({ title: clean(p.title), url: `${urlMap.get(p.id).newUrl}/` }));
+    const related = String(g.relatedTerms || '').split('·').map((t) => gByTerm.get(normT(t)))
+      .filter((t) => t && t.slug && t.slug !== r.slug).slice(0, 3).map((t) => ({ term: clean(t.term), slug: t.slug }));
+    return { key: r.key, label: r.label, term: clean(g.term), slug: r.slug, def: clean(g.definition), posts, ...(r.guide ? { guide: r.guide } : {}), related };
+  });
+
   const data = {
     generatedAt: new Date().toISOString(),
     stats: {
@@ -66,12 +91,13 @@ async function buildData() {
       terms: glossary.length,
       views: posts.reduce((s, p) => s + (p.views || 0), 0),
     },
-    mostRead, videos, terms, myths,
+    mostRead, videos, terms, myths, regions,
   };
   if (mostRead.length < 3) die(`en çok okunan yazı az: ${mostRead.length}`);
   if (videos.length < 3) die(`video az: ${videos.length}`);
   if (terms.length < 20) die(`terim havuzu az: ${terms.length}`);
   if (!myths.length) die('mit yok');
+  for (const k of ['boyun', 'bel']) if (regions.find((r) => r.key === k).posts.length < 3) die(`omurga haritası: ${k} için yazı az`);
   return data;
 }
 
@@ -102,6 +128,7 @@ export const render = (data) => renderToString(<StaticRouter location="/"><HomeV
 const data = await buildData();
 const body = await renderHome(data);
 if (!body.includes('Omurga Sağlığı Platformu')) die('SSR çıktısında H1 yok');
+if (!body.includes('Omurganızı keşfedin')) die('SSR çıktısında omurga haritası yok');
 
 // Root kabuğu: aynı sınıflar (Root.tsx) + yalnız logo içeren üst bar (73px; tam menü React ile gelir, yükseklik aynı).
 const shell = '<div class="min-h-screen flex flex-col bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">'
