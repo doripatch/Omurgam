@@ -8,6 +8,7 @@ import { Link, useLocation } from 'react-router';
 import { Search, ArrowRight, Flame, PlayCircle, BookOpen, MessageCircle, Zap, BedDouble, Heart, Stethoscope, Star, Target, Users, CalendarCheck, CheckCircle2, XCircle } from 'lucide-react';
 import Seo from '../components/Seo';
 import { TABLES } from '../lib/tables';
+import LearnButton from '../components/LearnButton';
 
 export interface HomeData {
   generatedAt: string;
@@ -155,6 +156,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
               </Link>
             ))}
           </div>
+          <LearnButton />
         </div>
       </section>
 
