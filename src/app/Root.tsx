@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation, useNavigate } from 'react-router';
+import { Outlet, Link, useLocation, useNavigate, ScrollRestoration } from 'react-router';
 import { Heart, Menu, X, User, LogOut, LayoutDashboard, Facebook, Twitter, Instagram, Youtube, Linkedin, Search, Bell, ChevronDown } from 'lucide-react';
 import { useState, useEffect, Suspense } from 'react';
 import DarkModeToggle from './components/DarkModeToggle';
@@ -420,6 +420,8 @@ export default function Root() {
       <main className="flex-1">
         <Suspense fallback={<div className="flex items-center justify-center py-24"><div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" /></div>}>
           <Outlet />
+          {/* Yeni sayfaya geçişte en üstten başla; geri/ileride önceki konuma dön; #bağlantıda o bölüme git. */}
+          <ScrollRestoration />
         </Suspense>
       </main>
 
