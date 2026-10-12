@@ -105,6 +105,16 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
   const term = data && data.terms.length ? data.terms[((day % data.terms.length) + data.terms.length) % data.terms.length] : null;
   const myth = data && data.myths.length ? data.myths[((day % data.myths.length) + data.myths.length) % data.myths.length] : null;
 
+  // Günün terimi kartı: geniş ekranda başlığın altındaki boşluğu doldurur (sol sütun), dar ekranda yan kartlarda.
+  const termCard = term ? (
+    <section className="rounded-3xl p-6 bg-gradient-to-br from-slate-900 to-amber-950 text-white min-h-[13rem] text-left">
+      <h2 className="text-xs font-bold uppercase tracking-wider text-amber-300">Günün terimi</h2>
+      <p className="mt-2 text-xl font-black">{term.term} nedir?</p>
+      <p className="mt-2 text-slate-200 text-sm leading-relaxed">{term.def}</p>
+      <Link to={`/omurga-sozlugu/${term.slug}/`} className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-amber-300 hover:text-amber-200">Devamını oku <ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
+    </section>
+  ) : null;
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
@@ -128,9 +138,10 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
       />
 
       {/* ÜST KISIM: geniş ekranda (xl+) solda başlık + arama, sağda omurga haritası; dar ekranda alt alta. Kenar boşluğu yok (akışkan genişlik). */}
-      <div className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 xl:grid xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:gap-12 xl:items-center xl:py-10">
+      <div className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 xl:grid xl:grid-cols-12 xl:gap-10 xl:items-start xl:py-10">
+      {/* Izgara: üst satır 5|7 (başlık | harita), alt satır da 5|7 (kartlar | listeler) → sütun kenarları alt alta hizalı. */}
       {/* HERO + ARAMA */}
-      <section className="pt-6 pb-8 md:pt-10 md:pb-10 xl:py-0 text-center xl:text-left">
+      <section className="pt-6 pb-8 md:pt-10 md:pb-10 xl:pb-0 xl:pt-8 xl:col-span-5 text-center xl:text-left">
         <div className="max-w-3xl mx-auto xl:mx-0">
           {/* Güven şeridi: editör rozeti + rakamlar tek satırda (ayrı sayaç bölümü yerine). */}
           <div className="flex flex-wrap items-center justify-center xl:justify-start gap-x-3 gap-y-2">
@@ -173,6 +184,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
             ))}
           </div>
           <LearnButton />
+          {termCard && <div className="hidden xl:block mt-8 [&>section]:min-h-0">{termCard}</div>}
         </div>
       </section>
 
@@ -181,8 +193,8 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
       </div>
 
       {/* PANO */}
-      <div className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 py-10 grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-8">
+      <div className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 py-10 grid gap-8 lg:grid-cols-3 xl:grid-cols-12 xl:gap-10">
+        <div className="lg:col-span-2 xl:col-span-7 space-y-8">
           {data && data.mostRead.length > 0 && (
             <section>
               <div className="flex items-end justify-between gap-3 mb-4">
@@ -243,17 +255,10 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
           )}
         </div>
 
-        <aside className="space-y-6">
-          {term && (
-            <section className="rounded-3xl p-6 bg-gradient-to-br from-slate-900 to-amber-950 text-white min-h-[13rem]">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-amber-300">Günün terimi</h2>
-              <p className="mt-2 text-xl font-black">{term.term} nedir?</p>
-              <p className="mt-2 text-slate-200 text-sm leading-relaxed">{term.def}</p>
-              <Link to={`/omurga-sozlugu/${term.slug}/`} className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-amber-300 hover:text-amber-200">Devamını oku <ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
-            </section>
-          )}
+        <aside className="space-y-6 xl:col-span-5 xl:order-first">
+          {term && <div className="xl:hidden">{termCard}</div>}
 
-          <section className="rounded-3xl p-6 border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 min-h-[14rem]">
+          <section className={`rounded-3xl p-6 border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 ${questions === null || questions.length > 0 ? 'min-h-[14rem]' : ''}`}>
             <h2 className="font-black text-slate-900 dark:text-white flex items-center gap-2"><MessageCircle className="w-5 h-5 text-orange-600" aria-hidden="true" /> Son cevaplanan sorular</h2>
             {questions === null ? (
               <div className="mt-4 space-y-3" aria-hidden="true">

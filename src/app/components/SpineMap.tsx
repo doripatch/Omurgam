@@ -101,7 +101,7 @@ export default function SpineMap({ regions }: { regions: SpineRegion[] }) {
     return (
       <svg
         viewBox={compact ? '122 0 100 522' : '-44 0 274 522'}
-        className={compact ? 'sm:hidden w-full h-auto select-none' : 'hidden sm:block w-full max-w-[15rem] mx-auto h-auto select-none transition-transform duration-300 ease-out'}
+        className={compact ? 'sm:hidden w-full h-auto select-none' : 'hidden sm:block w-full max-w-[15rem] xl:max-w-[17rem] mx-auto h-auto select-none transition-transform duration-300 ease-out'}
         style={compact ? undefined : { transform: `perspective(700px) rotateY(${tilt[0]}deg) rotateX(${tilt[1]}deg)` }}
         onMouseMove={compact ? undefined : onMove}
         onMouseLeave={() => { setHover(null); setTilt([0, 0]); }}
@@ -178,7 +178,7 @@ export default function SpineMap({ regions }: { regions: SpineRegion[] }) {
   };
 
   return (
-    <section aria-labelledby="spine-map-title" className="pt-2 xl:pt-0">
+    <section aria-labelledby="spine-map-title" className="pt-2 xl:pt-0 xl:col-span-7">
       <div className="rounded-3xl border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 p-5 md:p-8">
         <h2 id="spine-map-title" className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Omurganızı keşfedin</h2>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Bir bölgeye dokunun ya da üzerine gelin.</p>
@@ -199,7 +199,7 @@ export default function SpineMap({ regions }: { regions: SpineRegion[] }) {
           ))}
         </div>
 
-        <div className="mt-6 grid gap-4 sm:gap-6 grid-cols-[5rem_minmax(0,1fr)] sm:grid-cols-[minmax(0,15rem)_1fr] items-start">
+        <div className="mt-6 grid gap-4 sm:gap-6 grid-cols-[5rem_minmax(0,1fr)] sm:grid-cols-[minmax(0,15rem)_1fr] xl:grid-cols-[minmax(0,17rem)_1fr] items-start">
           {/* Telefonda etiketsiz dar çizim (etiketler yukarıdaki düğmelerde), geniş ekranda etiketli. */}
           {renderSvg(true)}
           {renderSvg(false)}
