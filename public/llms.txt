@@ -8,13 +8,16 @@
 - Yaklaşım: kanıta dayalı sağlık; uluslararası klinik rehberler, sistematik derlemeler ve hakemli yayınlar temel alınır.
 
 ## Ana Bölümler
-- [Omurgam Anlatıyor — bilgilendirme videoları](https://omurgam.com/videolar)
-- [Omurgam Ne Diyor? — omurga hakkında halka yönelik yazılar](https://omurgam.com/omurgam-ne-diyor)
+- [Omurgam Anlatıyor — bilgilendirme videoları](https://omurgam.com/videolar/)
+- [Omurgam Ne Diyor? — omurga hakkında halka yönelik yazılar](https://omurgam.com/omurgam-ne-diyor/)
 - [Sizden Gelenler — soru & cevap](https://omurgam.com/forum)
-- [Sağlıklı Yaşam — genel sağlık yazıları](https://omurgam.com/saglikli-yasam)
-- [Klinisyenler Buraya — meslektaşlara yönelik klinik değerlendirmeler](https://omurgam.com/klinisyenler)
+- [Sağlıklı Yaşam — genel sağlık yazıları](https://omurgam.com/saglikli-yasam/)
+- [Klinisyenler Buraya — meslektaşlara yönelik klinik değerlendirmeler](https://omurgam.com/klinisyenler/)
 - [Sağlık Sözlüğü — tıbbi terimlerin sade açıklamaları](https://omurgam.com/saglik-sozlugu)
+- [Omurga Sözlüğü — omurga ve MR terimlerinin sade açıklamaları, 188 terim](https://omurgam.com/omurga-sozlugu/)
 - [MR Terim Sözlüğü — MR raporu terimleri](https://omurgam.com/mr-analiz)
+- [Sıkça Sorulan Sorular — bel, boyun, MR raporu, duruş](https://omurgam.com/sorular)
+- [Yatak & Yastık Rehberi](https://omurgam.com/yatak-yastik-rehberi/)
 
 ## Konu Rehberleri (kapsamlı sayfalar)
 - [Bel Fıtığı (Lomber Disk Hernisi) — belirtiler, nedenler, tedavi](https://omurgam.com/bel-fitigi)

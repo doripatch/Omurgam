@@ -291,7 +291,10 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
       {/* SSS: <details> ile JS'siz açılır-kapanır (SSR'da görünür metin; FAQPage JSON-LD build'de index.html'e yazılır). */}
       {data && data.faq && data.faq.length > 0 && (
         <section aria-labelledby="home-faq-title" className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 pb-10">
-          <h2 id="home-faq-title" className="text-2xl font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2"><HelpCircle className="w-6 h-6 text-orange-600" aria-hidden="true" /> Sıkça sorulan sorular</h2>
+          <div className="flex items-end justify-between gap-3 mb-4">
+            <h2 id="home-faq-title" className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2"><HelpCircle className="w-6 h-6 text-orange-600" aria-hidden="true" /> Sıkça sorulan sorular</h2>
+            <Link to="/sorular" className="shrink-0 whitespace-nowrap text-sm font-bold text-orange-700 hover:text-orange-800 inline-flex items-center gap-1">Tüm sorular <ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
+          </div>
           <div className="grid gap-3 lg:grid-cols-2 items-start">
             {data.faq.map((f) => (
               <details key={f.q} className="group rounded-2xl border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 open:border-orange-300">

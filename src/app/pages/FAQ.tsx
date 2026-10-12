@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { faqAPI } from '../lib/api';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
 import Seo from '../components/Seo';
+import { Link } from 'react-router';
 
 interface FAQItem {
   id: string;
@@ -11,6 +12,7 @@ interface FAQItem {
   answer: string;
   icon?: string;
   createdAt?: string;
+  link?: { label: string; to: string };
 }
 
 export default function FAQ() {
@@ -30,8 +32,13 @@ export default function FAQ() {
   const loadItems = async () => {
     try {
       setIsLoading(true);
-      const data = await faqAPI.getAll();
-      setItems(data.items || []);
+      // Sabit liste build'de üretilir (dist/faq-data.json, scripts/lib/faq.mjs); panelden eklenenler sona eklenir.
+      const [base, kv] = await Promise.all([
+        fetch('/faq-data.json').then((r) => (r.ok ? r.json() : [])).catch(() => []),
+        faqAPI.getAll().catch(() => ({ items: [] })),
+      ]);
+      const fixed: FAQItem[] = (base || []).map((f: any) => ({ id: f.id, category: f.cat, question: f.q, answer: f.a, link: f.link }));
+      setItems([...fixed, ...((kv && kv.items) || [])]);
     } catch (error) {
       console.error('❌ SSS yüklenirken hata:', error);
     } finally {
@@ -172,6 +179,11 @@ export default function FAQ() {
                         <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
                           {faq.answer}
                         </p>
+                        {faq.link && (
+                          <Link to={faq.link.to} className="mt-3 inline-block text-sm font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-400">
+                            {faq.link.label} →
+                          </Link>
+                        )}
                       </div>
                     </div>
                   )}

@@ -13,6 +13,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, rmSync
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { buildSync } from 'esbuild';
+import { buildFaq, faqJsonLd, FAQ_CATEGORIES } from './lib/faq.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = process.env.PRERENDER_DIST || join(ROOT, 'dist');
@@ -230,7 +231,6 @@ async function main() {
     ['/basin', 'Basın Odası', 'Omurgam basın odası — Prof. Dr. Defne Kaya Utlu ve platform hakkında basın bilgileri, biyografi, logo ve iletişim.'],
     ['/forum', 'Sizden Gelenler', 'Omurga sağlığı hakkında sorularınızı sorun, Prof. Dr. Defne Kaya Utlu ve ekibinden yanıtlar alın.'],
     ['/soru-sor', 'Uzmana Soru Sor', 'Omurga sağlığıyla ilgili sorunuzu Omurgam uzmanlarına iletin; yanıtlar bilimsel kaynaklarla, sade bir dille verilir.'],
-    ['/sorular', 'Sıkça Sorulan Sorular', 'Omurgam ve omurga sağlığı hakkında en sık sorulan sorular ve yanıtları.'],
     ['/saglik-sozlugu', 'Sağlık Sözlüğü — Tıbbi ve Tedavi Terimleri', 'Çimentolu alçı, atel, traksiyon, ödem gibi tıbbi ve tedavi terimlerinin sade Türkçe açıklamaları. Omurgam Sağlık Sözlüğü.'],
     ['/gunun-terimi', 'Günün Terimi — Kelime Oyunu', "Her gün yeni bir tıbbi terim! Omurga ve sağlık terimlerini tahmin et, serini koru. Omurgam'ın günlük kelime oyunu."],
     ['/mit-avi', 'Mit Avı — Omurga Mitleri Oyunu', "Doğru mu, yanlış mı? Her gün omurga sağlığıyla ilgili 5 iddiayı değerlendir, yanlış bilinenleri öğren. Omurgam'ın günlük bilgi oyunu."],
@@ -245,6 +245,35 @@ async function main() {
       bodyHtml: `<main>${nav}<h1>${esc(title)}</h1><p>${esc(desc)}</p></main>`,
     });
   }
+  // ---------------- 6) Sıkça Sorulan Sorular (/sorular) ----------------
+  // Ortak kaynak scripts/lib/faq.mjs: sağlık cevapları Omurga Sözlüğü tanımıyla aynen. Görünür metin = FAQPage JSON-LD.
+  // dist/faq-data.json: React sayfası (FAQ.tsx) aynı listeyi gösterir (+ panelden eklenenler).
+  {
+    const glossaryMaster = JSON.parse(readFileSync(join(ROOT, 'src/app/data/spineGlossary.json'), 'utf8')).master;
+    const faq = buildFaq(glossaryMaster, die);
+    writeFileSync(join(DIST, 'faq-data.json'), JSON.stringify(faq));
+    // llms.txt (yapay zekâ asistanları için site özeti): SSS soruları build'de eklenir (public/llms.txt + bu bölüm).
+    const llms = readFileSync(join(DIST, 'llms.txt'), 'utf8').trimEnd();
+    if (llms.includes('## Sıkça Sorulan Sorular')) die('llms.txt SSS bölümü zaten var');
+    writeFileSync(join(DIST, 'llms.txt'), `${llms}\n\n## Sıkça Sorulan Sorular\n`
+      + faq.map((f) => `- [${f.q}](${ORIGIN}/sorular#${f.id}): ${f.a}`).join('\n') + '\n');
+    const title = 'Sıkça Sorulan Sorular';
+    const desc = 'Bel fıtığı, boyun fıtığı, siyatik, skolyoz ve MR raporu terimleri hakkında sık sorulan sorular; Prof. Dr. Defne Kaya Utlu editörlüğünde sade yanıtlar.';
+    const url = `${ORIGIN}/sorular`;
+    const groups = FAQ_CATEGORIES.map((c) => [c, faq.filter((f) => f.cat === c)]).filter(([, l]) => l.length);
+    writePage('/sorular', {
+      title: `${title} | Omurgam`, description: desc, type: 'website',
+      jsonLd: { '@context': 'https://schema.org', '@graph': [
+        { '@type': 'WebPage', name: title, url, inLanguage: 'tr-TR', isPartOf: { '@id': `${ORIGIN}/#website` } },
+        breadcrumb([['Ana Sayfa', `${ORIGIN}/`], [title, url]]),
+        faqJsonLd(faq, url),
+      ] },
+      bodyHtml: `<main>${nav}<h1>${esc(title)}</h1><p>${esc(desc)}</p>`
+        + groups.map(([c, l]) => `<section><h2>${esc(c)}</h2>${l.map((f) => `<div id="${esc(f.id)}"><h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>${f.link ? `<p><a href="${esc(f.link.to)}">${esc(f.link.label)}</a></p>` : ''}</div>`).join('')}</section>`).join('')
+        + `${DISCLAIMER}</main>`,
+    });
+  }
+
   // ---------------- DOĞRULAMA ----------------
   const errs = [];
   const titles = new Map();

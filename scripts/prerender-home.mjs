@@ -8,6 +8,7 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { build } from 'esbuild';
+import { buildFaq, faqJsonLd } from './lib/faq.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = process.env.PRERENDER_DIST || join(ROOT, 'dist');
@@ -98,26 +99,11 @@ async function buildData() {
     return { key: r.key, label: r.label, term: clean(g.term), slug: r.slug, def: clean(g.definition), posts, ...(r.guide ? { guide: r.guide } : {}), related };
   });
 
-  // SSS (anasayfa altı): sağlık soruları Omurga Sözlüğü tanımıyla AYNEN cevaplanır (yeni tıbbi metin yok);
-  // platform soruları kurum bilgisidir. Görünür metin = FAQPage JSON-LD metni (index.html'e build'de yazılır).
-  const FAQ_TERMS = [
-    ['Bel fıtığı nedir?', 'lomber-disk-hernisi'],
-    ['Boyun fıtığı nedir?', 'servikal-disk-hernisi'],
-    ['Skolyoz nedir?', 'skolyoz'],
-    ['Siyatik nedir?', 'siyatik'],
-    ['Sakralizasyon nedir?', 'sakralizasyon'],
-    ['MR raporumda "lordozda düzleşme" yazıyor, ne demek?', 'lordozda-duzlesme'],
-  ];
-  const faq = [
-    { q: 'Omurgam nedir?', a: "Omurgam, Prof. Dr. Defne Kaya Utlu editörlüğünde hazırlanan Türkçe omurga sağlığı platformudur. Yazılar, videolar ve Omurga Sözlüğü ile omurga sağlığını sade ve bilimsel bir dille anlatır.", link: { label: 'Hakkımızda', to: '/hakkimizda' } },
-    ...FAQ_TERMS.map(([q, slug]) => {
-      const g = gBySlug.get(slug);
-      if (!g || !g.definition) die(`SSS: sözlükte ${slug} yok`);
-      return { q, a: clean(g.definition), link: { label: `${clean(g.term)} hakkında daha fazlası`, to: `/omurga-sozlugu/${slug}/` } };
-    }),
-    { q: 'Buradaki bilgiler muayenenin yerine geçer mi?', a: 'Hayır. Omurgam’daki içerikler bilgilendirme amaçlıdır; tanı ve tedavi için bir hekime başvurun.' },
-    { q: 'Uzmana nasıl soru sorabilirim?', a: 'Uzmana Soru Sor sayfasından sorunuzu iletebilirsiniz. Randevu sayfasından da danışma talebi oluşturabilirsiniz.', link: { label: 'Uzmana soru sor', to: '/soru-sor' } },
-  ];
+  // SSS (anasayfa altı): ortak kaynak scripts/lib/faq.mjs; anasayfada seçili 9 soru, tamamı /sorular'da.
+  const allFaq = buildFaq(glossary, die);
+  const homeFaq = allFaq.filter((f) => f.home);
+  const faq = [...homeFaq.filter((f) => f.id === 'omurgam-nedir'), ...homeFaq.filter((f) => f.cat !== 'Omurgam hakkında'), ...homeFaq.filter((f) => f.cat === 'Omurgam hakkında' && f.id !== 'omurgam-nedir')]
+    .map(({ q, a, link }) => ({ q, a, ...(link ? { link } : {}) }));
 
   const data = {
     generatedAt: new Date().toISOString(),
@@ -181,7 +167,7 @@ if (!html.includes('<div id="root"></div>')) die('index.html boş #root içermiy
 const json = JSON.stringify(data).replace(/</g, '\\u003c');
 html = html.replace('</head>', `  <script>window.__omHome = ${json};</script>\n  </head>`);
 // SSS yapılandırılmış verisi: yalnız anasayfada (spa.html'e girmez); metin sayfada görünenle birebir aynı.
-const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: data.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) };
+const faqLd = { '@context': 'https://schema.org', ...faqJsonLd(data.faq, 'https://omurgam.com/') };
 html = html.replace('</head>', `  <script type="application/ld+json">${JSON.stringify(faqLd).replace(/</g, '\\u003c')}</script>\n  </head>`);
 html = html.replace('<div id="root"></div>', `<div id="root">${shell}</div>`);
 // Ana JS'i ilk çizimden SONRA iste: içerik zaten HTML'de; aksi halde (hızlı ağda) JS ilk çizimden önce başladığı için
