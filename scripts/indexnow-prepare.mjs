@@ -32,7 +32,9 @@ function fingerprint(html) {
   const root = (html.match(/<div id="root">([\s\S]*)<\/div>\s*<\/body>/) || [, ''])[1];
   const content = [
     pick(/<title>[\s\S]*?<\/title>/g), pick(/<meta name="description"[^>]*>/g), pick(/<link rel="canonical"[^>]*>/g),
-    pick(/<script type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/g),
+    // Yalnız sayfaya özgü JSON-LD (id="seo-jsonld"); tüm sayfalarda ortak Organization/Person bloğu hariç
+    // (editör bilgisi güncellenince 600 sayfa birden "değişti" sayılmasın).
+    pick(/<script type="application\/ld\+json" id="seo-jsonld"[^>]*>[\s\S]*?<\/script>/g),
     root.replace(/\/assets\/[^"' )]+/g, ''),
   ].join('\n');
   return createHash('sha256').update(content).digest('hex').slice(0, 16);
@@ -47,18 +49,21 @@ for (const u of urls) {
 }
 
 let prev = null;
-let firstRun = false; // canlıda durum dosyası hiç yoksa (404) ilk kurulum: tüm adresler bir kez gönderilir
+let firstRun = false;
+let baselineReset = false;
+const STATE_VERSION = 2; // canlıda durum dosyası hiç yoksa (404) ilk kurulum: tüm adresler bir kez gönderilir
 try {
   const r = await fetch(`${ORIGIN}/indexnow-state.json`, { signal: AbortSignal.timeout(10000) });
   if (r.ok) prev = await r.json();
+  if (prev && prev.v !== STATE_VERSION) { baselineReset = true; prev = null; } // parmak izi biçimi değişti: bu yayında gönderim yok, yeni temel kaydedilir
   else if (r.status === 404) firstRun = true;
 } catch { /* ağ yok → prev null, gönderim yok */ }
 
 let changed;
 if (process.env.FORCE_INDEXNOW_ALL === '1' || firstRun) changed = Object.keys(state);
 else if (!prev || typeof prev !== 'object') changed = [];
-else changed = Object.keys(state).filter((u) => prev[u] !== state[u]);
+else changed = Object.keys(state).filter((u) => (prev.h || {})[u] !== state[u]);
 
-writeFileSync(join(DIST, 'indexnow-state.json'), JSON.stringify(state));
+writeFileSync(join(DIST, 'indexnow-state.json'), JSON.stringify({ v: STATE_VERSION, h: state }));
 writeFileSync(join(DIST, 'indexnow-changed.json'), JSON.stringify({ generatedAt: new Date().toISOString(), urls: changed }));
-console.log(`[indexnow] OK — ${Object.keys(state).length} adres parmak izi (${missing} HTML'siz), önceki durum ${prev ? 'alındı' : 'YOK'}, değişen ${changed.length} -> dist/indexnow-changed.json`);
+console.log(`[indexnow] OK — ${Object.keys(state).length} adres parmak izi (${missing} HTML'siz), önceki durum ${prev ? 'alındı' : baselineReset ? 'eski biçim (temel yenilendi)' : 'YOK'}, değişen ${changed.length} -> dist/indexnow-changed.json`);
