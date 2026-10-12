@@ -143,7 +143,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
       {/* Izgara: üst satır 5|7 (başlık | harita), alt satır da 5|7 (kartlar | listeler) → sütun kenarları alt alta hizalı. */}
       {/* HERO + ARAMA */}
       <section className="pt-6 pb-8 md:pt-10 md:pb-10 xl:pb-0 xl:pt-8 xl:col-span-5 text-center xl:text-left">
-        <div className="max-w-3xl mx-auto xl:mx-0">
+        <div className="max-w-3xl mx-auto xl:mx-0 xl:max-w-none">
           {/* Güven şeridi: editör rozeti + rakamlar tek satırda (ayrı sayaç bölümü yerine). */}
           <div className="flex flex-wrap items-center justify-center xl:justify-start gap-x-3 gap-y-2">
             <Link to="/hakkimizda" className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-200 bg-amber-50 text-amber-800 text-sm font-semibold hover:border-amber-400 dark:bg-slate-800 dark:border-slate-700 dark:text-amber-300">
