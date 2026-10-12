@@ -120,7 +120,8 @@ export function trackPageview(path: string, key: string) {
 
 // Hedef etkinlikleri (GA4 "önemli etkinlik" adayları). Yalnız analitik onayı verilmişse gönderilir.
 // KİŞİSEL VERİ GÖNDERİLMEZ: ad, telefon, e-posta, mesaj metni asla parametre olarak eklenmez.
-export type GoalEvent = 'search' | 'appointment_request' | 'question_submit' | 'newsletter_signup' | 'contact_submit';
+// learn_random: "Bana rastgele bir şey öğret" kartı gösterildi (kind: term/quiz/post/video, n: oturumdaki kaçıncı kart).
+export type GoalEvent = 'search' | 'appointment_request' | 'question_submit' | 'newsletter_signup' | 'contact_submit' | 'learn_random';
 export function trackEvent(name: GoalEvent, params: Record<string, string | number> = {}) {
   if (typeof window === 'undefined' || !analyticsAllowed || !gaScriptLoaded) return;
   ensureGtag()('event', name, params);

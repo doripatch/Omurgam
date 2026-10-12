@@ -9,6 +9,7 @@ import { Search, ArrowRight, Flame, PlayCircle, BookOpen, MessageCircle, Zap, Be
 import Seo from '../components/Seo';
 import { TABLES } from '../lib/tables';
 import SpineMap, { type SpineRegion } from '../components/SpineMap';
+import LearnButton from '../components/LearnButton';
 
 export interface HomeData {
   generatedAt: string;
@@ -157,6 +158,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
               </Link>
             ))}
           </div>
+          <LearnButton />
         </div>
       </section>
 
