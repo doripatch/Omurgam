@@ -15,6 +15,8 @@ export interface HomeData {
   generatedAt: string;
   stats: { posts: number; videos: number; terms: number; views: number };
   mostRead: { title: string; url: string; category: string; views: number }[];
+  // En çok okunanlar sekmeleri (konuya göre ilk 4); 'Tümü' = mostRead.
+  mostReadTabs?: { key: string; label: string; posts: HomeData['mostRead'] }[];
   videos: { title: string; url: string; thumb: string }[];
   terms: { term: string; slug: string; def: string }[];
   myths: { term: string; wrong: string; right: string }[];
@@ -65,6 +67,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
   const [day, setDay] = useState(() => dayNumber(data?.generatedAt));
   const [questions, setQuestions] = useState<AnsweredQuestion[] | null>(null);
   const [query, setQuery] = useState('');
+  const [tab, setTab] = useState('all');
 
   useEffect(() => {
     setDay(dayNumber());
@@ -124,20 +127,28 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
       />
 
       {/* HERO + ARAMA */}
-      <section className="px-4 sm:px-6 lg:px-8 pt-10 pb-10 md:pt-16 md:pb-14 text-center">
+      <section className="px-4 sm:px-6 lg:px-8 pt-6 pb-8 md:pt-10 md:pb-10 text-center">
         <div className="max-w-3xl mx-auto">
-          <Link to="/hakkimizda" className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-200 bg-amber-50 text-amber-800 text-sm font-semibold hover:border-amber-400 dark:bg-slate-800 dark:border-slate-700 dark:text-amber-300">
-            <span className="w-2 h-2 rounded-full bg-orange-600" aria-hidden="true" />
-            Prof. Dr. Defne Kaya Utlu editörlüğünde
-          </Link>
-          <h1 className="mt-6 text-[2.5rem] md:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+          {/* Güven şeridi: editör rozeti + rakamlar tek satırda (ayrı sayaç bölümü yerine). */}
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+            <Link to="/hakkimizda" className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-200 bg-amber-50 text-amber-800 text-sm font-semibold hover:border-amber-400 dark:bg-slate-800 dark:border-slate-700 dark:text-amber-300">
+              <span className="w-2 h-2 rounded-full bg-orange-600" aria-hidden="true" />
+              Prof. Dr. Defne Kaya Utlu editörlüğünde
+            </Link>
+            {data && (
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+                {fmt(data.stats.posts)} yazı · {fmt(data.stats.videos)} video · {fmt(data.stats.terms)} terim
+              </span>
+            )}
+          </div>
+          <h1 className="mt-4 text-[2.5rem] md:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.1]">
             {/* Tek blok: LCP ölçümünde başlık tek öğe sayılır (iki satır ayrı blok olursa çerez bildirimi LCP olur). */}
             Omurgam<br /><span className="text-orange-600">Türkiye&apos;nin Omurga Sağlığı Platformu</span>
           </h1>
-          <p className="mt-5 text-lg md:text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
+          <p className="mt-3 text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
             Bir terim, bir ağrı ya da bir konu: aratın, sade Türkçe ve bilimsel açıklamasını bulun.
           </p>
-          <form onSubmit={onSearch} role="search" className="mt-7 flex items-center gap-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-2 pl-4">
+          <form onSubmit={onSearch} role="search" className="mt-5 flex items-center gap-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-2 pl-4">
             <Search className="w-5 h-5 text-slate-400 shrink-0" aria-hidden="true" />
             <label htmlFor="home-search" className="sr-only">Omurgam'da ara</label>
             <input
@@ -151,7 +162,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
             />
             <button type="submit" className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-orange-600 transition-colors dark:bg-orange-600">Ara</button>
           </form>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
             {CHIPS.map((c) => (
               <Link key={c.to} to={c.to} className="px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-orange-400 hover:text-orange-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
                 {c.label}
@@ -161,25 +172,6 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
           <LearnButton />
         </div>
       </section>
-
-      {/* SAYAÇLAR */}
-      {data && (
-        <section aria-label="Omurgam rakamlarla" className="border-y border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700">
-          <div className="max-w-5xl mx-auto px-4 py-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            {[
-              [fmt(data.stats.posts), 'yazı'],
-              [fmt(data.stats.videos), 'video'],
-              [fmt(data.stats.terms), 'sözlük terimi'],
-              [`${fmt(Math.floor(data.stats.views / 100) * 100)}+`, 'okunma'],
-            ].map(([n, l]) => (
-              <div key={l}>
-                <div className="text-3xl font-black text-slate-900 dark:text-white">{n}</div>
-                <div className="text-sm font-semibold text-slate-600 dark:text-slate-400">{l}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* OMURGA HARİTASI */}
       {data && data.regions && data.regions.length > 0 && <SpineMap regions={data.regions} />}
@@ -193,8 +185,24 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
                 <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2"><Flame className="w-6 h-6 text-orange-600" aria-hidden="true" /> En çok okunanlar</h2>
                 <Link to="/omurgam-ne-diyor/" className="shrink-0 whitespace-nowrap text-sm font-bold text-orange-700 hover:text-orange-800 inline-flex items-center gap-1">Tüm yazılar <ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
               </div>
+              {data.mostReadTabs && data.mostReadTabs.length > 0 && (
+                <div className="-mx-4 px-4 mb-3 flex gap-2 overflow-x-auto [scrollbar-width:none]" role="tablist" aria-label="Konuya göre en çok okunanlar">
+                  {[{ key: 'all', label: 'Tümü' }, ...data.mostReadTabs].map((t) => (
+                    <button
+                      key={t.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={tab === t.key}
+                      onClick={() => setTab(t.key)}
+                      className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-bold border transition-colors ${tab === t.key ? 'bg-slate-900 border-slate-900 text-white dark:bg-orange-700 dark:border-orange-700' : 'bg-white border-slate-200 text-slate-700 hover:border-orange-400 hover:text-orange-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200'}`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              )}
               <ol className="rounded-3xl border border-slate-200 bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:divide-slate-700">
-                {data.mostRead.map((p, i) => (
+                {(tab === 'all' ? data.mostRead : data.mostReadTabs?.find((t) => t.key === tab)?.posts ?? data.mostRead).map((p, i) => (
                   <li key={p.url}>
                     <Link to={p.url} className="flex items-start gap-4 p-4 md:p-5 hover:bg-amber-50/50 dark:hover:bg-slate-700/50">
                       <span className="text-2xl font-black text-slate-300 w-6 shrink-0" aria-hidden="true">{i + 1}</span>

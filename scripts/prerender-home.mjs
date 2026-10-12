@@ -58,6 +58,21 @@ async function buildData() {
   const myths = (termsRes.terms || []).filter((t) => t.mistakeWrong && t.mistakeRight).slice(0, 21)
     .map((t) => ({ term: clean(t.term), wrong: cut(t.mistakeWrong, 160), right: cut(t.mistakeRight, 180) }));
 
+  // En çok okunanlar sekmeleri: kategori veya başlık eşleşmesi, okunmaya göre ilk 4.
+  const TABS = [
+    { key: 'bel', label: 'Bel', cats: ['Bel Fıtığı', 'Bel Ağrısı'], rx: /(^|\s)bel(\s|$)|lomber|siyatik/ },
+    { key: 'boyun', label: 'Boyun', cats: ['Boyun Fıtığı', 'Boyun Ağrısı'], rx: /boyun|servikal/ },
+    { key: 'egzersiz', label: 'Egzersiz', cats: ['Egzersiz'], rx: null },
+    { key: 'yatak', label: 'Yatak & Yastık', cats: ['Yatak & Yastık'], rx: null },
+    { key: 'cocuk', label: 'Çocuk', cats: ['Çocuk & Ergen Sağlığı'], rx: /çocu|ergen/ },
+  ];
+  const lowerT = (s) => clean(s).toLocaleLowerCase('tr-TR');
+  const mostReadTabs = TABS.map((t) => ({
+    key: t.key, label: t.label,
+    posts: byViews.filter((p) => t.cats.includes(clean(p.category)) || (t.rx && t.rx.test(lowerT(p.title)))).slice(0, 4)
+      .map((p) => ({ title: clean(p.title), url: `${urlMap.get(p.id).newUrl}/`, category: clean(p.category), views: p.views || 0 })),
+  })).filter((t) => t.posts.length >= 3);
+
   // Omurga haritası: bölge tanımı ve ilgili terimler Omurga Sözlüğü'nden aynen; yazılar blogdan (başlık/kategori eşleşmesi,
   // okunmaya göre ilk 3). Yazısı az olan bölgelerde (sırt, sakrum, koksiks) liste gösterilmez, sözlük/rehber bağlantısı kalır.
   const gBySlug = new Map(glossary.map((t) => [t.slug, t]));
@@ -91,9 +106,10 @@ async function buildData() {
       terms: glossary.length,
       views: posts.reduce((s, p) => s + (p.views || 0), 0),
     },
-    mostRead, videos, terms, myths, regions,
+    mostRead, mostReadTabs, videos, terms, myths, regions,
   };
   if (mostRead.length < 3) die(`en çok okunan yazı az: ${mostRead.length}`);
+  if (mostReadTabs.length < 4) die(`en çok okunan sekmeleri eksik: ${mostReadTabs.map((t) => t.key).join(',')}`);
   if (videos.length < 3) die(`video az: ${videos.length}`);
   if (terms.length < 20) die(`terim havuzu az: ${terms.length}`);
   if (!myths.length) die('mit yok');

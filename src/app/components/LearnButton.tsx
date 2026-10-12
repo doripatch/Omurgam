@@ -12,7 +12,7 @@ export default function LearnButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-5 inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-orange-700 to-amber-700 text-white font-black shadow-lg shadow-orange-600/20 hover:scale-[1.03] active:scale-100 transition-transform"
+        className="mt-4 inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-orange-700 to-amber-700 text-white font-black shadow-lg shadow-orange-600/20 hover:scale-[1.03] active:scale-100 transition-transform"
       >
         <Dices className="w-5 h-5" aria-hidden="true" /> Bana rastgele bir şey öğret
       </button>
