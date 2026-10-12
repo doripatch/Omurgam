@@ -77,7 +77,8 @@ export default function FAQ() {
 
   return (
     <div className="w-full bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-16 px-4">
-      <Seo title={t.title || 'Sıkça Sorulan Sorular'} description={t.subtitle} jsonLd={faqJsonLd} />
+      {/* Başlık/açıklama build'deki /sorular.html ile aynı (panel başlığı "SSS" gibi kısa olabilir; arama sonucu için tam ad). */}
+      <Seo title="Sıkça Sorulan Sorular" description="Bel fıtığı, boyun fıtığı, siyatik, skolyoz ve MR raporu terimleri hakkında sık sorulan sorular; Prof. Dr. Defne Kaya Utlu editörlüğünde sade yanıtlar." jsonLd={faqJsonLd} />
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
