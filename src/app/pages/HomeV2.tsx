@@ -10,6 +10,7 @@ import Seo from '../components/Seo';
 import { TABLES } from '../lib/tables';
 import SpineMap, { type SpineRegion } from '../components/SpineMap';
 import LearnButton from '../components/LearnButton';
+import SpineQuiz from '../components/SpineQuiz';
 
 export interface HomeData {
   generatedAt: string;
@@ -290,6 +291,8 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
               <Link to="/mit-avi" className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-orange-700 hover:text-orange-800">Mit Avı'nı oyna <ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
             </section>
           )}
+
+          <SpineQuiz />
         </aside>
       </div>
 
