@@ -256,7 +256,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
           )}
         </div>
 
-        <aside className="space-y-6 xl:col-span-5 xl:order-first">
+        <aside className="space-y-6 xl:space-y-0 xl:flex xl:flex-col xl:gap-6 xl:col-span-5 xl:order-first">
           {term && <div className="xl:hidden">{termCard}</div>}
 
           <section className={`rounded-3xl p-6 border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 ${questions === null || questions.length > 0 ? 'min-h-[14rem]' : ''}`}>
@@ -292,6 +292,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
             </section>
           )}
 
+          {/* Geniş ekranda test kartı sol sütunun kalanını doldurur: iki sütun her zaman aynı çizgide biter. */}
           <SpineQuiz />
         </aside>
       </div>

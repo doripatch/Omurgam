@@ -83,10 +83,11 @@ export default function SpineQuiz() {
   };
 
   return (
-    <section aria-labelledby="spine-quiz-title" className="relative overflow-hidden rounded-3xl p-6 bg-gradient-to-br from-orange-700 via-orange-800 to-amber-900 text-white shadow-lg shadow-orange-700/20">
-      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10" aria-hidden="true" />
+    <section aria-labelledby="spine-quiz-title" className="relative overflow-hidden rounded-3xl p-6 md:p-8 xl:flex-1 xl:flex xl:flex-col xl:justify-center xl:min-h-[18rem] bg-gradient-to-br from-orange-700 via-orange-800 to-amber-900 text-white shadow-lg shadow-orange-700/20">
+      <div className="absolute -top-10 -right-10 w-40 h-40 xl:w-64 xl:h-64 rounded-full bg-white/10" aria-hidden="true" />
+      <Brain className="absolute right-6 bottom-6 w-28 h-28 xl:w-40 xl:h-40 text-white/10 rotate-12 pointer-events-none" aria-hidden="true" />
       <div className="absolute -bottom-12 -left-8 w-32 h-32 rounded-full bg-white/5" aria-hidden="true" />
-      <div className="relative">
+      <div className="relative w-full">
         <h2 id="spine-quiz-title" className="flex items-center gap-2 text-xl font-black"><Brain className="w-6 h-6" aria-hidden="true" /> Omurganı ne kadar tanıyorsun?</h2>
 
         {!qs && (
