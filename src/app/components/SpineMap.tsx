@@ -46,24 +46,23 @@ const DISCS = VERTS.map((v, i) => {
   const y = r1((v.y + v.h / 2 + (n.y - n.h / 2)) / 2);
   return { x: r1((v.x + n.x) / 2), y, rx: r1(((v.w + n.w) / 2) * 0.47), ry: r1(Math.max(1.4, (n.y - n.h / 2 - (v.y + v.h / 2)) / 2 + 0.6)), a: r1((v.a + n.a) / 2), k: v.k };
 });
-// Sakrum: arkaya eğik, aşağı doğru daralan kama (birleşik 5 segment çizgisiyle); koksiks: öne kıvrılan 4 küçük parça.
-const SACRUM_Y = [412, 424, 436, 448, 460, 472];
-const sacHalf = (y: number) => 18 - ((y - 412) / 60) * 12;
-const SACRUM = (() => {
-  const right: string[] = [];
-  const left: string[] = [];
-  for (let y = 412; y <= 472; y += 6) {
-    right.push(`${r1(cx(y) + sacHalf(y))},${y}`);
-    left.unshift(`${r1(cx(y) - sacHalf(y))},${y}`);
-  }
-  return [...right, ...left].join(' ');
-})();
-const COCCYX: Vert[] = [0, 1, 2, 3].map((i) => {
-  const y = 478 + i * 8;
-  return { x: r1(cx(472) - 2 - i * i * 1.3), y: r1(y - i * 1.2), w: r1(10 - i * 1.8), h: 6, a: r1(25 + i * 12), k: 'koksiks', sp: [0, 0] };
-});
-const BANDS: Record<Key, [number, number]> = { boyun: [8, 122], sirt: [122, 304], bel: [304, 411], sakrum: [411, 474], koksiks: [474, 514] };
-const LABEL_Y: Record<Key, number> = { boyun: 70, sirt: 214, bel: 358, sakrum: 442, koksiks: 496 };
+// Sakrum (yandan): üstte geniş taban (öndeki uç = promontoryum), önü içe (konkav), arkası dışa (konveks) kavisli,
+// aşağı doğru incelen kama; arkasında orta hat tümsekleri, içinde birleşik 5 segmentin sınır çizgileri.
+// Koksiks: sakrum ucundan öne-aşağı kıvrılan, giderek küçülen ve birbirine değen 4 parça.
+type P2 = [number, number];
+const bez = (a: P2, b: P2, c: P2, d: P2, t: number): P2 => {
+  const u = 1 - t;
+  return [r1(u * u * u * a[0] + 3 * u * u * t * b[0] + 3 * u * t * t * c[0] + t * t * t * d[0]), r1(u * u * u * a[1] + 3 * u * u * t * b[1] + 3 * u * t * t * c[1] + t * t * t * d[1])];
+};
+const SAC_A: [P2, P2, P2, P2] = [[151, 415], [162, 436], [176, 468], [174, 489]]; // ön yüz (promontoryum → uç)
+const SAC_P: [P2, P2, P2, P2] = [[185, 409], [197, 428], [198, 456], [190, 476]]; // arka yüz
+const SACRUM_D = 'M151 415 L185 409 C197 428 198 456 190 476 Q185 487 178 491 L174 489 C176 468 162 436 151 415 Z';
+const SACRUM_RIDGES = [0.2, 0.4, 0.6, 0.8].map((t) => [bez(...SAC_A, t), bez(...SAC_P, t)] as [P2, P2]);
+const SACRUM_CREST = [0.22, 0.42, 0.62].map((t) => bez(...SAC_P, t));
+const COCCYX_D = 'M173.5 489.5 L179.5 490.5 C180 498 175 505 167 510.5 C164 512.5 160.5 513.5 158.5 513 C160 509.5 163 506 166 502.5 C169.5 498.5 172.5 494.5 173.5 489.5 Z';
+const COCCYX_JOINTS: [P2, P2][] = [[[172.6, 495.5], [178.6, 496.6]], [[169.4, 501.2], [175.6, 503.4]], [[165, 506], [170.6, 508.4]]];
+const BANDS: Record<Key, [number, number]> = { boyun: [8, 122], sirt: [122, 304], bel: [304, 411], sakrum: [411, 491], koksiks: [491, 518] };
+const LABEL_Y: Record<Key, number> = { boyun: 70, sirt: 214, bel: 358, sakrum: 448, koksiks: 506 };
 
 function Vertebra({ v, p, fill }: { v: Vert; p: string; fill: string }) {
   // Yandan omur: gövde (ön, sol) + pedikül/lamina + dikensi çıkıntı (arka, sağ). Işık soldan-üstten (gradyan).
@@ -93,7 +92,7 @@ export default function SpineMap({ regions }: { regions: SpineRegion[] }) {
   const onMove = (e: React.MouseEvent<SVGSVGElement>) => {
     if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
     const b = e.currentTarget.getBoundingClientRect();
-    setTilt([r1(((e.clientX - b.left) / b.width - 0.5) * 16), r1(((e.clientY - b.top) / b.height - 0.5) * -6)]);
+    setTilt([r1(((e.clientX - b.left) / b.width - 0.5) * 10), r1(((e.clientY - b.top) / b.height - 0.5) * -4)]);
   };
 
   const renderSvg = (compact: boolean) => {
@@ -101,7 +100,7 @@ export default function SpineMap({ regions }: { regions: SpineRegion[] }) {
     const tone = (k: Key) => (k === active ? 'on' : k === hover ? 'hv' : 'bone');
     return (
       <svg
-        viewBox={compact ? '122 0 100 520' : '-28 0 258 520'}
+        viewBox={compact ? '122 0 100 522' : '-44 0 274 522'}
         className={compact ? 'sm:hidden w-full h-auto select-none' : 'hidden sm:block w-full max-w-[15rem] mx-auto h-auto select-none transition-transform duration-300 ease-out'}
         style={compact ? undefined : { transform: `perspective(700px) rotateY(${tilt[0]}deg) rotateX(${tilt[1]}deg)` }}
         onMouseMove={compact ? undefined : onMove}
@@ -123,9 +122,9 @@ export default function SpineMap({ regions }: { regions: SpineRegion[] }) {
 
         {/* Seçili bölgenin arkasında yumuşak, nabız gibi atan turuncu ışık */}
         <ellipse
-          cx={r1(cx((BANDS[active][0] + BANDS[active][1]) / 2) + 6)}
+          cx={active === 'sakrum' ? 176 : active === 'koksiks' ? 170 : r1(cx((BANDS[active][0] + BANDS[active][1]) / 2) + 6)}
           cy={(BANDS[active][0] + BANDS[active][1]) / 2}
-          rx={34}
+          rx={active === 'koksiks' ? 18 : 34}
           ry={r1((BANDS[active][1] - BANDS[active][0]) / 2 + 6)}
           fill="#fb923c"
           filter={`url(#${p}-glow)`}
@@ -144,19 +143,27 @@ export default function SpineMap({ regions }: { regions: SpineRegion[] }) {
               onClick={() => setActive(r.key)}
               className="cursor-pointer"
             >
-              <rect x={-28} y={b0} width={258} height={b1 - b0} fill="transparent" />
+              <rect x={-44} y={b0} width={274} height={b1 - b0} fill="transparent" />
               {DISCS.filter((d) => d.k === r.key).map((d, i) => (
                 <ellipse key={`d${i}`} cx={d.x} cy={d.y} rx={d.rx} ry={d.ry} transform={`rotate(${d.a} ${d.x} ${d.y})`} fill={`url(#${p}-${on ? 'discon' : 'disc'})`} />
               ))}
               {r.key === 'sakrum' && (
                 <g filter={`url(#${p}-sh)`}>
-                  <polygon points={SACRUM} fill={`url(#${p}-${t})`} stroke="#7a6146" strokeOpacity={0.3} strokeWidth={0.5} />
-                  {SACRUM_Y.slice(1, -1).map((y) => (
-                    <line key={y} x1={r1(cx(y) - sacHalf(y) + 2)} x2={r1(cx(y) + sacHalf(y) - 2)} y1={y} y2={y} stroke="#8a6f50" strokeOpacity={0.35} strokeWidth={0.8} />
+                  {SACRUM_CREST.map(([x, y], i) => <circle key={i} cx={r1(x - 0.6)} cy={y} r={2.3} fill={`url(#${p}-${t}2)`} stroke="#7a6146" strokeOpacity={0.3} strokeWidth={0.5} />)}
+                  <path d={SACRUM_D} fill={`url(#${p}-${t})`} stroke="#7a6146" strokeOpacity={0.35} strokeWidth={0.6} />
+                  {SACRUM_RIDGES.map(([a, b], i) => (
+                    <path key={i} d={`M${r1(a[0] + 1)} ${a[1]} Q${r1((a[0] + b[0]) / 2)} ${r1((a[1] + b[1]) / 2 + 3)} ${r1(b[0] - 1)} ${b[1]}`} fill="none" stroke="#8a6f50" strokeOpacity={0.4} strokeWidth={0.8} />
                   ))}
+                  <path d="M153 414.6 L184 409.4" stroke="#fff" strokeOpacity={0.5} strokeWidth={1} />
                 </g>
               )}
-              {(r.key === 'koksiks' ? COCCYX : VERTS.filter((v) => v.k === r.key)).map((v, i) => <Vertebra key={i} v={v} p={p} fill={t} />)}
+              {r.key === 'koksiks' && (
+                <g filter={`url(#${p}-sh)`}>
+                  <path d={COCCYX_D} fill={`url(#${p}-${t})`} stroke="#7a6146" strokeOpacity={0.35} strokeWidth={0.6} />
+                  {COCCYX_JOINTS.map(([a, b], i) => <line key={i} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke="#8a6f50" strokeOpacity={0.45} strokeWidth={0.7} />)}
+                </g>
+              )}
+              {VERTS.filter((v) => v.k === r.key).map((v, i) => <Vertebra key={i} v={v} p={p} fill={t} />)}
               {!compact && (
                 <>
                   <line x1={104} x2={r1(cx(LABEL_Y[r.key]) - 24)} y1={LABEL_Y[r.key]} y2={LABEL_Y[r.key]} strokeWidth={1} strokeDasharray="2 3" className={on ? 'stroke-orange-500' : 'stroke-slate-300 dark:stroke-slate-600'} />
