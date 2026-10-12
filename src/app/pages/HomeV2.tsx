@@ -5,7 +5,7 @@
 // Tıbbi metin YAZILMAZ: tanımlar ve mitler yalnız sözlük/sağlık sözlüğü verisinden gelir.
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Search, ArrowRight, Flame, PlayCircle, BookOpen, MessageCircle, Zap, BedDouble, Heart, Stethoscope, Star, Target, Users, CalendarCheck, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, ArrowRight, Flame, PlayCircle, BookOpen, MessageCircle, Zap, BedDouble, Heart, Stethoscope, Star, Target, Users, CalendarCheck, CheckCircle2, XCircle, HelpCircle, ChevronDown } from 'lucide-react';
 import Seo from '../components/Seo';
 import { TABLES } from '../lib/tables';
 import SpineMap, { type SpineRegion } from '../components/SpineMap';
@@ -21,6 +21,7 @@ export interface HomeData {
   terms: { term: string; slug: string; def: string }[];
   myths: { term: string; wrong: string; right: string }[];
   regions?: SpineRegion[];
+  faq?: { q: string; a: string; link?: { label: string; to: string } }[];
 }
 
 interface AnsweredQuestion { id: string; question: string; category?: string }
@@ -286,6 +287,29 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
           )}
         </aside>
       </div>
+
+      {/* SSS: <details> ile JS'siz açılır-kapanır (SSR'da görünür metin; FAQPage JSON-LD build'de index.html'e yazılır). */}
+      {data && data.faq && data.faq.length > 0 && (
+        <section aria-labelledby="home-faq-title" className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 pb-10">
+          <h2 id="home-faq-title" className="text-2xl font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2"><HelpCircle className="w-6 h-6 text-orange-600" aria-hidden="true" /> Sıkça sorulan sorular</h2>
+          <div className="grid gap-3 lg:grid-cols-2 items-start">
+            {data.faq.map((f) => (
+              <details key={f.q} className="group rounded-2xl border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 open:border-orange-300">
+                <summary className="flex items-center justify-between gap-3 cursor-pointer list-none p-4 md:p-5 font-bold text-slate-900 dark:text-white [&::-webkit-details-marker]:hidden">
+                  {f.q}
+                  <ChevronDown className="w-5 h-5 shrink-0 text-orange-600 transition-transform group-open:rotate-180" aria-hidden="true" />
+                </summary>
+                <div className="px-4 md:px-5 pb-4 md:pb-5 -mt-1 text-slate-700 dark:text-slate-300 leading-relaxed">
+                  <p>{f.a}</p>
+                  {f.link && (
+                    <Link to={f.link.to} className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-orange-700 hover:text-orange-800 dark:text-orange-400">{f.link.label} <ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
+                  )}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* KEŞFET */}
       <section className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 pb-14">

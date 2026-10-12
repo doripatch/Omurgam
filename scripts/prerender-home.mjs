@@ -98,6 +98,27 @@ async function buildData() {
     return { key: r.key, label: r.label, term: clean(g.term), slug: r.slug, def: clean(g.definition), posts, ...(r.guide ? { guide: r.guide } : {}), related };
   });
 
+  // SSS (anasayfa altı): sağlık soruları Omurga Sözlüğü tanımıyla AYNEN cevaplanır (yeni tıbbi metin yok);
+  // platform soruları kurum bilgisidir. Görünür metin = FAQPage JSON-LD metni (index.html'e build'de yazılır).
+  const FAQ_TERMS = [
+    ['Bel fıtığı nedir?', 'lomber-disk-hernisi'],
+    ['Boyun fıtığı nedir?', 'servikal-disk-hernisi'],
+    ['Skolyoz nedir?', 'skolyoz'],
+    ['Siyatik nedir?', 'siyatik'],
+    ['Sakralizasyon nedir?', 'sakralizasyon'],
+    ['MR raporumda "lordozda düzleşme" yazıyor, ne demek?', 'lordozda-duzlesme'],
+  ];
+  const faq = [
+    { q: 'Omurgam nedir?', a: "Omurgam, Prof. Dr. Defne Kaya Utlu editörlüğünde hazırlanan Türkçe omurga sağlığı platformudur. Yazılar, videolar ve Omurga Sözlüğü ile omurga sağlığını sade ve bilimsel bir dille anlatır.", link: { label: 'Hakkımızda', to: '/hakkimizda' } },
+    ...FAQ_TERMS.map(([q, slug]) => {
+      const g = gBySlug.get(slug);
+      if (!g || !g.definition) die(`SSS: sözlükte ${slug} yok`);
+      return { q, a: clean(g.definition), link: { label: `${clean(g.term)} hakkında daha fazlası`, to: `/omurga-sozlugu/${slug}/` } };
+    }),
+    { q: 'Buradaki bilgiler muayenenin yerine geçer mi?', a: 'Hayır. Omurgam’daki içerikler bilgilendirme amaçlıdır; tanı ve tedavi için bir hekime başvurun.' },
+    { q: 'Uzmana nasıl soru sorabilirim?', a: 'Uzmana Soru Sor sayfasından sorunuzu iletebilirsiniz. Randevu sayfasından da danışma talebi oluşturabilirsiniz.', link: { label: 'Uzmana soru sor', to: '/soru-sor' } },
+  ];
+
   const data = {
     generatedAt: new Date().toISOString(),
     stats: {
@@ -106,7 +127,7 @@ async function buildData() {
       terms: glossary.length,
       views: posts.reduce((s, p) => s + (p.views || 0), 0),
     },
-    mostRead, mostReadTabs, videos, terms, myths, regions,
+    mostRead, mostReadTabs, videos, terms, myths, regions, faq,
   };
   if (mostRead.length < 3) die(`en çok okunan yazı az: ${mostRead.length}`);
   if (mostReadTabs.length < 4) die(`en çok okunan sekmeleri eksik: ${mostReadTabs.map((t) => t.key).join(',')}`);
@@ -145,6 +166,7 @@ const data = await buildData();
 const body = await renderHome(data);
 if (!body.includes('Omurga Sağlığı Platformu')) die('SSR çıktısında H1 yok');
 if (!body.includes('Omurganızı keşfedin')) die('SSR çıktısında omurga haritası yok');
+if (!body.includes('Sıkça sorulan sorular')) die('SSR çıktısında SSS yok');
 
 // Root kabuğu: aynı sınıflar (Root.tsx) + yalnız logo içeren üst bar (73px; tam menü React ile gelir, yükseklik aynı).
 const shell = '<div class="min-h-screen flex flex-col bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">'
@@ -158,6 +180,9 @@ let html = readFileSync(file, 'utf8');
 if (!html.includes('<div id="root"></div>')) die('index.html boş #root içermiyor');
 const json = JSON.stringify(data).replace(/</g, '\\u003c');
 html = html.replace('</head>', `  <script>window.__omHome = ${json};</script>\n  </head>`);
+// SSS yapılandırılmış verisi: yalnız anasayfada (spa.html'e girmez); metin sayfada görünenle birebir aynı.
+const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: data.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) };
+html = html.replace('</head>', `  <script type="application/ld+json">${JSON.stringify(faqLd).replace(/</g, '\\u003c')}</script>\n  </head>`);
 html = html.replace('<div id="root"></div>', `<div id="root">${shell}</div>`);
 // Ana JS'i ilk çizimden SONRA iste: içerik zaten HTML'de; aksi halde (hızlı ağda) JS ilk çizimden önce başladığı için
 // Lighthouse onu ilk görüntünün bağımlısı sayıp FCP/LCP'yi JS indirmesine bağlıyor. Gizli sekmede rAF çalışmaz → 1,5 sn yedek.
