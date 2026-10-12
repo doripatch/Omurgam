@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { parseBlog, parseNote, blogBlocksToHtml, noteBlocksToHtml, parseEditorial, editorialBlocksToHtml, escapeHtml } from '../src/app/lib/richBlocks.mjs';
 import { findGlossaryMentions, findPillar } from '../src/app/lib/glossaryLinks.mjs';
 import { blogDescription } from '../src/app/lib/blogSeo.mjs';
+import { medicalWebPage, trDate } from '../src/app/lib/expertProfile.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // DIST varsayılan dist/; test/CI için PRERENDER_DIST ile geçersiz kılınabilir (davranış aynı).
@@ -125,6 +126,15 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
   if (posts.length !== 183) die(`canlı published blog 183 değil: ${posts.length}`);
   if (notes.length !== 80) die(`canlı published klinisyen 80 değil: ${notes.length}`);
 
+  // Görünür yazar + tarih satırı (E-E-A-T; JS çalıştırmayan botlar da görür). React sayfaları aynı bilgiyi AuthorBox'ta gösterir.
+  const byline = (created, updated) => {
+    const pub = trDate(created), upd = trDate(updated);
+    const t = (iso, s) => `<time datetime="${esc(String(iso).slice(0, 10))}">${esc(s)}</time>`;
+    return `<p class="byline">Yazar: <a href="/hakkimizda">Prof. Dr. Defne Kaya Utlu</a>`
+      + (pub ? ` · Yayın: ${t(created, pub)}` : '')
+      + (upd && upd !== pub ? ` · Son güncelleme: ${t(updated, upd)}` : '') + '</p>';
+  };
+
   // --- BLOG detay (183) ---
   const families = { kaleminden: [], 'saglikli-yasam': [], 'yatak-yastik': [] };
   let blogWithMentions = 0; // en az 1 sözlük linki alan blog yazısı sayısı (doğrulama için)
@@ -140,7 +150,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
       '@graph': [
         { '@type': 'Article', headline: p.title, description: description || undefined, articleSection: p.category,
           inLanguage: 'tr-TR', datePublished: p.createdAt || p.created_at, dateModified: p.updatedAt || p.createdAt || p.created_at,
-          image: p.imageUrl || LOGO, mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+          image: p.imageUrl || LOGO, mainEntityOfPage: medicalWebPage(canonical, p.updatedAt || p.createdAt || p.created_at),
           author: { '@id': `${ORIGIN}/#defne-kaya-utlu` }, publisher: { '@id': `${ORIGIN}/#org` } },
         breadcrumb(r.contentFamily, p.title, canonical),
       ],
@@ -158,7 +168,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
       ? `<p><a href="${pillar.url}">Kapsamlı rehber: ${esc(pillar.name)} →</a></p>`
       : '';
     const body = `<main><nav><a href="${FAM[r.contentFamily].base}/">← ${esc(FAM[r.contentFamily].name)}</a></nav>`
-      + `<p>${esc(p.category || '')}</p><h1>${esc(p.title)}</h1>`
+      + `<p>${esc(p.category || '')}</p><h1>${esc(p.title)}</h1>` + byline(p.createdAt || p.created_at, p.updatedAt)
       + (lead ? `<p>${esc(lead)}</p>` : '')
       + `<article>${(r.contentFamily === 'kaleminden' || r.contentFamily === 'saglikli-yasam')
           ? editorialBlocksToHtml(parseEditorial(p.content))
@@ -178,13 +188,13 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
       '@graph': [
         { '@type': 'Article', headline: n.title, description, articleSection: n.category || 'Klinik Değerlendirme',
           inLanguage: 'tr-TR', datePublished: n.createdAt, dateModified: n.updatedAt || n.createdAt,
-          mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+          mainEntityOfPage: medicalWebPage(canonical, n.updatedAt || n.createdAt),
           author: { '@id': `${ORIGIN}/#defne-kaya-utlu` }, publisher: { '@id': `${ORIGIN}/#org` } },
         breadcrumb('klinisyenler', n.title, canonical),
       ],
     };
     const body = `<main><nav><a href="/klinisyenler/">← Klinisyenlere Notlar</a></nav>`
-      + `<p>${esc(n.category || 'Klinik Değerlendirme')}</p><h1>${esc(n.title)}</h1>`
+      + `<p>${esc(n.category || 'Klinik Değerlendirme')}</p><h1>${esc(n.title)}</h1>` + byline(n.createdAt, n.updatedAt)
       + `<article>${noteBlocksToHtml(parseNote(n.content))}</article>${DISCLAIMER}</main>`;
     write(r.newUrl, renderPage({ title: `${n.title} | Omurgam`, description, canonical, type: 'article', jsonLd, bodyHtml: body }));
     clinList.push({ url: `${r.newUrl}/`, title: n.title, category: n.category || 'Klinik Değerlendirme' });
@@ -303,6 +313,7 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
     if (!html.includes(`rel="canonical" href="${ORIGIN}${rec.newUrl}/"`)) errs.push(`${name}: self-canonical yanlış`);
     if (!html.includes(`<h1>${esc(p.title)}</h1>`)) errs.push(`${name}: H1 yok`);
     if (!html.includes('"@type":"Article"')) errs.push(`${name}: Article JSON-LD yok`);
+    if (!html.includes('class="byline"') || !html.includes('"@type":"MedicalWebPage"')) errs.push(`${name}: yazar satırı / MedicalWebPage yok`);
     if (!html.includes('"@type":"BreadcrumbList"')) errs.push(`${name}: Breadcrumb yok`);
     if (/\/blog\/[0-9a-f-]{36}/.test(html)) errs.push(`${name}: eski /blog/<UUID> izi var`);
   }

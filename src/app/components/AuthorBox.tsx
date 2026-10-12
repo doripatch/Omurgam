@@ -1,4 +1,6 @@
 import { BadgeCheck, BookOpen } from 'lucide-react';
+import { Link } from 'react-router';
+import { EXPERT_PROFILES } from '../lib/expertProfile.mjs';
 
 // E-E-A-T yazar/uzman kutusu — Google sağlık içeriğinde yazar otoritesine çok önem verir.
 export default function AuthorBox({ updatedDate }: { updatedDate?: string }) {
@@ -25,6 +27,12 @@ export default function AuthorBox({ updatedDate }: { updatedDate?: string }) {
             </span>
             {updatedDate && <span>Son güncelleme: {updatedDate}</span>}
           </div>
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+            <Link to="/hakkimizda" className="font-semibold text-teal-700 hover:underline dark:text-teal-300">Özgeçmiş</Link>
+            {EXPERT_PROFILES.map((p) => (
+              <span key={p.label}> · <a href={p.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-teal-700 hover:underline dark:text-teal-300">{p.label}</a></span>
+            ))}
+          </p>
         </div>
       </div>
     </div>

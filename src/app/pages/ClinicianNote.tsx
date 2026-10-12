@@ -6,6 +6,7 @@ import { Link, useParams } from 'react-router';
 import { ArrowLeft, Clock, Stethoscope } from 'lucide-react';
 import { clinNotesAPI } from '../lib/api';
 import Seo from '../components/Seo';
+import { medicalWebPage } from '../lib/expertProfile.mjs';
 import NoteContent from '../components/NoteContent';
 import { ORIGIN, FAMILY_META, clinicianIdBySlug, recordById } from '../lib/urlMigration';
 
@@ -95,7 +96,7 @@ export default function ClinicianNote() {
         inLanguage: 'tr-TR',
         datePublished: note.createdAt,
         dateModified: note.updatedAt || note.createdAt,
-        mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+        mainEntityOfPage: medicalWebPage(canonical, note.updatedAt || note.createdAt),
         author: { '@id': `${ORIGIN}/#defne-kaya-utlu` },
         publisher: { '@id': `${ORIGIN}/#org` },
       },

@@ -14,6 +14,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { buildSync } from 'esbuild';
 import { buildFaq, faqJsonLd, FAQ_CATEGORIES } from './lib/faq.mjs';
+import { EXPERT_PROFILES } from '../src/app/lib/expertProfile.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = process.env.PRERENDER_DIST || join(ROOT, 'dist');
@@ -190,7 +191,7 @@ async function main() {
           mainEntity: { '@id': `${ORIGIN}/#defne-kaya-utlu` } },
         breadcrumb([['Ana Sayfa', `${ORIGIN}/`], ['Hakkımda', `${ORIGIN}/hakkimizda`]]),
       ] },
-      bodyHtml: `<main>${nav}<h1>${esc(h1)}</h1>${body}</main>`,
+      bodyHtml: `<main>${nav}<h1>${esc(h1)}</h1>${body}<h2>Akademik profiller</h2><ul>${EXPERT_PROFILES.map((p) => `<li><a href="${esc(p.url)}">${esc(p.label)}</a></li>`).join('')}</ul></main>`,
     });
   }
 

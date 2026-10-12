@@ -9,6 +9,7 @@ import { ArrowLeft, Clock, Eye, Tag } from 'lucide-react';
 import { blogAPI } from '../lib/api';
 import { toast } from 'sonner';
 import Seo from '../components/Seo';
+import { medicalWebPage } from '../lib/expertProfile.mjs';
 import FavoriteButton from '../components/FavoriteButton';
 import AuthorBox from '../components/AuthorBox';
 import RichText, { hasMarkdown } from '../components/RichText';
@@ -98,7 +99,7 @@ export default function MigratedBlogPost() {
         datePublished: post.createdAt || post.created_at,
         dateModified: post.updatedAt || post.createdAt || post.created_at,
         image: post.imageUrl || `${ORIGIN}/assets/logo-og.png`,
-        mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+        mainEntityOfPage: medicalWebPage(canonical, post.updatedAt || post.createdAt || post.created_at),
         author: { '@id': `${ORIGIN}/#defne-kaya-utlu` },
         publisher: { '@id': `${ORIGIN}/#org` },
       },

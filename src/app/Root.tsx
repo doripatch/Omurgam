@@ -15,6 +15,12 @@ import { useAuthStore } from './store/authStore';
 import { useSiteSettingsStore } from './store/siteSettingsStore';
 import { toast } from 'sonner';
 
+// Sosyal hesap bağlantısı gerçek bir profil mi? Panelde yalnız "https://www.youtube.com" gibi alan adı kalmışsa ikon gösterilmez.
+const isProfileUrl = (u?: string) => {
+  if (!u) return false;
+  try { return new URL(u).pathname.replace(/\/+$/, '').length > 0; } catch { return false; }
+};
+
 export default function Root() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -514,7 +520,7 @@ export default function Root() {
               <div className="mt-6">
                 <h4 className="font-semibold mb-3">{settings?.footer?.followTitle || 'Takip Edin'}</h4>
                 <div className="flex gap-3">
-                  {settings?.instagram && (
+                  {isProfileUrl(settings?.instagram) && (
                     <a 
                       href={settings.instagram} 
                       target="_blank" 
@@ -525,7 +531,7 @@ export default function Root() {
                       <Instagram className="w-5 h-5" />
                     </a>
                   )}
-                  {settings?.youtube && (
+                  {isProfileUrl(settings?.youtube) && (
                     <a 
                       href={settings.youtube} 
                       target="_blank" 
@@ -536,7 +542,7 @@ export default function Root() {
                       <Youtube className="w-5 h-5" />
                     </a>
                   )}
-                  {settings?.linkedin && (
+                  {isProfileUrl(settings?.linkedin) && (
                     <a 
                       href={settings.linkedin} 
                       target="_blank" 
@@ -547,7 +553,7 @@ export default function Root() {
                       <Linkedin className="w-5 h-5" />
                     </a>
                   )}
-                  {settings?.facebook && (
+                  {isProfileUrl(settings?.facebook) && (
                     <a 
                       href={settings.facebook} 
                       target="_blank" 
@@ -558,7 +564,7 @@ export default function Root() {
                       <Facebook className="w-5 h-5" />
                     </a>
                   )}
-                  {settings?.twitter && (
+                  {isProfileUrl(settings?.twitter) && (
                     <a 
                       href={settings.twitter} 
                       target="_blank" 

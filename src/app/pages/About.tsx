@@ -2,6 +2,7 @@ import { GraduationCap, Award, Briefcase, Heart, BookOpen, Globe, Users, Trophy,
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
 import Seo from '../components/Seo';
+import { EXPERT_PROFILES } from '../lib/expertProfile.mjs';
 
 export default function About() {
   const { settings, isLoading } = useSiteSettingsStore();  // 
@@ -141,6 +142,15 @@ export default function About() {
                 <div className="border-t border-teal-400/30 pt-4">
                   <div className="text-3xl font-bold">10+</div>
                   <div className="text-sm text-teal-100">Kitap Editörlüğü</div>
+                </div>
+              </div>
+              {/* Doğrulanabilir akademik profiller (src/app/lib/expertProfile.mjs) */}
+              <div className="mt-6 pt-4 border-t border-teal-400/30">
+                <div className="text-sm text-teal-100 mb-2">Akademik profiller</div>
+                <div className="flex flex-wrap gap-2">
+                  {EXPERT_PROFILES.map((p) => (
+                    <a key={p.label} href={p.url} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-sm font-semibold">{p.label}</a>
+                  ))}
                 </div>
               </div>
             </div>
