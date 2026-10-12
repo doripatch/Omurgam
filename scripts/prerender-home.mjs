@@ -149,7 +149,7 @@ if (!body.includes('Omurganızı keşfedin')) die('SSR çıktısında omurga har
 // Root kabuğu: aynı sınıflar (Root.tsx) + yalnız logo içeren üst bar (73px; tam menü React ile gelir, yükseklik aynı).
 const shell = '<div class="min-h-screen flex flex-col bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">'
   + '<header class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border-b border-amber-500/10 dark:border-slate-700 shadow-sm">'
-  + '<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex justify-between items-center h-[4.5rem] gap-2">'
+  + '<div class="w-full px-4 sm:px-6 lg:px-10 2xl:px-16"><div class="flex justify-between items-center h-[4.5rem] gap-2">'
   + '<a href="/" class="flex items-center group flex-shrink-0"><img src="/assets/logo-header.webp" alt="Omurgam" width="190" height="192" class="h-14 md:h-16 w-auto object-contain"></a>'
   + `</div></div></header><main class="flex-1">${body}</main></div>`;
 

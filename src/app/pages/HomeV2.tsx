@@ -126,11 +126,13 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
         jsonLd={jsonLd}
       />
 
+      {/* ÜST KISIM: geniş ekranda (xl+) solda başlık + arama, sağda omurga haritası; dar ekranda alt alta. Kenar boşluğu yok (akışkan genişlik). */}
+      <div className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 xl:grid xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:gap-12 xl:items-center xl:py-10">
       {/* HERO + ARAMA */}
-      <section className="px-4 sm:px-6 lg:px-8 pt-6 pb-8 md:pt-10 md:pb-10 text-center">
-        <div className="max-w-3xl mx-auto">
+      <section className="pt-6 pb-8 md:pt-10 md:pb-10 xl:py-0 text-center xl:text-left">
+        <div className="max-w-3xl mx-auto xl:mx-0">
           {/* Güven şeridi: editör rozeti + rakamlar tek satırda (ayrı sayaç bölümü yerine). */}
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+          <div className="flex flex-wrap items-center justify-center xl:justify-start gap-x-3 gap-y-2">
             <Link to="/hakkimizda" className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-200 bg-amber-50 text-amber-800 text-sm font-semibold hover:border-amber-400 dark:bg-slate-800 dark:border-slate-700 dark:text-amber-300">
               <span className="w-2 h-2 rounded-full bg-orange-600" aria-hidden="true" />
               Prof. Dr. Defne Kaya Utlu editörlüğünde
@@ -141,7 +143,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
               </span>
             )}
           </div>
-          <h1 className="mt-4 text-[2.5rem] md:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+          <h1 className="mt-4 text-[2.5rem] md:text-5xl lg:text-6xl xl:text-5xl 2xl:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.1]">
             {/* Tek blok: LCP ölçümünde başlık tek öğe sayılır (iki satır ayrı blok olursa çerez bildirimi LCP olur). */}
             Omurgam<br /><span className="text-orange-600">Türkiye&apos;nin Omurga Sağlığı Platformu</span>
           </h1>
@@ -162,7 +164,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
             />
             <button type="submit" className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-orange-600 transition-colors dark:bg-orange-600">Ara</button>
           </form>
-          <div className="mt-3 flex flex-wrap justify-center gap-2">
+          <div className="mt-3 flex flex-wrap justify-center xl:justify-start gap-2">
             {CHIPS.map((c) => (
               <Link key={c.to} to={c.to} className="px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-orange-400 hover:text-orange-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
                 {c.label}
@@ -175,9 +177,10 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
 
       {/* OMURGA HARİTASI */}
       {data && data.regions && data.regions.length > 0 && <SpineMap regions={data.regions} />}
+      </div>
 
       {/* PANO */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid gap-8 lg:grid-cols-3">
+      <div className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 py-10 grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
           {data && data.mostRead.length > 0 && (
             <section>
@@ -285,7 +288,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
       </div>
 
       {/* KEŞFET */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
+      <section className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 pb-14">
         <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-4">Keşfet</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {EXPLORE.map(({ label, to, Icon }) => (

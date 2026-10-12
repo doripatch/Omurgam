@@ -137,7 +137,7 @@ export default function Root() {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-stone-50 via-amber-50/30 to-orange-50/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Modern Header with Glassmorphism */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border-b border-amber-500/10 dark:border-slate-700 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16">
           <div className="flex justify-between items-center h-[4.5rem] gap-2">
             {/* Logo */}
             <Link to="/" className="flex items-center group flex-shrink-0">
@@ -439,7 +439,7 @@ export default function Root() {
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500 rounded-full blur-3xl"></div>
         </div>
 
-        <div className="relative max-w-7xl mx-auto">
+        <div className="relative w-full lg:px-6 2xl:px-12">
           <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
