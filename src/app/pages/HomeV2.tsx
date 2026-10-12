@@ -194,8 +194,8 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
       </div>
 
       {/* PANO */}
-      <div className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 py-10 grid gap-8 lg:grid-cols-3 xl:grid-cols-12 xl:gap-10">
-        <div className="lg:col-span-2 xl:col-span-7 space-y-8">
+      <div className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 py-10 grid grid-cols-1 gap-8 lg:grid-cols-3 xl:grid-cols-12 xl:gap-10">
+        <div className="min-w-0 lg:col-span-2 xl:col-span-7 space-y-8">
           {data && data.mostRead.length > 0 && (
             <section>
               <div className="flex items-end justify-between gap-3 mb-4">
