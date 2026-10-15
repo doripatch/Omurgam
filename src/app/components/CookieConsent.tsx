@@ -67,7 +67,7 @@ export default function CookieConsent() {
             <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
               <p>
                 Bu sitede; zorunlu çerezlerin yanı sıra, izninize bağlı olarak ziyaret istatistikleri (Google Analytics),
-                gömülü içerikler (YouTube){PIXEL_ENABLED ? ' ve reklamlarımızın ölçümü (Meta Pixel)' : ''} için çerezler kullanıyoruz.
+                gömülü içerikler (YouTube, Google Haritalar){PIXEL_ENABLED ? ' ve reklamlarımızın ölçümü (Meta Pixel)' : ''} için çerezler kullanıyoruz.
               </p>
               <p>
                 Tercihinizi seçebilirsiniz. Detaylar için{' '}
@@ -117,8 +117,8 @@ export default function CookieConsent() {
               onChange={setAnalytics}
             />
             <CategoryRow
-              title="Gömülü medya (YouTube)"
-              desc="Video sayfalarında gömülü YouTube oynatıcısını etkinleştirir."
+              title="Gömülü medya (YouTube, Google Haritalar)"
+              desc="Video sayfalarında YouTube oynatıcısını, İletişim sayfasında Google Haritalar'ı etkinleştirir."
               checked={media}
               onChange={setMedia}
             />

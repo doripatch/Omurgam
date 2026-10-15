@@ -1,10 +1,16 @@
-import { Mail, Phone, MapPin, Send, Clock, MessageCircle } from 'lucide-react';
-import { useState } from 'react';
+import { Mail, Phone, MapPin, Send, Clock, MessageCircle, Navigation, ExternalLink } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { trackEvent } from '../lib/analytics';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
 import { contactAPI } from '../lib/api';
 import Seo from '../components/Seo';
+import { getConsent, subscribeConsent, setConsent, openCookiePreferences } from '../lib/consent';
+
+// Harita araması için sade adres: paneldeki uzun adres metni ("… Banko Burger Üstü …") Google'da işletme kartı açıyor.
+// Adres değişirse burayı da güncelle.
+const MAP_QUERY = 'Ethemefendi Cad. No:3, Caddebostan, 34728 Kadıköy/İstanbul';
+const MAP_Q = encodeURIComponent(MAP_QUERY);
 
 export default function Contact() {
   const settings = useSiteSettingsStore((s) => s.settings);
@@ -17,6 +23,9 @@ export default function Contact() {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Google Haritalar gömülü medya izniyle yüklenir (YouTube ile aynı çerez kategorisi).
+  const [mapAllowed, setMapAllowed] = useState<boolean>(() => !!getConsent()?.media);
+  useEffect(() => subscribeConsent((c) => setMapAllowed(!!c?.media)), []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -233,13 +242,60 @@ export default function Contact() {
         {/* Harita */}
         <div className="mt-12">
           <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl p-4 border border-amber-500/10 dark:border-slate-700 shadow-sm overflow-hidden">
-            <div className="aspect-video bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 rounded-xl flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto mb-3" />
-                <p className="text-slate-600 dark:text-slate-400 font-medium whitespace-pre-line">
-                  {t.addressText}
-                </p>
+            {mapAllowed ? (
+              <iframe
+                className="w-full h-80 sm:h-[28rem] rounded-xl border-0"
+                src={`https://maps.google.com/maps?q=${MAP_Q}&z=17&hl=tr&output=embed`}
+                title="Omurgam adresi Google Haritalar'da"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            ) : (
+              <div className="min-h-80 sm:min-h-[28rem] bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 rounded-xl flex items-center justify-center p-6">
+                <div className="text-center max-w-xl">
+                  <MapPin className="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-600 dark:text-slate-400 font-medium whitespace-pre-line">
+                    {t.addressText}
+                  </p>
+                  <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                    Haritayı göstermek için Google Haritalar yüklenir; Google bu sırada çerez kullanabilir.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setConsent({ analytics: !!getConsent()?.analytics, media: true, marketing: !!getConsent()?.marketing })}
+                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 text-white text-sm font-bold hover:shadow-lg transition-all"
+                    >
+                      Haritayı Göster
+                    </button>
+                    <button
+                      type="button"
+                      onClick={openCookiePreferences}
+                      className="px-5 py-2.5 rounded-xl border border-slate-400/60 text-slate-700 dark:text-slate-200 text-sm font-semibold hover:bg-white/40 transition-colors"
+                    >
+                      Çerez Tercihleri
+                    </button>
+                  </div>
+                </div>
               </div>
+            )}
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${MAP_Q}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-orange-600 transition-colors dark:bg-orange-600"
+              >
+                <Navigation className="w-4 h-4" aria-hidden="true" /> Yol tarifi al
+              </a>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${MAP_Q}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:border-orange-400 hover:text-orange-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
+              >
+                <ExternalLink className="w-4 h-4" aria-hidden="true" /> Google Haritalar'da aç
+              </a>
             </div>
           </div>
         </div>
