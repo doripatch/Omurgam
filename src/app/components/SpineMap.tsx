@@ -178,8 +178,8 @@ export default function SpineMap({ regions }: { regions: SpineRegion[] }) {
   };
 
   return (
-    <section aria-labelledby="spine-map-title" className="pt-2 xl:pt-0 xl:col-span-7">
-      <div className="rounded-3xl border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 p-5 md:p-8">
+    <section aria-labelledby="spine-map-title" className="pt-2 xl:pt-0 xl:col-span-7 xl:flex xl:flex-col">
+      <div className="rounded-3xl border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 p-5 md:p-8 xl:flex-1">
         <h2 id="spine-map-title" className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Omurganızı keşfedin</h2>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Bir bölgeye dokunun ya da üzerine gelin.</p>
 

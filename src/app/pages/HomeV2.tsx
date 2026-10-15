@@ -139,11 +139,12 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
       />
 
       {/* ÜST KISIM: geniş ekranda (xl+) solda başlık + arama, sağda omurga haritası; dar ekranda alt alta. Kenar boşluğu yok (akışkan genişlik). */}
-      <div className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 xl:grid xl:grid-cols-12 xl:gap-10 xl:items-start xl:py-10">
-      {/* Izgara: üst satır 5|7 (başlık | harita), alt satır da 5|7 (kartlar | listeler) → sütun kenarları alt alta hizalı. */}
+      <div className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 xl:grid xl:grid-cols-12 xl:gap-10 xl:items-stretch xl:py-10">
+      {/* Izgara: üst satır 5|7 (başlık | harita), alt satır da 5|7 (kartlar | listeler) → sütun kenarları alt alta hizalı.
+          xl+: iki sütun aynı yükseklikte; sol üst = harita kartının üst kenarı, Günün terimi kartının altı = harita kartının altı. */}
       {/* HERO + ARAMA */}
-      <section className="pt-6 pb-8 md:pt-10 md:pb-10 xl:pb-0 xl:pt-8 xl:col-span-5 text-center xl:text-left">
-        <div className="max-w-3xl mx-auto xl:mx-0 xl:max-w-none">
+      <section className="pt-6 pb-8 md:pt-10 md:pb-10 xl:pb-0 xl:pt-0 xl:col-span-5 xl:flex xl:flex-col text-center xl:text-left">
+        <div className="max-w-3xl mx-auto xl:mx-0 xl:max-w-none xl:flex-1 xl:flex xl:flex-col">
           {/* Güven şeridi: editör rozeti + rakamlar tek satırda (ayrı sayaç bölümü yerine). */}
           <div className="flex flex-wrap items-center justify-center xl:justify-start gap-x-3 gap-y-2">
             <Link to="/hakkimizda" className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-200 bg-amber-50 text-amber-800 text-sm font-semibold hover:border-amber-400 dark:bg-slate-800 dark:border-slate-700 dark:text-amber-300">
@@ -185,7 +186,7 @@ export default function HomeV2({ initialData }: { initialData?: HomeData | null 
             ))}
           </div>
           <LearnButton />
-          {termCard && <div className="hidden xl:block mt-8 [&>section]:min-h-0">{termCard}</div>}
+          {termCard && <div className="hidden xl:block mt-8 xl:mt-auto xl:pt-8 [&>section]:min-h-0">{termCard}</div>}
         </div>
       </section>
 
