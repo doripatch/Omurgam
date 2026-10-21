@@ -18,6 +18,20 @@ import { ORIGIN, BASE_TO_FAMILY, FAMILY_META, idByBaseSlug, recordById } from '.
 import glossaryData from '../data/spineGlossary.json';
 import { findGlossaryMentions, findPillar } from '../lib/glossaryLinks.mjs';
 import { blogDescription } from '../lib/blogSeo.mjs';
+import { pickVideosForPost } from '../lib/videoLinks.mjs';
+
+type VideoCard = { url: string; title: string; category: string };
+// Kanonik video kartları build'de üretilir (prerender-content → dist/video-cards.json); oturum başına bir kez istenir.
+let videoCardsPromise: Promise<VideoCard[]> | null = null;
+function loadVideoCards(): Promise<VideoCard[]> {
+  if (!videoCardsPromise) {
+    videoCardsPromise = fetch('/video-cards.json')
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d) => (Array.isArray(d) ? d : []))
+      .catch(() => { videoCardsPromise = null; return []; });
+  }
+  return videoCardsPromise;
+}
 
 interface BlogPostData {
   id: string;
@@ -56,6 +70,15 @@ export default function MigratedBlogPost() {
 
   const [post, setPost] = useState<BlogPostData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [videoCards, setVideoCards] = useState<VideoCard[]>([]);
+
+  // "Bu konuda videolar" — yazı yüklendikten sonra (ilk çizimi bekletmez); hata olursa bölüm görünmez.
+  useEffect(() => {
+    if (!post) return;
+    let active = true;
+    loadVideoCards().then((cards) => { if (active) setVideoCards(cards); });
+    return () => { active = false; };
+  }, [post]);
 
   useEffect(() => {
     if (!id) { setIsLoading(false); return; }
@@ -188,6 +211,22 @@ export default function MigratedBlogPost() {
                       {mentions.map((m: { term: string; slug: string }) => (
                         <li key={m.slug}>
                           <Link to={`/omurga-sozlugu/${m.slug}/`} className="inline-block rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">{m.term} nedir?</Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                ) : null;
+              })()}
+              {(() => {
+                const pillar = findPillar(`${post.title} ${post.content}`) as { url: string } | null;
+                const vids = pickVideosForPost(id, pillar && pillar.url, videoCards) as VideoCard[];
+                return vids.length ? (
+                  <nav aria-label="Bu konuda videolar" className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-800/50">
+                    <h2 className="mb-3 text-lg font-bold text-slate-900 dark:text-white">Bu konuda videolar</h2>
+                    <ul className="space-y-2">
+                      {vids.map((v) => (
+                        <li key={v.url}>
+                          <Link to={v.url} className="font-semibold text-amber-800 hover:underline dark:text-amber-300">▶ {v.title}</Link>
                         </li>
                       ))}
                     </ul>

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useState, useEffect, useMemo } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { Search, Brain, AlertTriangle, CheckCircle, Info, TrendingUp, Shield, AlertCircle } from 'lucide-react';
 import { termsAPI } from '../lib/api';
 import { toast } from 'sonner';
@@ -7,6 +7,8 @@ import FavoriteButton from '../components/FavoriteButton';
 import Seo from '../components/Seo';
 import crossLinks from '../data/crossLinks.json';
 import { smartTruncate, faqPageJsonLd } from '../lib/glossarySeo.mjs';
+import { indexableMrTerms, mrNeighbors } from '../lib/mrLinks.mjs';
+import mrNoindex from '../data/mrNoindex.json';
 
 const MR_JSONLD = {
   '@context': 'https://schema.org',
@@ -84,6 +86,7 @@ const slugify = (s: string) =>
 // Omurga Sözlüğü'nde birebir karşılığı olan MR terimleri sözlüğe taşındı (2 Eki 2026; Netlify'da 301).
 const MERGED = crossLinks.mrToGlossary as Record<string, string>;
 const termHref = (slug: string) => (MERGED[slug] ? `/omurga-sozlugu/${MERGED[slug]}/` : `/mr-analiz/${slug}/`);
+const NOINDEX = new Set<string>((mrNoindex as { slugs: string[] }).slugs);
 
 export default function MRAnalyzer() {
   const location = useLocation();
@@ -97,6 +100,8 @@ export default function MRAnalyzer() {
   const [allTerms, setAllTerms] = useState<MRTerm[]>([]);
   const [popularTerms, setPopularTerms] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // "Diğer MR terimleri": dizine açık terimler arasında alfabetik komşular (prerender-mr ile aynı helper).
+  const indexableTerms = useMemo(() => indexableMrTerms(allTerms, MERGED, NOINDEX) as { slug: string; term: string }[], [allTerms]);
 
   useEffect(() => {
     loadTerms();
@@ -413,6 +418,23 @@ export default function MRAnalyzer() {
                 <p className="text-teal-800 text-sm md:text-base">{selectedTerm.term} — Omurga Sözlüğü açıklaması (hasta dili, sık karıştırılanlar) →</p>
               </a>
             )}
+
+            {/* Diğer MR terimleri — alfabetik komşular (iç linkleme) */}
+            {(() => {
+              const neighbors = mrNeighbors(slugify(selectedTerm.term), selectedTerm.term, indexableTerms) as { slug: string; term: string }[];
+              return neighbors.length > 0 ? (
+                <nav aria-label="Diğer MR terimleri" className="backdrop-blur-xl bg-white/80 border border-slate-200 rounded-2xl md:rounded-3xl p-4 md:p-6">
+                  <h2 className="font-bold text-slate-900 mb-3 text-base md:text-lg">Diğer MR terimleri</h2>
+                  <ul className="flex flex-wrap gap-2">
+                    {neighbors.map((x) => (
+                      <li key={x.slug}>
+                        <Link to={`/mr-analiz/${x.slug}/`} className="inline-block rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-sm font-semibold text-teal-800 hover:bg-teal-100">{x.term} nedir?</Link>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              ) : null;
+            })()}
 
             {/* SSS Card — FAQPage şemasıyla eşleşen görünür içerik */}
             {mrFaq.length > 0 && (

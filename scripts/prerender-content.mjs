@@ -8,6 +8,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseBlog, parseNote, blogBlocksToHtml, noteBlocksToHtml, parseEditorial, editorialBlocksToHtml, escapeHtml } from '../src/app/lib/richBlocks.mjs';
 import { findGlossaryMentions, findPillar } from '../src/app/lib/glossaryLinks.mjs';
+import { pickVideosForPost } from '../src/app/lib/videoLinks.mjs';
 import { blogDescription } from '../src/app/lib/blogSeo.mjs';
 import { medicalWebPage, trDate } from '../src/app/lib/expertProfile.mjs';
 
@@ -135,6 +136,13 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
       + (upd && upd !== pub ? ` · Son güncelleme: ${t(updated, upd)}` : '') + '</p>';
   };
 
+  // Kanonik video kartları: blog → ilgili video iç linkleri (statik HTML) + dist/video-cards.json (React aynısını gösterir).
+  const videoCards = videoMap
+    .filter((r) => r.id === r.canonicalCandidateId && videoById.has(r.id))
+    .map((r) => ({ url: `${r.newUrl}/`, title: videoById.get(r.id).title, category: videoById.get(r.id).category || '' }));
+  writeFileSync(join(DIST, 'video-cards.json'), JSON.stringify(videoCards));
+  let blogWithVideos = 0; // en az 1 video linki alan blog yazısı sayısı
+
   // --- BLOG detay (183) ---
   const families = { kaleminden: [], 'saglikli-yasam': [], 'yatak-yastik': [] };
   let blogWithMentions = 0; // en az 1 sözlük linki alan blog yazısı sayısı (doğrulama için)
@@ -167,12 +175,18 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
     const pillarHtml = pillar
       ? `<p><a href="${pillar.url}">Kapsamlı rehber: ${esc(pillar.name)} →</a></p>`
       : '';
+    // Bu konuda videolar (pillar kategorisine göre 3 video; MigratedBlogPost ile aynı seçim).
+    const vids = pickVideosForPost(r.id, pillar && pillar.url, videoCards);
+    if (vids.length) blogWithVideos++;
+    const videosHtml = vids.length
+      ? `<nav aria-label="Bu konuda videolar"><h2>Bu konuda videolar</h2><ul>${vids.map((v) => `<li><a href="${esc(v.url)}">${esc(v.title)}</a></li>`).join('')}</ul></nav>`
+      : '';
     const body = `<main><nav><a href="${FAM[r.contentFamily].base}/">← ${esc(FAM[r.contentFamily].name)}</a></nav>`
       + `<p>${esc(p.category || '')}</p><h1>${esc(p.title)}</h1>` + byline(p.createdAt || p.created_at, p.updatedAt)
       + (lead ? `<p>${esc(lead)}</p>` : '')
       + `<article>${(r.contentFamily === 'kaleminden' || r.contentFamily === 'saglikli-yasam')
           ? editorialBlocksToHtml(parseEditorial(p.content))
-          : blogBlocksToHtml(parseBlog(p.content))}</article>${pillarHtml}${relTermsHtml}${DISCLAIMER}</main>`;
+          : blogBlocksToHtml(parseBlog(p.content))}</article>${pillarHtml}${relTermsHtml}${videosHtml}${DISCLAIMER}</main>`;
     write(r.newUrl, renderPage({ title: `${p.title} | Omurgam`, description, canonical, type: 'article', jsonLd, bodyHtml: body }));
     families[r.contentFamily].push({ url: `${r.newUrl}/`, title: p.title, category: p.category });
   }
@@ -301,6 +315,8 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
   if (families['yatak-yastik'].length !== 32) errs.push(`yatak-yastik 32 değil: ${families['yatak-yastik'].length}`);
   // Blog iç linkleme: matcher bozuksa (0 eşleşme) build dursun.
   if (blogWithMentions < 40) errs.push(`blog→sözlük linki alan yazı beklenenden az: ${blogWithMentions} (<40)`);
+  if (videoCards.length < 36) errs.push(`video-cards beklenenden az: ${videoCards.length} (<36)`);
+  if (blogWithVideos < 30) errs.push(`blog→video linki alan yazı beklenenden az: ${blogWithVideos} (<30)`);
   if (blogWithPillar < 60) errs.push(`blog→pillar linki alan yazı beklenenden az: ${blogWithPillar} (<60)`);
   if (clinList.length !== 80) errs.push(`klinisyen 80 değil: ${clinList.length}`);
 
@@ -348,5 +364,5 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
   }
   if (errs.length) die('doğrulama:\n - ' + errs.join('\n - '));
 
-  console.log(`[prerender-content] OK — 263 blog/klinisyen detay (84/67/32/80) + 4 indeks + ${videoCanon.length} video detay + /videolar indeks; canlı 183+80+${videoCanon.length} eşleşti; tam 1 canonical & seo-jsonld; VideoObject yok; eski /blog|/video <UUID> izi yok.`);
+  console.log(`[prerender-content] OK — 263 blog/klinisyen detay (84/67/32/80) + 4 indeks + ${videoCanon.length} video detay + /videolar indeks; ${blogWithVideos} yazıda "Bu konuda videolar"; canlı 183+80+${videoCanon.length} eşleşti; tam 1 canonical & seo-jsonld; VideoObject yok; eski /blog|/video <UUID> izi yok.`);
 })();

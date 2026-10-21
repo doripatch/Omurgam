@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { smartTruncate, faqPageJsonLd } from '../src/app/lib/glossarySeo.mjs';
+import { indexableMrTerms, mrNeighbors } from '../src/app/lib/mrLinks.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = process.env.PRERENDER_DIST || join(ROOT, 'dist');
@@ -74,6 +75,9 @@ let noindexWritten = 0;
 // Omurga Sözlüğü'nde birebir karşılığı olan terimler sözlüğe taşındı (Netlify 301, generate-redirects.mjs) → üretilmez.
 const MERGED = crossLinks.mrToGlossary;
 let mergedSkipped = 0;
+// İç linkleme: dizine açık MR terimleri arasında alfabetik komşular (MRAnalyzer.tsx ile aynı helper).
+const INDEXABLE = indexableMrTerms(source, MERGED, NOINDEX);
+let neighborPages = 0;
 for (const [slug, term] of bySlug) {
   if (MERGED[slug]) { mergedSkipped++; continue; }
   const canonical = `${ORIGIN}${BASE}/${slug}/`;
@@ -110,10 +114,15 @@ for (const [slug, term] of bySlug) {
   const crossHtml = glossarySlug
     ? `<section><h2>Sözlükte daha ayrıntılı</h2><p><a href="/omurga-sozlugu/${esc(glossarySlug)}/">${esc(term.term)} — Omurga Sözlüğü açıklaması (hasta dili, sık karıştırılanlar) →</a></p></section>`
     : '';
+  const neighbors = mrNeighbors(slug, term.term, INDEXABLE);
+  if (neighbors.length === Math.min(8, INDEXABLE.length - (NOINDEX.has(slug) ? 0 : 1))) neighborPages++;
+  const neighborHtml = neighbors.length
+    ? `<nav aria-label="Diğer MR terimleri"><h2>Diğer MR terimleri</h2><ul>${neighbors.map((x) => `<li><a href="${BASE}/${esc(x.slug)}/">${esc(x.term)} nedir?</a></li>`).join('')}</ul></nav>`
+    : '';
   const body = `<main><nav><a href="${BASE}">← MR Terim Sözlüğü</a></nav>`
     + `<p>${esc(term.category || 'Omurga & MR Terimleri')}</p><h1>${esc(term.term)} Nedir?</h1>`
     + `<section><h2>Kısa ve doğrudan açıklama</h2><p>${esc(term.explanation)}</p></section>`
-    + recommendations + crossHtml + faqHtml + DISCLAIMER + '</main>';
+    + recommendations + crossHtml + faqHtml + neighborHtml + DISCLAIMER + '</main>';
   const dir = join(DIST, 'mr-analiz', slug);
   mkdirSync(dir, { recursive: true });
   if (NOINDEX.has(slug)) noindexWritten++;
@@ -139,8 +148,10 @@ for (const slug of samples) {
   if (!mrDescM || mrDescM[1].length > 170) { console.error(`[prerender-mr] HATA: ${slug} meta description uzun/eksik`); process.exit(1); }
 }
 
+if (INDEXABLE.length < 60) { console.error(`[prerender-mr] HATA: dizine açık MR terimi beklenenden az: ${INDEXABLE.length}`); process.exit(1); }
+if (neighborPages !== bySlug.size - mergedSkipped) { console.error(`[prerender-mr] HATA: komşu link bloğu eksik sayfa var (${neighborPages}/${bySlug.size - mergedSkipped})`); process.exit(1); }
 if (noindexWritten !== NOINDEX.size) { console.error(`[prerender-mr] HATA: noindex listesinde ${NOINDEX.size} terim var, ${noindexWritten} üretildi (taşınmış/yanlış slug?)`); process.exit(1); }
 for (const slug of Object.keys(MERGED)) {
   if (existsSync(join(DIST, 'mr-analiz', slug, 'index.html'))) { console.error(`[prerender-mr] HATA: sözlüğe taşınan ${slug} yine üretildi`); process.exit(1); }
 }
-console.log(`[prerender-mr] OK — ${bySlug.size - mergedSkipped} benzersiz detay üretildi (${mergedSkipped} terim Omurga Sözlüğü'ne taşındı, 301; ${noindexWritten} noindex); ${source.length - bySlug.size} mükerrer kaynak kayıt ilk-kayıt kuralıyla tekilleştirildi; slash canonical + görünür H1 + DefinedTerm doğrulandı.`);
+console.log(`[prerender-mr] OK — ${bySlug.size - mergedSkipped} benzersiz detay üretildi (her birinde ${Math.min(8, INDEXABLE.length - 1)} 'Diğer MR terimleri' linki; ${mergedSkipped} terim Omurga Sözlüğü'ne taşındı, 301; ${noindexWritten} noindex); ${source.length - bySlug.size} mükerrer kaynak kayıt ilk-kayıt kuralıyla tekilleştirildi; slash canonical + görünür H1 + DefinedTerm doğrulandı.`);
