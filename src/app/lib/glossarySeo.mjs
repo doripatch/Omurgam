@@ -31,8 +31,21 @@ export function faqPageJsonLd(faq) {
 // Başlık: "Nedir?" (arama niyetiyle eşleşir, Google kalınlaştırır) + iki DOĞRU
 // farklılaştırıcı (her terimde definition=anlamı ve clinicalNote=klinik önemi var).
 // React <Seo> " | Omurgam" ekini kendisi ekler; ona glossaryTitleBase verilir.
+// Arama sonucunda çok görünüp az tıklanan terimler (GSC, 17–23 Eki 2026): başlık, insanların aradığı
+// ifadeyi ve sözlükteki hasta dili karşılığını (patientLanguage) taşır. Tıbbi bilgi EKLENMEZ.
+const TITLE_OVERRIDES = {
+  'diffuz-disk-bulgingi': "Diffüz Bulging Nedir? MR'da Yaygın Disk Taşması Ne Demek?",
+  'schmorl-nodulu': 'Schmorl Nodülü Nedir? Disk Kemiğin İçine mi Girmiş?',
+  osteofit: 'Osteofit Nedir? Kemik Çıkıntısı, Kemik Dikeni Ne Demek?',
+  'vertebra-korpusu': 'Vertebra Korpusu Nedir? Omur Gövdesi Ne Demek?',
+  ligament: 'Ligament (Bağ) Nedir? Omurga Bağları Ne İşe Yarar?',
+  hiperlordoz: 'Hiperlordoz Nedir? Bel Çukurunun Fazla Olması Ne Demek?',
+};
+// Bu terimlerde meta açıklama: tanım + sözlüğün "doğrusu" (✅) cümlesi, ikisi de aynen.
+const DESC_WITH_TRUE = new Set(Object.keys(TITLE_OVERRIDES));
+
 export function glossaryTitleBase(term) {
-  return `${term.term} Nedir? Anlamı ve Klinik Önemi`;
+  return TITLE_OVERRIDES[term.slug] || `${term.term} Nedir? Anlamı ve Klinik Önemi`;
 }
 export function glossaryTitle(term) {
   return `${glossaryTitleBase(term)} | Omurgam`;
@@ -40,6 +53,17 @@ export function glossaryTitle(term) {
 
 // Meta description: kaynaktan; ≤155 krk; kelime ORTASINDA kesmez, tam sözcükte biter.
 export function glossaryDescription(term) {
+  if (DESC_WITH_TRUE.has(term.slug)) {
+    // Tanım + "doğrusu" cümlesi sığıyorsa ikisi; sığmıyorsa hasta dili karşılığıyla tanım (yarım cümle bırakmaz).
+    const def = clean(term.definition);
+    const right = clean(String(term.trueFalse ?? '').split('|')[1]).replace(/^✅\s*/, '');
+    if (right && `${def} ${right}`.length <= 155) return `${def} ${right}`;
+    // Hasta dili karşılığı kısa (≤3 sözcük) ve terim adında zaten geçmiyorsa parantez içinde eklenir.
+    const first = splitItems(term.patientLanguage)[0] || '';
+    const lay = first.split(/\s+/).length <= 3 && !String(term.term).toLocaleLowerCase('tr-TR').includes(first.toLocaleLowerCase('tr-TR'))
+      ? first.toLocaleLowerCase('tr-TR') : '';
+    return smartTruncate(`${term.term}${lay ? ` (${lay})` : ''} nedir? ${def}`, 155);
+  }
   return smartTruncate(`${term.term} nedir? ${term.definition}`, 155);
 }
 
