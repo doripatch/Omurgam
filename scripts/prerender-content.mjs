@@ -306,6 +306,31 @@ const DISCLAIMER = '<aside><strong>Önemli:</strong> Bu içerik bilgilendirme am
     write(VIDEO_BASE, renderPage({ title: `${VIDEO_NAME} | Omurgam`, description: VIDEO_DESC, canonical, type: 'website', jsonLd, bodyHtml: body }));
   }
 
+  // --- SİTE HARİTALARINA GERÇEK <lastmod> ---
+  // Yalnız içeriğin kendi güncelleme tarihi (API updatedAt/createdAt) olan sayfalar: blog, klinisyen notu, video.
+  // Sözlük/MR/statik sayfalarda güvenilir tarih yok → lastmod EKLENMEZ (sahte tarih üretilmez).
+  {
+    const day = (iso) => { const d = String(iso || '').slice(0, 10); return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : ''; };
+    const lastmod = new Map();
+    for (const r of blogRec) { const p = postById.get(r.id); const d = day(p.updatedAt || p.createdAt || p.created_at); if (d) lastmod.set(`${ORIGIN}${r.newUrl}/`, d); }
+    for (const r of clinRec) { const n = noteById.get(r.id); const d = day(n.updatedAt || n.createdAt); if (d) lastmod.set(`${ORIGIN}${r.newUrl}/`, d); }
+    for (const r of videoCanon) { const v = videoById.get(r.id); const d = day(v.updatedAt || v.createdAt); if (d) lastmod.set(`${ORIGIN}${r.newUrl}/`, d); }
+    let added = 0;
+    for (const f of ['sitemap.xml', 'blog-sitemap.xml']) {
+      const fp = join(DIST, f);
+      if (!existsSync(fp)) die(`${f} dist'te yok`);
+      const xml = readFileSync(fp, 'utf8').replace(/<url><loc>([^<]+)<\/loc>(?!<lastmod>)/g, (m, loc) => {
+        const d = lastmod.get(loc.replace(/&amp;/g, '&'));
+        if (!d) return m;
+        added++;
+        return `<url><loc>${loc}</loc><lastmod>${d}</lastmod>`;
+      });
+      writeFileSync(fp, xml);
+    }
+    if (added < 250) die(`site haritalarına lastmod beklenenden az eklendi: ${added} (<250)`);
+    console.log(`[prerender-content] site haritaları: ${added} adrese gerçek <lastmod> eklendi (blog/klinisyen/video).`);
+  }
+
   // --- ÜRETİM-GÜVENLİ DOĞRULAMALAR ---
   const errs = [];
   const detailTotal = blogRec.length + clinRec.length;
